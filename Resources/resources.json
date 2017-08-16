@@ -1,0 +1,12 @@
+{
+  "models": "Resources\\models\\models.json",
+  "menu": "Resources\\gui\\menu.json",
+  "hud": "Resources\\gui\\HUD.json",
+  "textures": "Resources\\textures\\texture.json",
+  "config": "Resources\\config.json",
+  "entity": "Resources\\entity.json",
+  "shaders": "Shaders\\shader.json",
+  "structures": "Resources\\structures.json",
+  "sounds": "Resources\\sound.json"
+}
+

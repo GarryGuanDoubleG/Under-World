@@ -1,0 +1,10 @@
+﻿  shader.cpp
+  ResManager.cpp
+  main.cpp
+  graphics.cpp
+  game.cpp
+  Mesh.cpp
+  Generating Code...
+c:\users\garryg\source\repos\underworld\underworld\source\shader.cpp(82): warning C4715: 'compile_attach_shader': not all control paths return a value
+  UnderWorld.vcxproj -> C:\Users\GarryG\source\repos\UnderWorld\Debug\UnderWorld.exe
+  UnderWorld.vcxproj -> C:\Users\GarryG\source\repos\UnderWorld\Debug\UnderWorld.pdb (Partial PDB)

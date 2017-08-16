@@ -1,0 +1,78 @@
+{
+  "mouseBox": {
+    "fs": "Shaders/mouseBox_fs.glsl",
+    "vs": "Shaders/mouseBox_vs.glsl"
+  },
+  "billboard": {
+    "fs": "Shaders/billboard_fs.glsl",
+    "vs": "Shaders/billboard_vs.glsl"
+  },
+  "model": {
+    "fs": "Shaders/model_fs.glsl",
+    "vs": "Shaders/model_vs.glsl"
+  },
+  "unlit": {
+    "vs": "Shaders/unlit_object_vs.glsl",
+    "fs": "Shaders/unlit_object_fs.glsl"
+  },
+  "object": {
+    "fs": "Shaders/object_fs.glsl",
+    "vs": "Shaders/object_vs.glsl"
+  },
+  "transparentObject": {
+    "vs": "Shaders/transparentObject_vs.glsl",
+    "fs": "Shaders/transparentObject_fs.glsl"
+  },
+  "voxel": {
+    "vs": "Shaders/voxel_vs.glsl",
+    "fs": "Shaders/voxel_fs.glsl"
+  },
+  "voxelTex": {
+    "vs": "Shaders/voxelTex_vs.glsl",
+    "fs": "Shaders/voxelTex_fs.glsl"
+  },
+  "lighting": {
+    "vs": "Shaders/lighting_vs.glsl",
+    "fs": "Shaders/lighting_fs.glsl"
+  },
+
+  "minimap": {
+    "vs": "Shaders/minimap_vs.glsl",
+    "fs": "Shaders/minimap_fs.glsl"
+  },
+
+  "hud": {
+    "vs": "Shaders/ui.vert",
+    "fs": "Shaders/ui.frag"
+  },
+
+  "ray": {
+    "vs": "Shaders/ray.vert",
+    "fs": "Shaders/ray.frag"
+  },
+
+  "skybox": {
+    "vs": "Shaders/skybox_vs.glsl",
+    "fs": "Shaders/skybox_fs.glsl"
+  },
+
+  "quad": {
+    "vs": "Shaders/quad_vs.glsl",
+    "fs": "Shaders/quad_fs.glsl"
+  },
+  "water_texture": {
+    "vs": "Shaders/waterTex_vs.glsl",
+    "fs": "Shaders/waterTex_fs.glsl"
+  },
+  "water": {
+    "vs": "Shaders/water_vs.glsl",
+    "fs": "Shaders/water_fs.glsl"
+  },
+  "health": {
+    "vs": "Shaders/health_vs.glsl",
+    "fs": "Shaders/health_fs.glsl"
+  }
+
+
+}
+
