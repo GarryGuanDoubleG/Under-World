@@ -1,0 +1,54 @@
+{
+  "worker": {
+    "path": "Resources\\models\\worker\\chr_knight.fbx",
+    "anim": {
+      "attack": "Resources\\models\\worker\\hook_punch.fbx",
+      "walking": "Resources\\models\\worker\\walking.fbx",
+      "jogging": "Resources\\models\\worker\\jogging.fbx"
+    },
+    "scale": [ 0.25, 0.25, 0.25 ]
+  },
+
+  "boss": {
+    "path": "Resources\\models\\boss\\boss.fbx",
+    "anim": {
+      "death": "Resources\\models\\boss\\boss_death.fbx",
+      "walking": "Resources\\models\\boss\\boss_idle.fbx",
+      "attack": "Resources\\models\\boss\\boss_attack.fbx"
+    },
+    "scale": [ 0.25, 0.25, 0.25 ]
+  },
+  "swordsman": {
+    "path": "Resources\\models\\swordsman\\swordsman.fbx",
+    "anim": {
+      "death": "Resources\\models\\swordsman\\swordsman_death.fbx",
+      "attack": "Resources\\models\\swordsman\\swordsman_walk.fbx",
+      "walking": "Resources\\models\\swordsman\\swordsman_attack.fbx"
+    },
+    "scale": [ 0.25, 0.25, 0.25 ]
+  },
+
+  "castle": {
+    "path": "Resources\\models\\castle\\castle.obj",
+    "scale": [ 0.5, 0.5, 0.5 ],
+    "frames": [
+      "castle1.obj",
+      "castle2.obj",
+      "castle3.obj",
+      "castle4.obj",
+      "castle5.obj",
+      "castle6.obj",
+      "castle7.obj",
+      "castle8.obj",
+      "castle9.obj"
+    ]
+  },
+  "cube": {
+    "path": "Resources\\models\\cube.obj",
+    "scale": [ 1.0, 1.0, 1.0 ]
+  },
+  "sphere": {
+    "path": "Resources\\models\\sphere.obj",
+    "scale": [ 1.0, 1.0, 1.0 ]
+  }
+}

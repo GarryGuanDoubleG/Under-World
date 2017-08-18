@@ -1,13 +1,17 @@
 #pragma once
-#include <GL\glew.h>
-#include <SDL.h>
 
 class ResManager
 {
+private:
+	Json m_resources;
+
 public:
 	ResManager();
 	~ResManager();
 
 	void LoadResources();
-	void LoadShaders(std::string filepath);
+
+	map<string, Texture*> LoadTextures();
+	map<string, Shader *> LoadShaders();
+	map<string, Model *> LoadModels();
 };

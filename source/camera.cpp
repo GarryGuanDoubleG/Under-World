@@ -1,0 +1,104 @@
+#include "game.hpp"
+
+Camera::Camera(glm::vec3 position, glm::vec3 target)
+{
+	m_pos = position;
+
+	//camera orientation vecs
+	m_up = glm::vec3(0.0f, 1.0f, 0.0f); //set default up vector to positive y
+	m_right = glm::vec3(1.0f, 0.0f, 0.0f);
+	m_forward = glm::normalize(target - position);
+
+	//default perspective mat
+	m_view_mat = glm::lookAt(m_pos, m_pos + m_forward, m_up);
+
+	//set up perspective mat4
+	m_perspect_proj = glm::perspective(45.0f, SCREEN_WIDTH / SCREEN_HEIGHT, 1.f, 1000.0f);
+
+	m_yaw = 0.0f;
+	m_pitch = 0.0f;
+	m_roll = 0.0f;
+}
+
+Camera::~Camera()
+{
+
+}
+
+
+glm::mat4 Camera::GetProj()
+{
+	return m_perspect_proj;
+}
+
+glm::mat4 Camera::GetViewMat()
+{
+	return m_view_mat;
+}
+
+glm::vec3 Camera::GetPosition()
+{
+	return m_pos;
+}
+
+glm::vec3 Camera::GetRotation()
+{
+	return glm::vec3(glm::radians(m_pitch), glm::radians(m_yaw), glm::radians(m_roll));
+}
+
+
+void Camera::HandleInput(SDL_Event event)
+{
+	float time = Game::GetDeltaTime();
+	GLfloat cam_speed = 3.0f;
+
+	if (event.type == SDL_KEYDOWN)
+	{
+		switch (event.key.keysym.sym)
+		{
+		case SDLK_w:
+			m_pos += cam_speed * m_forward;
+			break;
+		case SDLK_s:
+			m_pos -= cam_speed * m_forward;
+			break;
+		case SDLK_a:
+			m_pos -= m_right * cam_speed;
+			break;
+		case SDLK_d:
+			m_pos += m_right * cam_speed;
+			break;
+		default:
+			break;
+		}
+	}
+	else if (event.type == SDL_MOUSEMOTION)
+	{
+		GLfloat sensitivity = 0.05f; // mouse sensitivity
+
+		glm::vec2 motion = glm::vec2(event.motion.x, event.motion.y);
+		glm::vec2 center = glm::vec2(SCREEN_WIDTH * .5f, SCREEN_HEIGHT * .5f);
+		glm::vec2 offset = motion - center;
+
+		float xoffset = (float)offset.x * sensitivity;
+		float yoffset = (float)offset.y * sensitivity;
+
+		m_yaw += xoffset;
+		m_pitch -= yoffset;
+
+		if (m_pitch > 89.0f)
+			m_pitch = 89.0f;
+		else if (m_pitch < -89.0f)
+			m_pitch = -89.0f;
+
+		glm::vec3 front;
+		front.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+		front.y = sin(glm::radians(m_pitch));
+		front.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+
+		m_forward = glm::normalize(front);
+		m_right = glm::normalize(glm::cross(m_forward, m_up));
+	}
+
+	m_view_mat = glm::lookAt(m_pos, m_pos + m_forward, m_up);
+}

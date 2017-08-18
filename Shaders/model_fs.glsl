@@ -39,5 +39,4 @@ void main()
 	//color = vec4(colorMod * result, 1.0f) * model_color;
 	color = vec4(result, 1.0f) * model_color;
 	color = color * vec4(colorMod, 1.0f);
-
 }

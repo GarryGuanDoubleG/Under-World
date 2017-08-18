@@ -1,21 +1,15 @@
 #include <map>
-#include <fstream>
-#include "ResManager.hpp"
-#include "json.hpp"
-#include "shader.hpp"
+#include "game.hpp"
 
 #define RESOURCE_PATH "Resources\\resources.json"
 
 static ResManager *g_resManager;
-static std::map<std::string, Shader *> g_shader_map;
-
-using Json = nlohmann::json;
 
 ResManager::ResManager()
 {
 	if (g_resManager)
 	{
-		std::cout << "Error: Resource Manager has already been initialized\n";
+		cout << "Error: Resource Manager has already been initialized\n";
 		return;
 	}
 
@@ -32,36 +26,54 @@ void ResManager::LoadResources()
 {
 	//parse json file into json obj
 	//loads the location of resource files
-	std::ifstream in(RESOURCE_PATH);
+	ifstream in(RESOURCE_PATH);
 	if (!in.is_open()) return;
 
-	Json resources;
-	in >> resources;
+	in >> m_resources;
 	in.close();
-
-	std::string filepath;
-
-	filepath = resources["shaders"].get<std::string>();
-	LoadShaders(filepath);
 }
 
-void DeleteShaders()
+
+map<string, Texture*> ResManager::LoadTextures()
 {
-	for (auto &kv : g_shader_map)
-	{
-		glDeleteProgram(kv.second->m_shaderID);
+	map<string, Texture*> texture_map;
+
+	ifstream i(m_resources["textures"].get<string>());
+	if (!i.is_open()) {
+		cout << "Incorrect filename: " << m_resources["textures"].get<string>() << endl;
+		return texture_map;
 	}
 
-	g_shader_map.clear();
+	Json textures;
+	i >> textures;
+
+	for (Json::iterator it = textures.begin(); it != textures.end(); ++it)
+	{
+		Json obj = it.value();
+		string key = it.key();
+
+		if (key == "skybox") {
+			Texture *skybox = new Texture();
+			skybox->LoadSkybox(obj["path"].get<string>());
+			texture_map.insert(pair<string, Texture*>(key,skybox));
+		}
+		else {
+			texture_map.insert(pair<string, Texture*>(key, new Texture(obj["path"].get<string>())));
+		}
+	}
+
+	return texture_map;
+	
 }
 
-void ResManager::LoadShaders(std::string filepath)
+map<string, Shader *> ResManager::LoadShaders()
 {
-	std::ifstream i(filepath);
+	map<string, Shader*> shader_map;
+	ifstream i(m_resources["shaders"].get<string>());
 	
 	if (!i.is_open()) {
-		std::cout << "Incorrect filename: " << filepath << std::endl;
-		return;
+		cout << "Incorrect filename: " << m_resources["shaders"].get<string>() << endl;
+		return shader_map;
 	}
 
 	Json shaders;
@@ -70,14 +82,34 @@ void ResManager::LoadShaders(std::string filepath)
 	for (Json::iterator it = shaders.begin(); it != shaders.end(); ++it)
 	{
 		Json obj = it.value();
-		std::string key = it.key();
+		string key = it.key();
 
-		std::string vs_filename = obj["vs"];
-		std::string fs_filename = obj["fs"];
-
-		g_shader_map.insert(std::pair<std::string, Shader*>(key, new Shader(vs_filename, fs_filename)));
+		shader_map.insert(pair<string, Shader*>(key, new Shader(obj["vs"].get<string>(), obj["fs"].get<string>())));
 	}
 
-	atexit(DeleteShaders);
+	return shader_map;
 }
 
+map<string, Model*> ResManager::LoadModels()
+{
+	map<string, Model*> model_map;
+	ifstream i(m_resources["models"].get<string>());
+
+	if (!i.is_open()) {
+		cout << "Incorrect filename: " << m_resources["shaders"].get<string>() << endl;
+		return model_map;
+	}
+
+	Json shaders;
+	i >> shaders;
+
+	for (Json::iterator it = shaders.begin(); it != shaders.end(); ++it)
+	{
+		Json obj = it.value();
+		string key = it.key();
+
+		model_map.insert(pair<string, Model*>(key, new Model(obj["path"].get<string>())));
+	}
+
+	return model_map;
+}

@@ -1,4 +1,3 @@
-#include <iostream>
 #include "game.hpp"
 
 
@@ -11,15 +10,12 @@ int main(int argc, char **argv)
 	Game *game = new Game();
 
 	//main game loop
-
 	while (game->IsRunning())
 	{
 		game->Input();
 		game->Update();
 		game->Draw();
 	}
-
-//	graphics->Cleanup();
 
 	return 0;
 }

@@ -1,0 +1,51 @@
+{
+  "unit_display": {
+    "texture": "Resources/textures/unit_display.png",
+    "position": "bottom_center",
+    "width": 1280,
+    "height": 128
+  },
+
+  "castle_button": {
+    "texture": "Resources\\textures\\gui\\castle_button.png",
+    "position": [ 1714, 10 ],
+    "width": 196,
+    "height": 196,
+    "type":  "building",
+    "name": "castle"
+  },
+
+  "worker_button": {
+    "texture": "Resources\\textures\\gui\\worker_button.png",
+    "position": [ 1714, 206 ],
+    "width": 196,
+    "height": 196,
+    "type": "unit",
+    "name": "worker"
+  },
+  "swordsman_button": {
+    "texture": "Resources\\textures\\gui\\swordsman_button.png",
+    "position": [ 1714, 396 ],
+    "width": 196,
+    "height": 196,
+    "type": "unit",
+    "name": "swordsman"
+  },
+
+  "victory": {
+    "texture": "Resources\\textures\\gui\\victory.png",
+    "position": [ 610, 350 ],
+    "width": 780,
+    "height": 196,
+    "name": "victory",
+    "active": false
+  },
+  "defeat":{
+    "texture": "Resources\\textures\\gui\\defeat.png",
+    "position": [ 610, 350],
+    "width": 780,
+    "height": 196,
+    "name": "defeat",
+    "active":  false
+  }  
+}

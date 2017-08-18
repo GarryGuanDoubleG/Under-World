@@ -1,0 +1,16 @@
+{
+  "castle": 
+  {
+    "model": "castle",
+
+    "health": 1000,
+    "speed": 0,
+    "thinkRate": 1,
+    "AABBmin": [ 0, 0, 0 ],
+    "AABBmax": [ 8, 10, 8 ],
+
+    "tick_rate": 0.25,
+    "totalFrames": 9
+  }
+}
+

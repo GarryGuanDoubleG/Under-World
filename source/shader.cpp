@@ -1,8 +1,4 @@
-#include <fstream>
-#include <iostream>
-#include <string>
-
-#include"shader.hpp"
+#include "game.hpp"
 
 /**
 *@brief prints out any errors with compiling a particular shader
@@ -23,7 +19,7 @@ GLuint check_shader_err(char *name, GLuint shader)
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &InfoLogLength);
 		glGetShaderInfoLog(shader, InfoLogLength, &InfoLogLength, infoLog);
 
-		std::cout << "Shader Error: " << name << " " << infoLog << std::endl;
+		cout << "Shader Error: " << name << " " << infoLog << endl;
 
 		return GL_FALSE;
 	}
@@ -35,18 +31,18 @@ GLuint check_shader_err(char *name, GLuint shader)
 * @param reference to output string
 * @return false if file could not be opened, else true
 */
-bool read_file(char *name, std::string &out)
+bool read_file(char *name, string &out)
 {
-	std::ifstream shader_if(name, std::ifstream::in);
-	std::string input;
+	ifstream in(name, ifstream::in);
+	string input;
 
-	if (!shader_if.is_open())
+	if (!in.is_open())
 	{
-		std::cout << "Read_File: Failed to open file " << name << std::endl;
+		cout << "Read_File: Failed to open file " << name << endl;
 		return false;
 	}
 
-	while (std::getline(shader_if, input))
+	while (getline(in, input))
 	{
 		out.append(input + "\n");
 	}
@@ -54,11 +50,11 @@ bool read_file(char *name, std::string &out)
 	return true;
 }
 
-bool compile_attach_shader(std::string filename, GLuint type, GLuint program)
+bool compile_attach_shader(string filename, GLuint type, GLuint program)
 {
 	GLuint shader;
 
-	std::string shader_str;
+	string shader_str;
 	const char * shader_src;
 
 	if (!read_file((char *)filename.c_str(), shader_str)) return false;
@@ -85,7 +81,7 @@ bool compile_attach_shader(std::string filename, GLuint type, GLuint program)
 * @brief compiles a vertex and fragment shader and attaches it into a program
 * @return id of compiled program
 */
-GLuint compile_shaders(std::string &vs_shader, std::string &fs_shader)
+GLuint compile_shaders(string &vs_shader, string &fs_shader)
 {
 	GLuint program;
 	GLchar infoLog[512];
@@ -112,7 +108,20 @@ GLuint compile_shaders(std::string &vs_shader, std::string &fs_shader)
 }
 
 
-Shader::Shader( std::string &vs_shader, std::string fs_shader)
+Shader::Shader( string &vs_shader, string fs_shader)
 {
 	m_shaderID = compile_shaders(vs_shader, fs_shader);	
+}
+
+void Shader::Use()
+{
+	if (m_shaderID)
+	{
+		glUseProgram(m_shaderID);
+	}
+}
+
+GLuint Shader::Uniform(string uniformName)
+{
+	return glGetUniformLocation(m_shaderID, uniformName.c_str());
 }

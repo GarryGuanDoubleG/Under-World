@@ -1,0 +1,24 @@
+Neverwinter (True Type Font)
+----------------------------
+Heavily-flourished font based on the logo used by Bioware's Neverwinter
+Nights computer game. Very strong decorative font, most useful for titles
+and headings.
+
+Legal Notice
+------------
+This font is released as freeware. It may not be sold, manipulated, edited,
+or redistributed without direct written consent by Neale Davidson. It may be
+used without royalties for any reasonable purpose.
+
+Version Information
+-------------------
+1.00 - August 15, 2001
+1.01 - August 16, 2001
+	Added left and right quotes
+	Added ellipsis
+	Added cent sign
+	Added Yen sign
+	Added per thousand sign
+1.20 - April 25, 2001
+	Added a few european characters
+	Rekerned font

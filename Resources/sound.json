@@ -1,0 +1,16 @@
+{
+  "music": {
+    "menu": "Resources\\sounds\\menu.ogg",
+    "game": "Resources\\sounds\\game.ogg",
+    "ambient":  "Resources\\sounds\\ambient.ogg"
+  },
+
+  "sound": {
+    "hammer": "Resources\\sounds\\hammer.wav",
+    "sword": "Resource\\sounds\\sword.wav",
+    "click": "Resources\\sounds\\click.wav"
+  }
+ 
+
+}
+

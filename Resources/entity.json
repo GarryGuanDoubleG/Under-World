@@ -1,0 +1,37 @@
+{
+  "worker": {
+    "id": 1,
+    "model": "worker",
+    "range": 10.0,
+    "health": 100,
+    "thinkRate": 1,
+    "attack": 10,
+    "speed": 15,
+    "AABBmin": [ 0.0, 0.0, 0.0 ],
+    "AABBmax": [ 2.0, 4.0, 2.0 ]
+  },
+  "swordsman": {
+    "id": 3,
+    "model": "swordsman",
+    "range":  15.0,
+    "health": 100,
+    "thinkRate": 1,
+    "attack":  40,
+    "speed": 15,
+    "AABBmin": [ 0.0, 0.0, 0.0 ],
+    "AABBmax": [ 2.0, 4.0, 2.0 ]
+  },
+  "boss": {
+    "id": 2,
+    "model": "boss",
+    "range": 60.0,
+    "health": 500,
+    "thinkRate": 1,
+    "attack": 25,
+    "speed": 5,
+    "AABBmin": [ 0.0, 10.0, 0.0 ],
+    "AABBmax": [ 5.5, 20.0, 5.5 ]
+  }
+
+}
+

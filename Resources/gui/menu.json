@@ -1,0 +1,177 @@
+{
+	"name": "menu",
+	"login":
+	{
+		"font": "Resources/fonts/darkcrystaloutline.ttf",
+		"padding": [16, 8],
+		"margin":[0, 25],
+		"textsize": 32,
+		"widgets":
+		[
+			{
+				"img_path": "Resources\\textures\\bg.jpg",
+				"type": "image",
+				"id" : "bg",
+				"position": "tr",
+				"offset": [-280, -450],
+				"width":4,
+				"height": 4
+			},
+				{
+				"type": "label",
+				"id": "label_name",
+				"text_size": 144,
+				"string": "Reign of Voxels",
+				"position": "center",
+				"offset": [-500, -280],
+				"text_color": [255,0,0,255],
+				"box_color": [255,255,255,0]
+			},
+			{
+				"type": "label",
+				"id": "label_name",
+				"text_size": 48,
+				"string": "username",
+				"widget_id": "username",
+				"position": "center",
+				"offset": [-160, -140],
+				"text_color": [255,0,0,255],
+				"box_color": [255,255,255,0]
+			},
+			{ 
+				"type": "textbox",
+				"input": "alpha_num",
+				"id": "username",
+				"text_size": 32,
+				"max_str_length": 16,
+				"width": 315,
+				"height": 50,				
+				"offset": [-150, -75],
+				"position": "center",								
+				"text_color": [255,0,0,255],
+				"box_color": [255,255,255,255]
+			},
+			{
+				"type": "label",
+				"id": "label_port",
+				"text_size": 48,
+				"string": "port",
+				"widget_id": "port",
+				"position": "center",
+				"offset": [-160, -40],
+				"text_color": [255,0,0,255],
+				"box_color": [0,0,0,0],
+				"color": [255,0,0]
+			},
+			{ 
+				"type": "textbox",
+				"input": "num",
+				"id": "port",
+				"text_size": 32,
+				"max_str_length": 5,
+				"width": 192,
+				"height": 50,
+				"position": "center",
+				"offset": [-150, 25],
+				"text_color": [255,0,0,255],
+				"box_color": [255,255,255,255]
+			},
+			{
+				"type": "button",
+				"id": "login",
+				"string": "Login",
+				"event": "login",
+				"text_size": 48,
+				"width": 200,
+				"height": 100,
+				"position": "center",
+				"offset": [-150, 100],
+				"text_color": [255,255,255,255],
+				"box_color": [255,0,0,255]				
+			}
+		]
+	},
+	"lobby":
+	{
+		"font": "Resources/fonts/Quicksand-Bold.otf",
+		"padding": [16, 4],
+		"margin":[0, 25],
+		"textsize": 32,
+		"widgets":
+		[
+			{
+				"type": "label",
+				"id": "p1",
+				"width": 400,
+				"height": 50,
+				"text_size": 48,
+				"string": "",
+				"position": "center",
+				"offset": [-160, -60],
+				"text_color": [255,0,0,255],
+				"box_color": [128,255,128,255]
+			},
+			{
+				"type": "label",
+				"id": "p2",
+				"width": 400,
+				"height": 50,
+				"text_size": 48,
+				"string": "",
+				"position": "center",
+				"offset": [-160, -10],
+				"text_color": [255,255,255,255],
+				"box_color": [255,0,0,255]
+			},
+			{
+				"type": "label",
+				"id": "p3",
+				"width": 400,
+				"height": 50,
+				"text_size": 48,
+				"string": "",
+				"position": "center",
+				"offset": [-160, 50],
+				"text_color": [255,0,0,255],
+				"box_color": [255,0,255,255]
+			},
+			{
+				"type": "label",
+				"id": "p4",
+				"width": 400,
+				"height": 50,
+				"text_size": 48,
+				"string": "",
+				"position": "center",
+				"offset": [-160, 110],
+				"text_color": [255,0,0,255],
+				"box_color": [255,255,0,255]
+			},
+
+			{ 
+				"type": "textbox",
+				"input": "alpha_num",
+				"id": "username",
+				"text_size": 32,
+				"max_str_length": 16,
+				"width": 315,
+				"height": 50,				
+				"position": "bl",								
+				"text_color": [255,0,0,255],
+				"box_color": [255,255,255,255]
+			},
+			{
+				"type": "button",
+				"id": "login",
+				"string": "Start",
+				"event": "start",
+				"text_size": 48,
+				"width": 400,
+				"height": 100,
+				"position": "br",
+				"text_color": [255,255,255,255],
+				"box_color": [0,0,255,255]				
+			}
+		]
+	}
+}

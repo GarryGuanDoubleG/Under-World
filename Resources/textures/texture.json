@@ -1,0 +1,43 @@
+{
+  "grass": {
+    "path": "Resources\\textures\\grass\\0206 060x2 gld01.png",
+    "normal": "Resources\\textures\\grass\\grass_lush_daisies_01_N.png"
+  },
+  "grass1": {
+    "path": "billboard_grass.png"
+  },
+  "dirt": {
+    "path": "Resources\\textures\\dirt.png"
+  },
+  "water": {
+    "path": "Resources\\textures\\water2.png"
+  },
+  "waterdudv": {
+    "path":  "Resources\\textures\\waterdudv.png"
+  },
+  "snow": {
+    "path": "Resources\\textures\\snow.png"
+  },
+   "soil": {
+    "path": "Resources\\textures\\soil.png"
+  },
+  "billboard_grass": {
+    "path": "Resources\\textures\\billboard_grass.png"
+  },
+  "skybox": {
+    "path": "Resources\\textures\\skybox\\"
+  },
+
+  "skybox1": {
+    "path": "Resources\\textures\\skybox\\front.jpg"
+  },
+  "minimap_alpha": {
+    "path": "Resources\\textures\\minimap_alpha.png"
+  },
+  "health_bar": {
+    "path": "Resources\\textures\\health_bar.png"
+  },
+  "health_bar_grey": {
+    "path":  "Resources\\textures\\health_bar_grey.png"
+  }
+}

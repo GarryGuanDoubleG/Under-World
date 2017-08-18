@@ -19,12 +19,149 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Shaders\transparentObject_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\transparentObject_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\unlit_object_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\unlit_object_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\voxel_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\voxel_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\voxelTex_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\voxelTex_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\water_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\water_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\waterTex_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\waterTex_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\billboard_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\billboard_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\health_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\health_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\lighting_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\lighting_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\minimap_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\minimap_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\model_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\model_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\mouseBox_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\mouseBox_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\object_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\object_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\quad_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\quad_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\skybox_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\skybox_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
     <None Include="Resources\config.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\entity.json">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Resources\resources.json">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Resources\sound.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\structures.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\textures\texture.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\models\models.json">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\game.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\graphics.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\resManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\shader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\model.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\mesh.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\texture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\mathUtil.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\animController.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\camera.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\graphics.cpp">
@@ -33,34 +170,32 @@
     <ClCompile Include="source\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\shader.cpp">
+    <ClCompile Include="source\mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\ResManager.cpp">
+    <ClCompile Include="source\model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\resManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp">
+    <ClCompile Include="source\texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="source\graphics.hpp">
+    <ClCompile Include="source\mathUtil.cpp">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\shader.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ResManager.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\game.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    </ClCompile>
+    <ClCompile Include="source\animController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
