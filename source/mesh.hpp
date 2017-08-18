@@ -61,7 +61,7 @@ public:
 	* @brief draws all the vertices and textures stored in this mesh
 	* @param the shader to use for drawing
 	*/
-	void Draw(GLuint shader);
+	void Draw(Shader *shader);
 
 	/**
 	* @brief additional buffer for instance rendering

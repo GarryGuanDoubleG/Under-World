@@ -123,5 +123,8 @@ void Shader::Use()
 
 GLuint Shader::Uniform(string uniformName)
 {
+	if (glGetUniformLocation(m_shaderID, uniformName.c_str()) < 0)
+		cout << "Shader could not find " << uniformName << endl;
+
 	return glGetUniformLocation(m_shaderID, uniformName.c_str());
 }

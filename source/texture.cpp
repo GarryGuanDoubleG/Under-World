@@ -17,15 +17,29 @@ Texture::Texture(const char * filename, const char * directory)
 
 Texture::Texture(aiTexture * texture)
 {
-	GLuint m_texID;
+	m_type = Tex2D;
+
 	if (!texture) return;
 
 	//now generate texture with data
 	glGenTextures(1, &m_texID);
 	glBindTexture(GL_TEXTURE_2D, m_texID);
 
-	//texture compressed. uncompress.
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, texture->mWidth, texture->mHeight, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, texture->pcData);
+	if (texture->mHeight == 0)
+	{
+		SDL_RWops *rw = SDL_RWFromMem(texture->pcData, texture->mWidth);
+		SDL_Surface *surface = IMG_Load_RW(rw, 1);
+		int mode = surface->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB;
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, mode, GL_UNSIGNED_BYTE, surface->pixels);
+
+		SDL_FreeSurface(surface);
+	}
+	else
+	{
+		//texture compressed. uncompress.
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, texture->mWidth, texture->mHeight, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, texture->pcData);
+	}
 
 	TriFiltering();
 	glBindTexture(GL_TEXTURE_2D, 0);

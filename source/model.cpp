@@ -5,6 +5,7 @@
 */
 Model::Model(string &filepath)
 {
+	m_animController = new AnimController;
 	this->LoadModel(filepath);
 }
 
@@ -45,7 +46,7 @@ vector<Mesh> *Model::GetMesh()
 void Model::LoadEmbeddedTextures()
 {
 	//add embedded textures
-	for (int i = 0; i < m_scene->mNumTextures; i++)
+	for (int i = 0; i < m_scene->mNumMaterials; i++)
 	{
 		aiTexture* tex = m_scene->mTextures[i];
 
@@ -73,15 +74,15 @@ void Model::LoadModel(string model_path)
 
 	this->ProcessNode(m_scene->mRootNode, directory);
 
-	LoadEmbeddedTextures();
+	//LoadEmbeddedTextures();
 }
 
 void Model::LoadAnimations(const vector<string> &animations, const vector<string> &animNames)
 {
-	/*for (int i = 0; i < animations.size(); i++)
+	for (int i = 0; i < animations.size(); i++)
 	{
-		m_animController.LoadAnimation(animations[i], animNames[i]);
-	}*/
+		m_animController->LoadAnimation(animations[i], animNames[i]);
+	}
 }
 
 void Model::LoadModel(string model_path, const vector<string> &animations, const vector<string> &animNames)
@@ -104,33 +105,30 @@ void Model::LoadModel(string model_path, const vector<string> &animations, const
 	this->ProcessNode(m_scene->mRootNode, directory);
 
 	LoadEmbeddedTextures();
-
 	LoadAnimations(animations, animNames);
-
 }
-
 
 /**
 * @brief renders all the m_meshes of this model
 * @param shader compiled shader id to use to render
 */
-void Model::Draw(GLuint shader)
+void Model::Draw(Shader *shader)
 {
 	for (GLuint i = 0; i < this->m_meshes.size(); i++)
 		this->m_meshes[i].Draw(shader);
 }
 
-void Model::Draw(GLuint shader, string animation, float timeInSeconds)
+void Model::Draw(Shader *shader, string animation, float timeInSeconds)
 {
-	//m_animController.SetAnimation(timeInSeconds, animation);
-	//m_animController.BoneTransform(timeInSeconds);
+	m_animController->SetAnimation(timeInSeconds, animation);
+	m_animController->BoneTransform(timeInSeconds);
 
-	//glUniformMatrix4fv(glGetUniformLocation(shader, "gBones"),
-	//	m_animController.m_finalTransforms.size(), GL_FALSE,
-	//	glm::value_ptr(m_animController.m_finalTransforms[0]));
+	glUniformMatrix4fv(shader->Uniform("gBones"), 
+						m_animController->m_finalTransforms.size(), GL_FALSE, 
+						glm::value_ptr(m_animController->m_finalTransforms[0]));
 
-	//for (GLuint i = 0; i < this->m_meshes.size(); i++)
-	//	this->m_meshes[i].Draw(shader);
+	for (GLuint i = 0; i < this->m_meshes.size(); i++)
+		this->m_meshes[i].Draw(shader);
 }
 
 /**
@@ -145,11 +143,25 @@ vector<Texture> Model::LoadMaterials(aiMaterial *mat, aiTextureType type, string
 
 	for (GLuint i = 0; i < mat->GetTextureCount(type); i++)
 	{
-		aiString str;
-		mat->GetTexture(type, i, &str);
+		Texture tex;
+		aiString path;
+		mat->GetTexture(type, i, &path);
 
-		Texture tex(str.C_Str(), directory.c_str());
+		//texture is embedded
+		if (path.data[0] == '*')
+		{
+			GLint texIndex;
+			string index = path.data;
+			index.erase(0, 1);
+			texIndex = stoi(index);
 
+			aiTexture *aiTex = m_scene->mTextures[texIndex];
+			tex = Texture(aiTex);
+		}
+		else
+		{
+			Texture tex(path.C_Str(), directory.c_str());
+		}
 		//check if load failed
 		if (tex.GetTexID() != 0)
 			textures.push_back(tex);
@@ -178,7 +190,7 @@ void Model::ProcessNode(aiNode *node, string directory)
 
 void Model::LoadBones(aiMesh*mesh, vector<glm::ivec4> &boneIds, vector<glm::vec4> &weights)
 {
-	//m_animController.m_boneTransforms.resize(m_animController.m_boneTransforms.size() + mesh->mNumBones);
+	//m_animController->m_boneTransforms.resize(m_animController->m_boneTransforms.size() + mesh->mNumBones);
 	//weights.resize(mesh->mNumVertices);
 	//boneIds.resize(mesh->mNumVertices);
 
@@ -190,22 +202,22 @@ void Model::LoadBones(aiMesh*mesh, vector<glm::ivec4> &boneIds, vector<glm::vec4
 	//	int boneIndex = 0;
 	//	string boneName(mesh->mBones[i]->mName.data);
 
-	//	if (m_animController.m_boneMap.find(boneName) == m_animController.m_boneMap.end())
+	//	if (m_animController->m_boneMap.find(boneName) == m_animController->m_boneMap.end())
 	//	{
-	//		boneIndex = m_animController.m_boneCount;
-	//		++m_animController.m_boneCount;
+	//		boneIndex = m_animController->m_boneCount;
+	//		++m_animController->m_boneCount;
 	//	}
 	//	else
 	//	{
-	//		boneIndex = m_animController.m_boneMap[boneName];
+	//		boneIndex = m_animController->m_boneMap[boneName];
 	//	}
 
-	//	m_animController.m_boneMap[boneName] = boneIndex;
+	//	m_animController->m_boneMap[boneName] = boneIndex;
 
 	//	glm::mat4 offsetMat(0);
 	//	MathUtil::AssimpToGLMMat4(&mesh->mBones[i]->mOffsetMatrix, offsetMat);
 
-	//	m_animController.m_boneTransforms[boneIndex] = offsetMat;
+	//	m_animController->m_boneTransforms[boneIndex] = offsetMat;
 
 	//	for (int j = 0; j < mesh->mBones[i]->mNumWeights; j++)
 	//	{

@@ -10,36 +10,28 @@ Mesh::Mesh(vector<Vertex>& vertices, vector<GLuint>& indices, vector<Texture>& t
 	this->m_instanced = GL_FALSE;
 }
 
-void Mesh::Draw(GLuint shader)
+void Mesh::Draw(Shader *shader)
 {
+	//bind textures
+	glBindVertexArray(this->m_vao);
+
 	for (GLuint i = 0; i < m_textures.size(); i++)
 	{
-		std::string textUniform = "colorTex";
-
 		m_textures[i].Bind(i);
-
-		GLuint location = glGetUniformLocation(shader, textUniform.c_str());
-		glUniform1i(location, i);
+		glUniform1i(shader->Uniform("colorTex"), i);
 	}
 
-	// Draw mesh
-	glBindVertexArray(this->m_vao);
+	//draw the mesh
 	if (m_instanced)
-	{
 		glDrawElementsInstanced(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0, m_instanceCount);
-	}
 	else
-	{
 		glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
-	}
+
 	glBindVertexArray(0);
 
 	// Unbind the textures after drawing
-	for (GLuint i = 0; i < this->m_textures.size(); i++)
-	{
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
+	for (auto tex : m_textures)
+		tex.Unbind();
 }
 /**
 * @brief binds all the vertex data to a vertex array object

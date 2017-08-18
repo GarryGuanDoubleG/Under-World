@@ -42,7 +42,8 @@ void Game::Draw()
 
 	m_graphics->RenderBackground(bg_color);
 	m_graphics->RenderSkybox();
-	m_graphics->RenderCube(glm::mat4(1.0f));
+	//m_graphics->RenderCube(glm::mat4(1.0f));
+	m_graphics->RenderModel("arissa", glm::mat4(1.0f));
 	m_graphics->Render();
 }
 

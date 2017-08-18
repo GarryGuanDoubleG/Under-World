@@ -8,6 +8,7 @@ class Model
 {
 private:
 
+	AnimController *m_animController;
 	Assimp::Importer m_importer;
 	const aiScene *m_scene;
 	glm::mat4 m_invTransform;
@@ -46,14 +47,14 @@ public:
 	* @brief renders all the meshes of this model
 	* @param shader compiled shader id to use to render
 	*/
-	void Draw(GLuint shader);
+	void Draw(Shader *shader);
 
 	/**
 	* @brief renders all the meshes of this model
 	* @param shader compiled shader id to use to render
 	* @param time in seconds used to interpolate animation vertices
 	*/
-	void Draw(GLuint shader, string animation, float timeInSeconds);
+	void Draw(Shader *shader, string animation, float timeInSeconds);
 private:
 	/**
 	*@brief Load textures that are embedded into the model (.fbx)

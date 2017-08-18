@@ -11,7 +11,6 @@ uniform vec3 lightPos;
 uniform vec3 lightColor;
 uniform vec3 colorMod;
 
-
 uniform sampler2D texture_diffuse0;
 uniform sampler2D texture_diffuse1;
 

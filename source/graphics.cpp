@@ -56,6 +56,13 @@ bool Graphics::InitGraphics(int winWidth, int winHeight)
 		printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
 	}
 
+	// Enable depth test
+	glEnable(GL_DEPTH_TEST);
+	// Accept fragment if it closer to the camera than the former one
+	glDepthFunc(GL_LESS);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	atexit(SDL_Quit);
 	return true;
 }
@@ -219,6 +226,10 @@ void Graphics::RenderSkybox()
 
 	glm::mat4 view = glm::mat4(glm::mat3(m_camera->GetViewMat()));
 
+	GLint depthMode;
+	glGetIntegerv(GL_DEPTH_FUNC, &depthMode);
+	glDepthFunc(GL_LEQUAL);
+
 	glBindVertexArray(m_vaoMap["skybox"]);
 	glUniformMatrix4fv(shader->Uniform("view"), 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(shader->Uniform("projection"), 1, GL_FALSE, &m_camera->GetProj()[0][0]);
@@ -232,28 +243,55 @@ void Graphics::RenderSkybox()
 	texture->Unbind();
 
 	glBindVertexArray(0);
+
+	glDepthFunc(depthMode);
 }
 
 void Graphics::RenderCube(glm::mat4 model)
 {
 	Shader *shader = m_shaderMap["object"];
 	shader->Use();
-	
+
+	Texture *tex = m_textureMap["grass"];
+	tex->Bind(0);
+
 	glBindVertexArray(m_vaoMap["cube"]);
 
 	glUniformMatrix4fv(shader->Uniform("model"), 1, GL_FALSE, &model[0][0]);
 	glUniformMatrix4fv(shader->Uniform("projection"), 1, GL_FALSE, &m_camera->GetProj()[0][0]);
 	glUniformMatrix4fv(shader->Uniform("view"), 1, GL_FALSE, &m_camera->GetViewMat()[0][0]);
 
+	glm::vec3 light_pos(10.f,10.f, 10.f);
+	glm::vec3 light_color(1.0f, 1.0f, 1.0f);
+
+	glUniform3fv(shader->Uniform("viewPos"), 1, &m_camera->GetPosition()[0]);
+	glUniform3fv(shader->Uniform("lightPos"), 1, &light_pos[0]);
+	glUniform3fv(shader->Uniform("lightColor"), 1, &light_color[0]);
+
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
+	tex->Unbind();
 	glBindVertexArray(0);
 }
 
 void Graphics::RenderModel(string name, glm::mat4 modelMat)
 {
-	Model * model = m_modelMap[name];
-	Shader *shader = m_shaderMap["model"];
+	Model * model = m_modelMap["arissa"];
+	Shader *shader = m_shaderMap["object"];
+	shader->Use();
+
+	glUniformMatrix4fv(shader->Uniform("model"), 1, GL_FALSE, &modelMat[0][0]);
+	glUniformMatrix4fv(shader->Uniform("projection"), 1, GL_FALSE, &m_camera->GetProj()[0][0]);
+	glUniformMatrix4fv(shader->Uniform("view"), 1, GL_FALSE, &m_camera->GetViewMat()[0][0]);
+
+	glm::vec3 light_pos(200.f, 200.f, 200.f);
+	glm::vec3 light_color(1.0f, 1.0f, 1.0f);
+
+	glUniform3fv(shader->Uniform("viewPos"), 1, &m_camera->GetPosition()[0]);
+	glUniform3fv(shader->Uniform("lightPos"), 1, &light_pos[0]);
+	glUniform3fv(shader->Uniform("lightColor"), 1, &light_color[0]);
+
+	model->Draw(shader);
 }
 
 void Graphics::Render()
