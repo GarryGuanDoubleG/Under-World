@@ -203,7 +203,7 @@ void Graphics::SetTextures(map<string, Texture*>& textures)
 
 void Graphics::SetModel(map<string, Model*> &models)
 {
-	m_models = models;
+	m_modelMap = models;
 }
 
 void Graphics::RenderBackground(GLfloat bg_color[4])
@@ -234,7 +234,7 @@ void Graphics::RenderSkybox()
 	glBindVertexArray(0);
 }
 
-void Graphics::RenderCube(glm::mat4 model, glm::mat4 proj, glm::mat4 view)
+void Graphics::RenderCube(glm::mat4 model)
 {
 	Shader *shader = m_shaderMap["object"];
 	shader->Use();
@@ -242,17 +242,18 @@ void Graphics::RenderCube(glm::mat4 model, glm::mat4 proj, glm::mat4 view)
 	glBindVertexArray(m_vaoMap["cube"]);
 
 	glUniformMatrix4fv(shader->Uniform("model"), 1, GL_FALSE, &model[0][0]);
-	glUniformMatrix4fv(shader->Uniform("projection"), 1, GL_FALSE, &proj[0][0]);
-	glUniformMatrix4fv(shader->Uniform("view"), 1, GL_FALSE, &view[0][0]);
+	glUniformMatrix4fv(shader->Uniform("projection"), 1, GL_FALSE, &m_camera->GetProj()[0][0]);
+	glUniformMatrix4fv(shader->Uniform("view"), 1, GL_FALSE, &m_camera->GetViewMat()[0][0]);
 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	glBindVertexArray(0);
 }
 
-void Graphics::RenderModel(string name)
+void Graphics::RenderModel(string name, glm::mat4 modelMat)
 {
-
+	Model * model = m_modelMap[name];
+	Shader *shader = m_shaderMap["model"];
 }
 
 void Graphics::Render()

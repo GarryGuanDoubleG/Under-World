@@ -1,4 +1,7 @@
 {
+  "arissa": {
+    "path": "Resources\\models\\arissa\\Arissa.fbx"
+  },
   "worker": {
     "path": "Resources\\models\\worker\\chr_knight.fbx",
     "anim": {

@@ -11,7 +11,7 @@ class Graphics
 	map<string, GLuint> m_vboMap;
 	map<string, Texture*> m_textureMap;
 	map<string, Shader*> m_shaderMap;
-	map<string, Model*> m_models;
+	map<string, Model*> m_modelMap;
 
 public:
 	Graphics(int winWidth, int winHeight);
@@ -28,7 +28,8 @@ public:
 	void Render();
 	void RenderBackground(GLfloat bg_color[4]);
 	void RenderSkybox();
-	void RenderCube(glm::mat4 model, glm::mat4 proj, glm::mat4 view);
+	void RenderCube(glm::mat4 model);
+	void RenderModel(string name, glm::mat4 modelMat);
 	//void RenderModel(Shader *)
 
 	void Cleanup();

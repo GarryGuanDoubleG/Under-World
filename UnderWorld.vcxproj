@@ -70,19 +70,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\GarryG\source\SDL2\SDL2-2.0.5\include;C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\include;C:\Users\GarryG\source\repos\UnderWorld\UnderWorld\utility;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\lib\x86;C:\Users\GarryG\source\SDL2\SDL2-2.0.5\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\GarryG\source\SDL2\SDL2-2.0.5\include;C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\include;C:\Users\GarryG\source\repos\UnderWorld\UnderWorld\utility;C:\Users\GarryG\source\assimp\assimp-3.3.1\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\lib\x86;C:\Users\GarryG\source\SDL2\SDL2-2.0.5\lib\x86;C:\Users\GarryG\source\assimp\assimp-3.3.1\build\code\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\GarryG\source\SDL2\SDL2-2.0.5\include;C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\include;C:\Users\GarryG\source\repos\UnderWorld\UnderWorld\utility;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\GarryG\source\SDL2\SDL2-2.0.5\include;C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\include;C:\Users\GarryG\source\repos\UnderWorld\UnderWorld\utility;C:\Users\GarryG\source\assimp\assimp-3.3.1\include\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>SDL2main.lib;SDL2.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2main.lib;SDL2.lib;SDL2_image.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\lib\x86;C:\Users\GarryG\source\SDL2\SDL2-2.0.5\lib\x86;C:\Users\GarryG\source\repos\UnderWorld\UnderWorld\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -188,8 +188,6 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets" Condition="Exists('..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets')" />
     <Import Project="..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets" Condition="Exists('..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets')" />
-    <Import Project="..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets" Condition="Exists('..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" />
-    <Import Project="..\packages\Assimp.3.0.0\build\native\Assimp.targets" Condition="Exists('..\packages\Assimp.3.0.0\build\native\Assimp.targets')" />
     <Import Project="..\packages\glm.0.9.8.4\build\native\glm.targets" Condition="Exists('..\packages\glm.0.9.8.4\build\native\glm.targets')" />
     <Import Project="..\packages\libpng.1.6.28.1\build\native\libpng.targets" Condition="Exists('..\packages\libpng.1.6.28.1\build\native\libpng.targets')" />
     <Import Project="..\packages\libjpeg.redist.9.0.1.4\build\native\libjpeg.redist.targets" Condition="Exists('..\packages\libjpeg.redist.9.0.1.4\build\native\libjpeg.redist.targets')" />
@@ -206,8 +204,6 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets'))" />
     <Error Condition="!Exists('..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets'))" />
-    <Error Condition="!Exists('..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets'))" />
-    <Error Condition="!Exists('..\packages\Assimp.3.0.0\build\native\Assimp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Assimp.3.0.0\build\native\Assimp.targets'))" />
     <Error Condition="!Exists('..\packages\glm.0.9.8.4\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glm.0.9.8.4\build\native\glm.targets'))" />
     <Error Condition="!Exists('..\packages\libpng.1.6.28.1\build\native\libpng.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libpng.1.6.28.1\build\native\libpng.targets'))" />
     <Error Condition="!Exists('..\packages\libjpeg.redist.9.0.1.4\build\native\libjpeg.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libjpeg.redist.9.0.1.4\build\native\libjpeg.redist.targets'))" />
