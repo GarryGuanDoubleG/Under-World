@@ -43,17 +43,16 @@ vector<Mesh> *Model::GetMesh()
 	return &this->m_meshes;
 }
 
-void Model::LoadEmbeddedTextures()
+Texture Model::LoadEmbeddedTexture(aiString embededIndex)
 {
-	//add embedded textures
-	for (int i = 0; i < m_scene->mNumMaterials; i++)
-	{
-		aiTexture* tex = m_scene->mTextures[i];
+	GLint texIndex;
+	string index = embededIndex.data;
+	index.erase(0, 1);
+	texIndex = stoi(index);
 
-		//add texture id to child meshes
-		for (int i = 0; i < m_meshes.size(); i++)
-			m_meshes[i].m_textures.push_back(Texture(tex));
-	}
+	aiTexture *aiTex = m_scene->mTextures[texIndex];
+
+	return Texture(aiTex);;
 }
 
 /**
@@ -104,7 +103,6 @@ void Model::LoadModel(string model_path, const vector<string> &animations, const
 
 	this->ProcessNode(m_scene->mRootNode, directory);
 
-	LoadEmbeddedTextures();
 	LoadAnimations(animations, animNames);
 }
 
@@ -137,7 +135,7 @@ void Model::Draw(Shader *shader, string animation, float timeInSeconds)
 * @param type assimp texture type (diffuse / specular)
 * @param type_name string name of texture type
 */
-vector<Texture> Model::LoadMaterials(aiMaterial *mat, aiTextureType type, string type_name, string directory)
+vector<Texture> Model::LoadMaterials(aiMaterial *mat, aiTextureType type, string directory)
 {
 	vector<Texture> textures;
 
@@ -149,22 +147,16 @@ vector<Texture> Model::LoadMaterials(aiMaterial *mat, aiTextureType type, string
 
 		//texture is embedded
 		if (path.data[0] == '*')
-		{
-			GLint texIndex;
-			string index = path.data;
-			index.erase(0, 1);
-			texIndex = stoi(index);
-
-			aiTexture *aiTex = m_scene->mTextures[texIndex];
-			tex = Texture(aiTex);
-		}
+			tex = LoadEmbeddedTexture(path);
 		else
-		{
-			Texture tex(path.C_Str(), directory.c_str());
-		}
+			tex = Texture(path.C_Str(), directory.c_str());
+
 		//check if load failed
 		if (tex.GetTexID() != 0)
+		{
+			tex.SetTexType(type);
 			textures.push_back(tex);
+		}
 	}
 
 	return textures;
@@ -345,8 +337,11 @@ Mesh Model::ProcessMesh(aiMesh *mesh, string directory)
 	{
 		aiMaterial *material = m_scene->mMaterials[mesh->mMaterialIndex];
 
-		vector<Texture>diffuse_maps = this->LoadMaterials(material, aiTextureType_DIFFUSE, "texture_diffuse", directory);
+		vector<Texture>diffuse_maps = LoadMaterials(material, aiTextureType_DIFFUSE, directory);
 		textures.insert(textures.end(), diffuse_maps.begin(), diffuse_maps.end());
+
+		vector<Texture> specularMaps = LoadMaterials(material, aiTextureType_SPECULAR, directory);
+		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
 	//load skeletal data

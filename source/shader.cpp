@@ -121,6 +121,16 @@ void Shader::Use()
 	}
 }
 
+void Shader::SetUniform1f(string uniform, GLfloat value)
+{
+	glUniform1f(Uniform(uniform), value);
+}
+
+void Shader::SetUniform1i(string uniform, GLint value)
+{
+	glUniform1i(Uniform(uniform), value);
+}
+
 GLuint Shader::Uniform(string uniformName)
 {
 	if (glGetUniformLocation(m_shaderID, uniformName.c_str()) < 0)

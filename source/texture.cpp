@@ -48,7 +48,6 @@ Texture::Texture(aiTexture * texture)
 void Texture::LoadTexture(string filepath)
 {
 	SDL_Surface *texture = IMG_Load(filepath.c_str());
-
 	m_type = Tex2D;
 
 	if (!texture)
@@ -157,6 +156,10 @@ void Texture::Bind(GLuint activeTex)
 		break;
 	case Skybox:
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_texID);
+		break;
+	default:
+		glBindTexture(GL_TEXTURE_2D, m_texID);
+		break;
 	}
 }
 
@@ -166,9 +169,37 @@ void Texture::Unbind()
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void Texture::SetTexType(TextureType type)
+{
+	m_type = type;
+}
+
+void Texture::SetTexType(aiTextureType type)
+{
+	switch (type)
+	{
+	case aiTextureType_DIFFUSE:
+		m_type = Diffuse;
+		break;
+	case aiTextureType_SPECULAR:
+		m_type = Specular;
+		break;
+	case aiTextureType_AMBIENT:
+		m_type = Ambient;
+		break;
+	default:
+		break;
+	}
+}
+
 GLuint Texture::GetTexID()
 {
 	return m_texID;
+}
+
+TextureType Texture::GetTexType()
+{
+	return m_type;
 }
 
 

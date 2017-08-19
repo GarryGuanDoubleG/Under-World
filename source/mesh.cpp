@@ -17,8 +17,20 @@ void Mesh::Draw(Shader *shader)
 
 	for (GLuint i = 0; i < m_textures.size(); i++)
 	{
-		m_textures[i].Bind(i);
-		glUniform1i(shader->Uniform("colorTex"), i);
+		m_textures[i].Bind(GL_TEXTURE0 + i);
+
+		switch (m_textures[i].GetTexType())
+		{
+		case Diffuse:
+			shader->SetUniform1i("textureDiffuse", i);
+			break;
+		case Specular:
+			shader->SetUniform1i("textureSpecular", i);
+			break;
+		case Ambient:
+			shader->SetUniform1i("textureAmbient", i);
+			break;
+		}
 	}
 
 	//draw the mesh

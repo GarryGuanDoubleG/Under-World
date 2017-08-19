@@ -58,8 +58,11 @@ public:
 private:
 	/**
 	*@brief Load textures that are embedded into the model (.fbx)
+	*@param embeded Index starting with *
+	*@return texture uncompressed and loaded
 	*/
-	void LoadEmbeddedTextures();
+	Texture LoadEmbeddedTexture(aiString embededIndex);
+
 	void LoadAnimations(const vector<string> &animations, const vector<string> &animNames);
 	/**
 	*@brief Reads model file using assimp to get root node of model.
@@ -93,6 +96,6 @@ private:
 	* @param type assimp texture type (diffuse / specular)
 	* @param type_name string name of texture type
 	*/
-	vector<Texture> LoadMaterials(aiMaterial *mat, aiTextureType type, string type_name, string directory);
+	vector<Texture> LoadMaterials(aiMaterial *mat, aiTextureType type, string directory);
 
 };

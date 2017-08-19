@@ -3,7 +3,10 @@
 enum TextureType
 {
 	Tex2D = 0,
-	Skybox = 1
+	Skybox = 1,
+	Ambient = 2,
+	Diffuse = 3,
+	Specular = 4
 };
 
 class Texture
@@ -24,6 +27,11 @@ public:
 	void Bind(GLuint activeTex);
 	void Unbind();
 
+	void SetTexType(TextureType type);
+	void SetTexType(aiTextureType type);
 
 	GLuint GetTexID();
+	TextureType GetTexType();
+	
+	
 };

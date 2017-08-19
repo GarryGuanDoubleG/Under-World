@@ -284,7 +284,7 @@ void Graphics::RenderModel(string name, glm::mat4 modelMat)
 	glUniformMatrix4fv(shader->Uniform("projection"), 1, GL_FALSE, &m_camera->GetProj()[0][0]);
 	glUniformMatrix4fv(shader->Uniform("view"), 1, GL_FALSE, &m_camera->GetViewMat()[0][0]);
 
-	glm::vec3 light_pos(200.f, 200.f, 200.f);
+	glm::vec3 light_pos(50.f, 200.f, 50.f);
 	glm::vec3 light_color(1.0f, 1.0f, 1.0f);
 
 	glUniform3fv(shader->Uniform("viewPos"), 1, &m_camera->GetPosition()[0]);
