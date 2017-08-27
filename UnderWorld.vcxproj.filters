@@ -16,63 +16,15 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{f2061c97-28d7-44a6-9139-4cfa56d2b989}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Voxels">
+      <UniqueIdentifier>{e3a89854-8262-4d76-8744-2f9549b4afc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Voxels">
+      <UniqueIdentifier>{2da63bd7-0d5b-4b1d-a9d9-77131993e1ae}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Shaders\transparentObject_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\transparentObject_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\unlit_object_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\unlit_object_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\voxel_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\voxel_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\voxelTex_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\voxelTex_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\water_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\water_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\waterTex_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\waterTex_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\billboard_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\billboard_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\health_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\health_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\lighting_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\lighting_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\minimap_fs.glsl">
       <Filter>Shaders</Filter>
     </None>
@@ -85,22 +37,10 @@
     <None Include="Shaders\model_vs.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="Shaders\mouseBox_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\mouseBox_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\object_fs.glsl">
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\object_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\quad_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\quad_vs.glsl">
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\skybox_fs.glsl">
@@ -162,6 +102,30 @@
     <ClInclude Include="source\camera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\chunk.hpp">
+      <Filter>Header Files\Voxels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\octree.hpp">
+      <Filter>Header Files\Voxels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\voxelManager.hpp">
+      <Filter>Header Files\Voxels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Allocator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\player.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\svd.hpp">
+      <Filter>Header Files\Voxels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\qef.hpp">
+      <Filter>Header Files\Voxels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\density.hpp">
+      <Filter>Header Files\Voxels</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\graphics.cpp">
@@ -188,14 +152,32 @@
     <ClCompile Include="source\texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\mathUtil.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\animController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\camera.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\chunk.cpp">
+      <Filter>Source Files\Voxels</Filter>
+    </ClCompile>
+    <ClCompile Include="source\octree.cpp">
+      <Filter>Source Files\Voxels</Filter>
+    </ClCompile>
+    <ClCompile Include="source\mathUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\voxelManager.cpp">
+      <Filter>Source Files\Voxels</Filter>
+    </ClCompile>
+    <ClCompile Include="source\svd.cpp">
+      <Filter>Source Files\Voxels</Filter>
+    </ClCompile>
+    <ClCompile Include="source\qef.cpp">
+      <Filter>Source Files\Voxels</Filter>
+    </ClCompile>
+    <ClCompile Include="source\density.cpp">
+      <Filter>Source Files\Voxels</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

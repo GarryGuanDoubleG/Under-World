@@ -1,21 +1,22 @@
 #include "game.hpp"
 
-
 /**
 * @brief main game loop
 * @return 0 if properly exited
 */
 int main(int argc, char **argv)
 {
-	Game *game = new Game();
+	g_game = new Game();
 
 	//main game loop
-	while (game->IsRunning())
+	while (g_game->IsRunning())
 	{
-		game->Input();
-		game->Update();
-		game->Draw();
+		g_game->Input();
+		g_game->Update();
+		g_game->Draw();
 	}
+
+//	g_game->Close();
 
 	return 0;
 }

@@ -1,6 +1,7 @@
 #include <map>
 #include "game.hpp"
 
+#define MAX_MEMORY 4294967296 //4gigs
 #define RESOURCE_PATH "Resources\\resources.json"
 
 static ResManager *g_resManager;
@@ -16,6 +17,7 @@ ResManager::ResManager()
 	g_resManager = this;
 
 	LoadResources();
+	ReserveMemory();
 }
 
 ResManager::~ResManager()
@@ -33,19 +35,29 @@ void ResManager::LoadResources()
 	in.close();
 }
 
+template <typename T> T *ResManager::Allocate(int size)
+{
+
+}
+
+void ResManager::ReserveMemory()
+{
+	//m_memory = malloc(MAX_MEMORY);
+}
+
 
 map<string, Texture*> ResManager::LoadTextures()
 {
 	map<string, Texture*> texture_map;
 
-	ifstream i(m_resources["textures"].get<string>());
-	if (!i.is_open()) {
+	ifstream in(m_resources["textures"].get<string>());
+	if (!in.is_open()) {
 		cout << "Incorrect filename: " << m_resources["textures"].get<string>() << endl;
 		return texture_map;
 	}
 
 	Json textures;
-	i >> textures;
+	in >> textures;
 
 	for (Json::iterator it = textures.begin(); it != textures.end(); ++it)
 	{
@@ -62,6 +74,8 @@ map<string, Texture*> ResManager::LoadTextures()
 		}
 	}
 
+	in.close();
+
 	return texture_map;
 	
 }
@@ -69,15 +83,15 @@ map<string, Texture*> ResManager::LoadTextures()
 map<string, Shader *> ResManager::LoadShaders()
 {
 	map<string, Shader*> shader_map;
-	ifstream i(m_resources["shaders"].get<string>());
+	ifstream in(m_resources["shaders"].get<string>());
 	
-	if (!i.is_open()) {
+	if (!in.is_open()) {
 		cout << "Incorrect filename: " << m_resources["shaders"].get<string>() << endl;
 		return shader_map;
 	}
 
 	Json shaders;
-	i >> shaders;
+	in >> shaders;
 
 	for (Json::iterator it = shaders.begin(); it != shaders.end(); ++it)
 	{
@@ -86,6 +100,8 @@ map<string, Shader *> ResManager::LoadShaders()
 
 		shader_map.insert(pair<string, Shader*>(key, new Shader(obj["vs"].get<string>(), obj["fs"].get<string>())));
 	}
+
+	in.close();
 
 	return shader_map;
 }

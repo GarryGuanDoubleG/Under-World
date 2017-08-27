@@ -1,3 +1,24 @@
-﻿  graphics.cpp
+﻿  resManager.cpp
+  Generating Code...
+  Compiling...
+  game.cpp
+c:\users\garryg\source\repos\underworld\underworld\source\game.cpp(9): warning C4244: 'return': conversion from 'Uint32' to 'float', possible loss of data
+c:\users\garryg\source\repos\underworld\underworld\source\game.cpp(22): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+c:\users\garryg\source\repos\underworld\underworld\source\game.cpp(58): warning C4244: '=': conversion from 'Uint32' to 'float', possible loss of data
+c:\users\garryg\source\repos\underworld\underworld\source\game.cpp(61): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+  Generating Code...
+  Skipping... (no relevant changes detected)
+  voxelManager.cpp
+  texture.cpp
+  shader.cpp
+  octree.cpp
+  model.cpp
+  mesh.cpp
+  mathUtil.cpp
+  main.cpp
+  graphics.cpp
+  chunk.cpp
+  camera.cpp
+  animController.cpp
   UnderWorld.vcxproj -> C:\Users\GarryG\source\repos\UnderWorld\Debug\UnderWorld.exe
   UnderWorld.vcxproj -> C:\Users\GarryG\source\repos\UnderWorld\Debug\UnderWorld.pdb (Partial PDB)

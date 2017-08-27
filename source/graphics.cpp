@@ -22,6 +22,10 @@ Graphics::Graphics(int winWidth, int winHeight)
 	InitSkybox();
 }
 
+Graphics::~Graphics()
+{
+}
+
 bool Graphics::InitGraphics(int winWidth, int winHeight)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -30,7 +34,8 @@ bool Graphics::InitGraphics(int winWidth, int winHeight)
 	}
 
 	m_window = SDL_CreateWindow("Under World", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-		winWidth, winHeight, SDL_WINDOW_OPENGL);
+		winWidth, winHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	
 	if (!m_window)
 	{
 		cout << "Unable to create Window \n";
@@ -39,6 +44,15 @@ bool Graphics::InitGraphics(int winWidth, int winHeight)
 	}
 
 	m_context = SDL_GL_CreateContext(m_window);
+
+	if (m_context == NULL)
+	{
+		CheckSDLError();
+		return false;
+	}
+
+	CheckSDLError();
+
 	SDL_GL_SetSwapInterval(1);
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -46,15 +60,15 @@ bool Graphics::InitGraphics(int winWidth, int winHeight)
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
+	CheckSDLError();
+
 	//intialize glew for opengl calls
-	glewInit();
+	if(glewInit() != GLEW_OK) printf("Glew Initialization Error\n");
+	glViewport(0, 0, winWidth, winHeight);
 
 	//intialze SDL2_image
 	int imgFlags = IMG_INIT_JPG | IMG_INIT_PNG;
-	if (!(IMG_Init(imgFlags) & imgFlags))
-	{
-		printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
-	}
+	if (!(IMG_Init(imgFlags) & imgFlags)) printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
@@ -294,7 +308,7 @@ void Graphics::RenderModel(string name, glm::mat4 modelMat)
 	model->Draw(shader);
 }
 
-void Graphics::Render()
+void Graphics::Display()
 {
 	SDL_GL_SwapWindow(m_window);
 }
@@ -316,13 +330,13 @@ void Graphics::CheckSDLError(int line)
 
 void Graphics::Cleanup()
 {
-	for (auto &kv : m_shaderMap)
-	{
-		glDeleteProgram(kv.second->m_shaderID);
-	}
+	for (auto &kv : m_vaoMap) glDeleteVertexArrays(1, &kv.second);
+	for (auto &kv : m_vboMap) glDeleteBuffers(1, &kv.second);
 
 	m_shaderMap.clear();
-
+	m_textureMap.clear();
+	m_modelMap.clear();
+	
 	SDL_GL_DeleteContext(m_context);
 	SDL_DestroyWindow(m_window);
 }

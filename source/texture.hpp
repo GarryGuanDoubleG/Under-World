@@ -20,8 +20,11 @@ public:
 	Texture(const char * filename, const char * directory);
 	Texture(aiTexture *texture);
 
+	~Texture();
+
 	void LoadTexture(string filepath);
 	void LoadSkybox(string filepath);
+	void Destroy();
 	void TriFiltering();
 	
 	void Bind(GLuint activeTex);
@@ -32,6 +35,4 @@ public:
 
 	GLuint GetTexID();
 	TextureType GetTexType();
-	
-	
 };

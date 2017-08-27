@@ -4,6 +4,7 @@
 Texture::Texture()
 {
 }
+
 Texture::Texture(string filepath)
 {
 	LoadTexture(filepath);
@@ -43,6 +44,10 @@ Texture::Texture(aiTexture * texture)
 
 	TriFiltering();
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+Texture::~Texture()
+{
 }
 
 void Texture::LoadTexture(string filepath)
@@ -132,6 +137,11 @@ void Texture::LoadSkybox(string filepath)
 
 	//unbind texture
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+}
+
+void Texture::Destroy()
+{
+	glDeleteTextures(1, &m_texID);
 }
 
 void Texture::TriFiltering()

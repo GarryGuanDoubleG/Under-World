@@ -73,6 +73,14 @@
     <IncludePath>C:\Users\GarryG\source\SDL2\SDL2-2.0.5\include;C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\include;C:\Users\GarryG\source\repos\UnderWorld\UnderWorld\utility;C:\Users\GarryG\source\assimp\assimp-3.3.1\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\lib\x86;C:\Users\GarryG\source\SDL2\SDL2-2.0.5\lib\x86;C:\Users\GarryG\source\assimp\assimp-3.3.1\build\code\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>C:\Users\GarryG\source\repos\UnderWorld\UnderWorld\utility;C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\include;C:\Users\GarryG\source\assimp\assimp-3.3.1\include\assimp;C:\Users\GarryG\source\SDL2\SDL2-2.0.5\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\GarryG\source\SDL2\SDL2-2.0.5\lib\x64;C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\lib\x64;C:\Users\GarryG\source\assimp\assimp-3.3.1\build2\code\Debug;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\Users\GarryG\source\repos\UnderWorld\UnderWorld\utility;C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\include;C:\Users\GarryG\source\assimp\assimp-3.3.1\include\assimp;C:\Users\GarryG\source\SDL2\SDL2-2.0.5\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\GarryG\source\SDL2\SDL2-2.0.5\lib\x64;C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\lib\x64;C:\Users\GarryG\source\assimp\assimp-3.3.1\build2\code\Debug;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -91,7 +99,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\GarryG\source\repos\UnderWorld\UnderWorld\utility;C:\Users\GarryG\source\SDL2\SDL2-2.0.5\include;C:\Users\GarryG\source\assimp\assimp-3.3.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Users\GarryG\source\SDL2\SDL2-2.0.5\lib\x64;C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\lib\x64;C:\Users\GarryG\source\assimp\assimp-3.3.1\build2\code\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc140-mt.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -113,10 +128,15 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\GarryG\source\repos\UnderWorld\UnderWorld\utility;C:\Users\GarryG\source\SDL2\SDL2-2.0.5\include;C:\Users\GarryG\source\assimp\assimp-3.3.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>C:\Users\GarryG\source\SDL2\SDL2-2.0.5\lib\x64;C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\lib\x64;C:\Users\GarryG\source\assimp\assimp-3.3.1\build2\code\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc140-mt.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -128,61 +148,53 @@
     <None Include="Resources\sound.json" />
     <None Include="Resources\structures.json" />
     <None Include="Resources\textures\texture.json" />
-    <None Include="Shaders\billboard_fs.glsl" />
-    <None Include="Shaders\billboard_vs.glsl" />
-    <None Include="Shaders\health_fs.glsl" />
-    <None Include="Shaders\health_vs.glsl" />
-    <None Include="Shaders\lighting_fs.glsl" />
-    <None Include="Shaders\lighting_vs.glsl" />
     <None Include="Shaders\minimap_fs.glsl" />
     <None Include="Shaders\minimap_vs.glsl" />
     <None Include="Shaders\model_fs.glsl" />
     <None Include="Shaders\model_vs.glsl" />
-    <None Include="Shaders\mouseBox_fs.glsl" />
-    <None Include="Shaders\mouseBox_vs.glsl" />
     <None Include="Shaders\object_fs.glsl" />
     <None Include="Shaders\object_vs.glsl" />
-    <None Include="Shaders\quad_fs.glsl" />
-    <None Include="Shaders\quad_vs.glsl" />
     <None Include="Shaders\skybox_fs.glsl" />
     <None Include="Shaders\skybox_vs.glsl" />
-    <None Include="Shaders\transparentObject_fs.glsl" />
-    <None Include="Shaders\transparentObject_vs.glsl" />
-    <None Include="Shaders\unlit_object_fs.glsl" />
-    <None Include="Shaders\unlit_object_vs.glsl" />
-    <None Include="Shaders\voxelTex_fs.glsl" />
-    <None Include="Shaders\voxelTex_vs.glsl" />
-    <None Include="Shaders\voxel_fs.glsl" />
-    <None Include="Shaders\voxel_vs.glsl" />
-    <None Include="Shaders\waterTex_fs.glsl" />
-    <None Include="Shaders\waterTex_vs.glsl" />
-    <None Include="Shaders\water_fs.glsl" />
-    <None Include="Shaders\water_vs.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Allocator.hpp" />
     <ClInclude Include="source\animController.hpp" />
     <ClInclude Include="source\camera.hpp" />
+    <ClInclude Include="source\chunk.hpp" />
+    <ClInclude Include="source\density.hpp" />
     <ClInclude Include="source\game.hpp" />
     <ClInclude Include="source\graphics.hpp" />
     <ClInclude Include="source\mathUtil.hpp" />
     <ClInclude Include="source\mesh.hpp" />
     <ClInclude Include="source\model.hpp" />
+    <ClInclude Include="source\octree.hpp" />
+    <ClInclude Include="source\player.hpp" />
+    <ClInclude Include="source\qef.hpp" />
     <ClInclude Include="source\resManager.hpp" />
     <ClInclude Include="source\shader.hpp" />
+    <ClInclude Include="source\svd.hpp" />
     <ClInclude Include="source\texture.hpp" />
+    <ClInclude Include="source\voxelManager.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\animController.cpp" />
     <ClCompile Include="source\camera.cpp" />
+    <ClCompile Include="source\chunk.cpp" />
+    <ClCompile Include="source\density.cpp" />
     <ClCompile Include="source\game.cpp" />
     <ClCompile Include="source\graphics.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\mathUtil.cpp" />
     <ClCompile Include="source\mesh.cpp" />
     <ClCompile Include="source\model.cpp" />
+    <ClCompile Include="source\octree.cpp" />
+    <ClCompile Include="source\qef.cpp" />
     <ClCompile Include="source\resManager.cpp" />
     <ClCompile Include="source\shader.cpp" />
+    <ClCompile Include="source\svd.cpp" />
     <ClCompile Include="source\texture.cpp" />
+    <ClCompile Include="source\voxelManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

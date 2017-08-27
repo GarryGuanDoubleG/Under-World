@@ -1,8 +1,8 @@
 #include "game.hpp"
-
-static float g_prevTime;
-
 #define FP_MODE 1
+
+Game * g_game;
+static float g_prevTime;
 
 float Game::GetElapsedTime()
 {
@@ -16,8 +16,10 @@ float Game::GetDeltaTime()
 
 Game::Game() : m_running(true)
 {
+	g_game = this;
+
 	m_resManager = new ResManager();
-	m_camera = new Camera(glm::vec3(-2.f, 2.f, -2.f), glm::vec3(0.f));
+	m_camera = new Camera(glm::vec3(200.f, 200.f, 200.f), glm::vec3(0.f));
 
 	m_graphics = new Graphics(SCREEN_WIDTH, SCREEN_HEIGHT);
 	m_graphics->SetShaders(m_resManager->LoadShaders());
@@ -25,8 +27,10 @@ Game::Game() : m_running(true)
 	m_graphics->SetModel(m_resManager->LoadModels());
 	m_graphics->SetCamera(m_camera);
 
-	InitFlags();
+	m_voxelManager = new VoxelManager();
+	m_voxelManager->Init();
 
+	InitFlags();
 	g_prevTime = 0;
 }
 
@@ -44,18 +48,15 @@ void Game::Draw()
 	m_graphics->RenderSkybox();
 	//m_graphics->RenderCube(glm::mat4(1.0f));
 	m_graphics->RenderModel("arissa", glm::mat4(1.0f));
-	m_graphics->Render();
+	m_graphics->Display();
+
 }
 
 void Game::Update()
 {
-	if (!m_running)
-	{
-		Close();
-		exit(0);
-	}
-
 	g_prevTime = SDL_GetTicks();
+
+	m_voxelManager->Update();
 
 	if (m_flag & FP_MODE) {
 		SDL_WarpMouseInWindow(m_graphics->GetWindow(), SCREEN_WIDTH * .5f, SCREEN_HEIGHT * .5f);
@@ -95,7 +96,11 @@ void Game::Input()
 			}
 		}
 	}
+}
 
+glm::vec3 Game::GetPlayerPosition()
+{
+	return m_camera->GetPosition();
 }
 
 bool Game::IsRunning()

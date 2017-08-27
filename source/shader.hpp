@@ -6,6 +6,7 @@ public:
 	GLuint m_shaderID;
 
 	Shader(string & vs_shader, string fs_shader);
+	~Shader();
 
 	void Use();
 	void SetUniform1f(string uniform, GLfloat value);

@@ -19,7 +19,7 @@ void main()
 	//color = vec4((texture(texture_diffuse1, UV)) *lightColor);
 	vec3 lightDir = normalize(lightPos - FragPos); 
 	
-	float specularStrength = 0.69f;
+	float specularStrength = 1.f;
 	vec3 norm = normalize(vs_normal);
 	vec3 viewDir = normalize(viewPos - FragPos);
 	vec3 reflectDir = reflect(-lightDir, norm);

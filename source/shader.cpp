@@ -107,10 +107,14 @@ GLuint compile_shaders(string &vs_shader, string &fs_shader)
 	return program;
 }
 
-
 Shader::Shader( string &vs_shader, string fs_shader)
 {
 	m_shaderID = compile_shaders(vs_shader, fs_shader);	
+}
+
+Shader::~Shader()
+{
+	glDeleteProgram(m_shaderID);
 }
 
 void Shader::Use()

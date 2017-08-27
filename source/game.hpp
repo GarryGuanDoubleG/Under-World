@@ -1,6 +1,7 @@
 #pragma once
 #include <json.hpp>
 using Json = nlohmann::json;
+using namespace std;
 
 #include <iostream>
 #include <fstream>
@@ -15,13 +16,14 @@ using Json = nlohmann::json;
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm\gtx\euler_angles.hpp>
+#include <glm/gtc/noise.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <string.h>
 
-using namespace std;
-
+class Game;
+extern Game *g_game;
 #include "mathUtil.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -29,8 +31,12 @@ using namespace std;
 #include "animController.hpp"
 #include "mesh.hpp"
 #include "model.hpp"
+#include "resManager.hpp"
+#include "density.hpp"
+#include "octree.hpp"
+#include "chunk.hpp"
+#include "voxelManager.hpp"
 #include "graphics.hpp"
-#include "ResManager.hpp"
 
 #define SCREEN_WIDTH 1680.0f
 #define SCREEN_HEIGHT 1080.0f
@@ -43,8 +49,7 @@ class Game
 	Camera *m_camera;
 	Graphics *m_graphics;
 	ResManager *m_resManager;
-
-
+	VoxelManager *m_voxelManager;
 public:
 	//get time in milliseconds since SDL initiation
 	static float GetElapsedTime();
@@ -59,8 +64,9 @@ public:
 	void Close();
 	void Input();
 
-	bool IsRunning();
+	glm::vec3 GetPlayerPosition();
 
+	bool IsRunning();
 private:
 	void InitFlags();
 };

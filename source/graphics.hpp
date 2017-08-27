@@ -15,7 +15,7 @@ class Graphics
 
 public:
 	Graphics(int winWidth, int winHeight);
-
+	~Graphics();
 	bool InitGraphics(int winWidth, int winHeight);
 	void InitShapes();
 	void InitSkybox();
@@ -25,7 +25,7 @@ public:
 	void SetTextures(map<string, Texture*> &textures);
 	void SetModel(map<string, Model*>& models);
 
-	void Render();
+	void Display();
 	void RenderBackground(GLfloat bg_color[4]);
 	void RenderSkybox();
 	void RenderCube(glm::mat4 model);

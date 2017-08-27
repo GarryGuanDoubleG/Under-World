@@ -27,11 +27,11 @@ void main()
 	vec3 lightDir = normalize(lightPos - FragPos); 
 	
 	//**********SPECULAR*************
-	float specularStrength = 1.f;
+	float specularStrength = 2.f;
 	vec3 norm = normalize(vs_normal);
 	vec3 viewDir = normalize(viewPos - FragPos);
 	vec3 reflectDir = reflect(-lightDir, norm);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64);
 	vec3 specular =  spec * lightColor * vec3(texture(textureSpecular, UV));
 
 	//***********DIFFUSE*************
