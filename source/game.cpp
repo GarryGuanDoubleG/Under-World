@@ -1,5 +1,9 @@
 #include "game.hpp"
+
 #define FP_MODE 1
+#define WIRE_FRAME_MODE 2
+#define SKYBOX_MODE 4
+#define VOXEL_MODE 8
 
 Game * g_game;
 static float g_prevTime;
@@ -45,11 +49,14 @@ void Game::Draw()
 	GLfloat bg_color[] = { 0.3f, 0.3f, 0.3f, 1.f };
 
 	m_graphics->RenderBackground(bg_color);
-	m_graphics->RenderSkybox();
-	//m_graphics->RenderCube(glm::mat4(1.0f));
+
+	if (m_flag &WIRE_FRAME_MODE) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	if(m_flag & SKYBOX_MODE) m_graphics->RenderSkybox();
+	if(m_flag & VOXEL_MODE) m_graphics->RenderVoxels(m_voxelManager);
 	m_graphics->RenderModel("arissa", glm::mat4(1.0f));
 	m_graphics->Display();
-
 }
 
 void Game::Update()
@@ -86,11 +93,18 @@ void Game::Input()
 			case SDLK_ESCAPE:
 				m_running = false;
 				break;
-			case SDLK_q:
-				if (m_flag & FP_MODE)
-					m_flag &= ~FP_MODE;
-				else
-					m_flag |= FP_MODE;
+			case SDLK_q:				
+				m_flag ^= FP_MODE;
+				break;
+			case SDLK_1:
+				m_flag ^= WIRE_FRAME_MODE;
+				break;
+			case SDLK_2:
+				m_flag ^= SKYBOX_MODE;
+				break;
+			case SDLK_3:
+				m_flag ^= VOXEL_MODE;
+				break;
 			default:
 				break;
 			}

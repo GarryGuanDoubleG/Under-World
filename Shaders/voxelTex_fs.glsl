@@ -6,7 +6,7 @@ in vec3 FragPos;
 flat in int texID;
 
 uniform vec3 viewPos;
-uniform vec3 lightPos; 
+uniform vec3 lightDirection;
 uniform vec3 lightColor;
 uniform vec3 voxelColor;
 
@@ -20,7 +20,7 @@ vec3 getTriPlanarBlend(vec3 _wNorm){
 	vec3 blending = abs( _wNorm );
 	blending = normalize(max(blending, 0.00001)); // Force weights to sum to 1.0
 	float b = (blending.x + blending.y + blending.z);
-	blending /= vec3(b, b, b);
+	blending /= vec3(b);
 	return blending;
 }
 
@@ -28,33 +28,29 @@ void main(void)
 {	
 	int index = int(texID);
 	//int index = 0;
-	float scale = .05f;
+	float scale = .00015f;
 	vec3 blending = getTriPlanarBlend(vs_normal);
 	vec3 xaxis = texture2D( voxelTexture[index], FragPos.yz * scale).rgb;
 	vec3 yaxis = texture2D( voxelTexture[index], FragPos.xz * scale).rgb;
 	vec3 zaxis = texture2D( voxelTexture[index], FragPos.xy * scale).rgb;
 	vec3 tex = xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
 
-
-	vec3 lightDir = normalize(lightPos - FragPos); 
-	
-	float specularStrength = 0.8f;
+	//specular uses direction towards light source
+	vec3 lightDir = normalize(-lightDirection);
 	vec3 norm = normalize(vs_normal);
-
 	vec3 viewDir = normalize(viewPos - FragPos);
-	vec3 reflectDir = reflect(-lightDir, norm);
 	vec3 halfwayDir = normalize(lightDir + viewDir);
-	float spec = pow(max(dot(lightDir, halfwayDir), 0.0), 32);
-	vec3 specular = specularStrength * spec * lightColor;
+	float spec = pow(max(dot(viewDir, halfwayDir), 0.0), 32);
+	vec3 specular =  .8f * spec * lightColor * tex;
 
-	float diff = max(dot(norm, lightDir), 0.0);
-	vec3 diffuse = diff * lightColor;
+	//diffuse uses direction away from light source
+	float diff = max(dot(norm, -lightDir), 0.0);
+	vec3 diffuse = diff * tex * lightColor * .5f;
 	
-	float ambientStrength = 0.3f;
-	vec3 ambient = ambientStrength * lightColor;
+	float ambientStrength = 0.2f;
+	vec3 ambient = ambientStrength * lightColor * tex;
 
     vec3 result = (specular + ambient + diffuse);
-
-	//color =   vec4(tex * result, 1.0f);
-	color =  vec4(tex * result, 1.0f);
+	//vec3 result = diffuse;
+	color = vec4(result, 1.0f);
 }

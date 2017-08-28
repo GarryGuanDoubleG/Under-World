@@ -17,7 +17,7 @@ void Mesh::Draw(Shader *shader)
 
 	for (GLuint i = 0; i < m_textures.size(); i++)
 	{
-		m_textures[i].Bind(GL_TEXTURE0 + i);
+		m_textures[i].Bind(i);
 
 		switch (m_textures[i].GetTexType())
 		{

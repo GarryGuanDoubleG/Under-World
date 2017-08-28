@@ -30,7 +30,7 @@ public:
 	void RenderSkybox();
 	void RenderCube(glm::mat4 model);
 	void RenderModel(string name, glm::mat4 modelMat);
-	//void RenderModel(Shader *)
+	void RenderVoxels(VoxelManager *voxelManager);
 
 	void Cleanup();
 

@@ -25,12 +25,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Shaders\minimap_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\minimap_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\model_fs.glsl">
       <Filter>Shaders</Filter>
     </None>
@@ -69,6 +63,12 @@
     </None>
     <None Include="Resources\models\models.json">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Shaders\voxelTex_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\voxelTex_vs.glsl">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

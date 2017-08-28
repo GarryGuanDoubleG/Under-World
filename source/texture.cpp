@@ -157,7 +157,7 @@ void Texture::TriFiltering()
 void Texture::Bind(GLuint activeTex)
 {
 	m_activeTex = activeTex;
-	glActiveTexture(activeTex); // Active proper texture unit before binding
+	glActiveTexture(GL_TEXTURE0 + activeTex); // Active proper texture unit before binding
 
 	switch (m_type)
 	{
@@ -175,7 +175,7 @@ void Texture::Bind(GLuint activeTex)
 
 void Texture::Unbind()
 {
-	glActiveTexture(m_activeTex); // Active proper texture unit before binding									  
+	glActiveTexture(GL_TEXTURE0 + m_activeTex); // Active proper texture unit before binding									  
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 

@@ -13,7 +13,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 target)
 	m_view_mat = glm::lookAt(m_pos, m_pos + m_forward, m_up);
 
 	//set up perspective mat4
-	m_perspect_proj = glm::perspective(45.0f, SCREEN_WIDTH / SCREEN_HEIGHT, 1.f, 1000.0f);
+	m_perspect_proj = glm::perspective(45.0f, SCREEN_WIDTH / SCREEN_HEIGHT, 1.f, 1000000.0f);
 
 	m_yaw = 0.0f;
 	m_pitch = 0.0f;

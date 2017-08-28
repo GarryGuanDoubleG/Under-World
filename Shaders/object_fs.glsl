@@ -27,7 +27,6 @@ void main()
 	vec3 lightDir = normalize(lightPos - FragPos); 
 	
 	//**********SPECULAR*************
-	float specularStrength = 2.f;
 	vec3 norm = normalize(vs_normal);
 	vec3 viewDir = normalize(viewPos - FragPos);
 	vec3 reflectDir = reflect(-lightDir, norm);

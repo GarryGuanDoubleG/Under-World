@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 		g_game->Draw();
 	}
 
-//	g_game->Close();
+	g_game->Close();
 
 	return 0;
 }

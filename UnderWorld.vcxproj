@@ -148,14 +148,14 @@
     <None Include="Resources\sound.json" />
     <None Include="Resources\structures.json" />
     <None Include="Resources\textures\texture.json" />
-    <None Include="Shaders\minimap_fs.glsl" />
-    <None Include="Shaders\minimap_vs.glsl" />
     <None Include="Shaders\model_fs.glsl" />
     <None Include="Shaders\model_vs.glsl" />
     <None Include="Shaders\object_fs.glsl" />
     <None Include="Shaders\object_vs.glsl" />
     <None Include="Shaders\skybox_fs.glsl" />
     <None Include="Shaders\skybox_vs.glsl" />
+    <None Include="Shaders\voxelTex_fs.glsl" />
+    <None Include="Shaders\voxelTex_vs.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Allocator.hpp" />

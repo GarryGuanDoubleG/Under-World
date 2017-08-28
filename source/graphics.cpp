@@ -308,6 +308,32 @@ void Graphics::RenderModel(string name, glm::mat4 modelMat)
 	model->Draw(shader);
 }
 
+void Graphics::RenderVoxels(VoxelManager * voxelManager)
+{
+	Shader *shader = m_shaderMap["voxelTex"];
+	shader->Use();
+
+	glUniformMatrix4fv(shader->Uniform("model"), 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
+	glUniformMatrix4fv(shader->Uniform("view"), 1, GL_FALSE, &m_camera->GetViewMat()[0][0]);
+	glUniformMatrix4fv(shader->Uniform("projection"), 1, GL_FALSE, &m_camera->GetProj()[0][0]);
+
+	glm::vec3 light_color(1.0f, 1.0f, 1.0f);
+	glm::vec3 light_dir(-.2f, -1.f, -0.3f);
+
+
+	glUniform3fv(shader->Uniform("viewPos"), 1, &m_camera->GetPosition()[0]);
+	glUniform3fv(shader->Uniform("lightColor"), 1, &light_color[0]);
+	glUniform3fv(shader->Uniform("lightDirection"), 1, &light_dir[0]);
+	
+	m_textureMap["grass"]->Bind(0);
+	
+	GLint samplers[] = { 0, 1, 2, 3, 4 };
+	glUniform1iv(shader->Uniform("voxelTexture"), 5, &samplers[0]);
+	voxelManager->Render(shader);
+
+	m_textureMap["grass"]->Unbind();
+}
+
 void Graphics::Display()
 {
 	SDL_GL_SwapWindow(m_window);

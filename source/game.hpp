@@ -6,6 +6,8 @@ using namespace std;
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <string.h>
+#include <thread>
 #include <GL\glew.h>
 #include <SDL.h>
 #include <SDL_image.h>
@@ -20,7 +22,6 @@ using namespace std;
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include <string.h>
 
 class Game;
 extern Game *g_game;
