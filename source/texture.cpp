@@ -167,6 +167,9 @@ void Texture::Bind(GLuint activeTex)
 	case Skybox:
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_texID);
 		break;
+	case DepthMap:
+		glBindTexture(GL_TEXTURE_2D, m_texID);
+		break;
 	default:
 		glBindTexture(GL_TEXTURE_2D, m_texID);
 		break;
@@ -200,6 +203,24 @@ void Texture::SetTexType(aiTextureType type)
 	default:
 		break;
 	}
+}
+
+void Texture::SetDepthMap(GLuint width, GLuint height)
+{
+	m_type = DepthMap;
+
+	glGenTextures(1, &m_texID);
+	glBindTexture(GL_TEXTURE_2D, m_texID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 GLuint Texture::GetTexID()

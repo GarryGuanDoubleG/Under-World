@@ -6,7 +6,8 @@ enum TextureType
 	Skybox = 1,
 	Ambient = 2,
 	Diffuse = 3,
-	Specular = 4
+	Specular = 4,
+	DepthMap = 5
 };
 
 class Texture
@@ -32,6 +33,8 @@ public:
 
 	void SetTexType(TextureType type);
 	void SetTexType(aiTextureType type);
+
+	void SetDepthMap(GLuint width, GLuint height);
 
 	GLuint GetTexID();
 	TextureType GetTexType();

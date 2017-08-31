@@ -23,8 +23,7 @@ using namespace std;
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-class Game;
-extern Game *g_game;
+#include "simple_logger.h"
 #include "mathUtil.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
@@ -32,6 +31,8 @@ extern Game *g_game;
 #include "animController.hpp"
 #include "mesh.hpp"
 #include "model.hpp"
+#include "entity.hpp"
+#include "LightSource.hpp"
 #include "resManager.hpp"
 #include "density.hpp"
 #include "octree.hpp"
@@ -42,16 +43,33 @@ extern Game *g_game;
 #define SCREEN_WIDTH 1680.0f
 #define SCREEN_HEIGHT 1080.0f
 
+#define FP_MODE 1
+#define WIRE_FRAME_MODE 2
+#define SKYBOX_MODE 4
+#define VOXEL_MODE 8
+#define MODEL_MODE 16
+#define SHADOW_MODE 32
+
+class Game;
+extern Game *g_game;
+
 class Game
 {
+
+private:
 	bool m_running;
 	int m_flag;
 
 	Camera *m_camera;
 	Graphics *m_graphics;
 	ResManager *m_resManager;
-	VoxelManager *m_voxelManager;
+	Entity *m_entitiesList;
+
 public:
+	VoxelManager *m_voxelManager;
+
+public:
+
 	//get time in milliseconds since SDL initiation
 	static float GetElapsedTime();
 	//get time since last game update
@@ -59,6 +77,8 @@ public:
 
 	Game();
 	~Game();
+
+	void RenderScene();
 
 	void Draw();
 	void Update();
@@ -68,6 +88,4 @@ public:
 	glm::vec3 GetPlayerPosition();
 
 	bool IsRunning();
-private:
-	void InitFlags();
 };

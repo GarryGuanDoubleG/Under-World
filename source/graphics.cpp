@@ -20,6 +20,7 @@ Graphics::Graphics(int winWidth, int winHeight)
 
 	InitShapes();
 	InitSkybox();
+	InitDepthMap();
 }
 
 Graphics::~Graphics()
@@ -76,6 +77,8 @@ bool Graphics::InitGraphics(int winWidth, int winHeight)
 	glDepthFunc(GL_LESS);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	
 
 	atexit(SDL_Quit);
 	return true;
@@ -139,6 +142,40 @@ void Graphics::InitShapes()
 
 	m_vaoMap.insert(pair<string, GLuint>("cube", cube_vao));
 	m_vboMap.insert(pair<string, GLuint>("cube", cube_vbo));
+
+	//quad
+	GLfloat quadVertices[] = {   // Vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+								 // Positions   // TexCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		1.0f, -1.0f,  1.0f, 0.0f,
+		1.0f,  1.0f,  1.0f, 1.0f
+	};
+
+	GLuint quad_vao;
+	glGenVertexArrays(1, &quad_vao);
+	glBindVertexArray(quad_vao);
+
+	GLuint quad_vbo;
+	glGenBuffers(1, &quad_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, quad_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices[0], GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+
+	//uv
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	m_vaoMap.insert(pair<string, GLuint>("quad", quad_vao));
+	m_vboMap.insert(pair<string, GLuint>("quad", quad_vbo));
 }
 
 void Graphics::InitSkybox()
@@ -207,6 +244,24 @@ void Graphics::InitSkybox()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void Graphics::InitDepthMap()
+{
+	Texture *depthMap = new Texture();
+	depthMap->SetDepthMap(1680, 1080);
+	m_textureMap.insert(pair<string, Texture*>("depthMap", depthMap));
+	
+	glBindTexture(GL_TEXTURE_2D, depthMap->GetTexID());
+
+	glGenFramebuffers(1, &m_depthMapFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap->GetTexID(), 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 void Graphics::SetCamera(Camera * camera)
 {
 	m_camera = camera;
@@ -219,12 +274,22 @@ void Graphics::SetShaders(map<string, Shader*>& shaders)
 
 void Graphics::SetTextures(map<string, Texture*>& textures)
 {
-	m_textureMap = textures;
+	m_textureMap.insert(textures.begin(), textures.end());
 }
 
 void Graphics::SetModel(map<string, Model*> &models)
 {
 	m_modelMap = models;
+}
+
+void Graphics::SetFlag(GLuint flag)
+{
+	m_flag = flag;
+}
+
+void Graphics::XORSetFlag(GLuint flag)
+{
+	m_flag ^= flag;
 }
 
 void Graphics::RenderBackground(GLfloat bg_color[4])
@@ -235,6 +300,8 @@ void Graphics::RenderBackground(GLfloat bg_color[4])
 
 void Graphics::RenderSkybox()
 {
+	if (~m_flag & SKYBOX_MODE) return;
+
 	Shader *shader = m_shaderMap["skybox"];
 	shader->Use();
 
@@ -261,6 +328,78 @@ void Graphics::RenderSkybox()
 	glDepthFunc(depthMode);
 }
 
+void Graphics::RenderScene()
+{
+	if (m_flag & SHADOW_MODE)
+	{
+		RenderShadowMap();
+		//RenderToQuad();
+	}
+
+	RenderVoxels();
+
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(400.f, 250, 400.0f));
+	model = glm::scale(model, glm::vec3(1.5f));
+	RenderModel("arissa", model);
+	
+}
+
+void Graphics::RenderShadowMap()
+{
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_depthMapFBO);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	 
+	Shader *shader = m_shaderMap["depthMap"];
+	shader->Use();
+
+	float near_plane = 1.0f,
+		far_plane = 2000.f;
+
+	glm::vec3 lightPos(700.0f, 700, 700.f);
+
+	glm::mat4 lightProjection = glm::ortho(-840.0f, 840.0f, -540.0f, 540.0f, near_plane, far_plane);
+	glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+	glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+
+	shader->SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+	glCullFace(GL_FRONT);
+	//render voxel shadows
+
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(400.f, 250, 400.0f));
+	model = glm::scale(model, glm::vec3(1.5f));
+	shader->SetMat4("model", model);
+	m_modelMap["arissa"]->Draw(shader);
+
+
+
+
+	//shader->SetMat4("model", glm::mat4(1.0f));
+	//g_game->m_voxelManager->Render();
+
+	glCullFace(GL_BACK);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Graphics::RenderToQuad()
+{
+	Shader *shader = m_shaderMap["quad"];
+	shader->Use();
+
+	float near_plane = 1.0f,
+		far_plane = 1000.f;
+	shader->SetUniform1i("depthMap", 0);
+
+	glBindVertexArray(m_vaoMap["quad"]);
+	m_textureMap["depthMap"]->Bind(0);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	m_textureMap["depthMap"]->Unbind();
+	glBindVertexArray(0);
+}
+
+
 void Graphics::RenderCube(glm::mat4 model)
 {
 	Shader *shader = m_shaderMap["object"];
@@ -271,9 +410,9 @@ void Graphics::RenderCube(glm::mat4 model)
 
 	glBindVertexArray(m_vaoMap["cube"]);
 
-	glUniformMatrix4fv(shader->Uniform("model"), 1, GL_FALSE, &model[0][0]);
-	glUniformMatrix4fv(shader->Uniform("projection"), 1, GL_FALSE, &m_camera->GetProj()[0][0]);
-	glUniformMatrix4fv(shader->Uniform("view"), 1, GL_FALSE, &m_camera->GetViewMat()[0][0]);
+	shader->SetMat4("model", model);
+	shader->SetMat4("projection", m_camera->GetProj());
+	shader->SetMat4("view", m_camera->GetViewMat());
 
 	glm::vec3 light_pos(10.f,10.f, 10.f);
 	glm::vec3 light_color(1.0f, 1.0f, 1.0f);
@@ -288,15 +427,17 @@ void Graphics::RenderCube(glm::mat4 model)
 	glBindVertexArray(0);
 }
 
-void Graphics::RenderModel(string name, glm::mat4 modelMat)
+void Graphics::RenderModel(const string &name, const glm::mat4 &modelMat)
 {
+	if (~m_flag & MODEL_MODE) return;
+
 	Model * model = m_modelMap["arissa"];
 	Shader *shader = m_shaderMap["object"];
 	shader->Use();
 
-	glUniformMatrix4fv(shader->Uniform("model"), 1, GL_FALSE, &modelMat[0][0]);
-	glUniformMatrix4fv(shader->Uniform("projection"), 1, GL_FALSE, &m_camera->GetProj()[0][0]);
-	glUniformMatrix4fv(shader->Uniform("view"), 1, GL_FALSE, &m_camera->GetViewMat()[0][0]);
+	shader->SetMat4("model", modelMat);
+	shader->SetMat4("projection", m_camera->GetProj());
+	shader->SetMat4("view", m_camera->GetViewMat());
 
 	glm::vec3 light_pos(50.f, 200.f, 50.f);
 	glm::vec3 light_color(1.0f, 1.0f, 1.0f);
@@ -308,14 +449,31 @@ void Graphics::RenderModel(string name, glm::mat4 modelMat)
 	model->Draw(shader);
 }
 
-void Graphics::RenderVoxels(VoxelManager * voxelManager)
+void Graphics::RenderVoxels()
 {
+	if (~m_flag & VOXEL_MODE) return;
+
 	Shader *shader = m_shaderMap["voxelTex"];
 	shader->Use();
 
-	glUniformMatrix4fv(shader->Uniform("model"), 1, GL_FALSE, &glm::mat4(1.0f)[0][0]);
-	glUniformMatrix4fv(shader->Uniform("view"), 1, GL_FALSE, &m_camera->GetViewMat()[0][0]);
-	glUniformMatrix4fv(shader->Uniform("projection"), 1, GL_FALSE, &m_camera->GetProj()[0][0]);
+	if (m_flag & SHADOW_MODE)
+	{
+		float near_plane = 1.0f;
+		float far_plane = 1000.f;
+
+		glm::vec3 lightPos(700.0f, 700, 700.f);
+
+		glm::mat4 lightProjection = glm::ortho(-840.0f, 840.0f, -540.0f, 540.0f, near_plane, far_plane);
+		glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+		shader->SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+		m_textureMap["depthMap"]->Bind(16);
+		shader->SetUniform1i("shadowMap", 16);
+	}
+
+	shader->SetMat4("model", glm::mat4(1.0f));
+	shader->SetMat4("projection", m_camera->GetProj());
+	shader->SetMat4("view", m_camera->GetViewMat());
 
 	glm::vec3 light_color(1.0f, 1.0f, 1.0f);
 	glm::vec3 light_dir(-.2f, -1.f, -0.3f);
@@ -329,9 +487,10 @@ void Graphics::RenderVoxels(VoxelManager * voxelManager)
 	
 	GLint samplers[] = { 0, 1, 2, 3, 4 };
 	glUniform1iv(shader->Uniform("voxelTexture"), 5, &samplers[0]);
-	voxelManager->Render(shader);
+	g_game->m_voxelManager->Render();
 
 	m_textureMap["grass"]->Unbind();
+	if (m_flag & SHADOW_MODE) m_textureMap["depthMap"]->Unbind();
 }
 
 void Graphics::Display()

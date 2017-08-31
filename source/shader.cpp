@@ -125,6 +125,11 @@ void Shader::Use()
 	}
 }
 
+void Shader::SetMat4(string uniform, glm::mat4 mat4)
+{
+	glUniformMatrix4fv(Uniform(uniform), 1, GL_FALSE, &mat4[0][0]);
+}
+
 void Shader::SetUniform1f(string uniform, GLfloat value)
 {
 	glUniform1f(Uniform(uniform), value);
@@ -133,6 +138,11 @@ void Shader::SetUniform1f(string uniform, GLfloat value)
 void Shader::SetUniform1i(string uniform, GLint value)
 {
 	glUniform1i(Uniform(uniform), value);
+}
+
+void Shader::SetUniform2fv(string uniform, glm::vec2 value)
+{
+	glUniform2fv(Uniform(uniform), 1, &value[0]);
 }
 
 GLuint Shader::Uniform(string uniformName)

@@ -1,5 +1,11 @@
 #pragma once
 
+struct AABB
+{
+	glm::vec3 min;
+	glm::vec3 max;
+};
+
 /**
 *3D model class. Supports most file formats. Imports and parses model file and stores mesh information
 *to use for rendering

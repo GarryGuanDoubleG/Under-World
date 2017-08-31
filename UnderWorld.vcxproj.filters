@@ -70,6 +70,21 @@
     <None Include="Shaders\voxelTex_vs.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Shaders\depthShader_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\shader.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Shaders\depthShader_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\quad_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\quad_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\game.hpp">
@@ -126,6 +141,15 @@
     <ClInclude Include="source\density.hpp">
       <Filter>Header Files\Voxels</Filter>
     </ClInclude>
+    <ClInclude Include="source\LightSource.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\entity.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\simple_logger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\graphics.cpp">
@@ -178,6 +202,15 @@
     </ClCompile>
     <ClCompile Include="source\density.cpp">
       <Filter>Source Files\Voxels</Filter>
+    </ClCompile>
+    <ClCompile Include="source\LightSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\simple_logger.cpp">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -12,6 +12,8 @@ Mesh::Mesh(vector<Vertex>& vertices, vector<GLuint>& indices, vector<Texture>& t
 
 void Mesh::Draw(Shader *shader)
 {
+
+
 	//bind textures
 	glBindVertexArray(this->m_vao);
 

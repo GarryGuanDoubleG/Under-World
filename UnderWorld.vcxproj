@@ -148,10 +148,15 @@
     <None Include="Resources\sound.json" />
     <None Include="Resources\structures.json" />
     <None Include="Resources\textures\texture.json" />
+    <None Include="Shaders\depthShader_vs.glsl" />
+    <None Include="Shaders\depthShader_fs.glsl" />
     <None Include="Shaders\model_fs.glsl" />
     <None Include="Shaders\model_vs.glsl" />
     <None Include="Shaders\object_fs.glsl" />
     <None Include="Shaders\object_vs.glsl" />
+    <None Include="Shaders\quad_fs.glsl" />
+    <None Include="Shaders\quad_vs.glsl" />
+    <None Include="Shaders\shader.json" />
     <None Include="Shaders\skybox_fs.glsl" />
     <None Include="Shaders\skybox_vs.glsl" />
     <None Include="Shaders\voxelTex_fs.glsl" />
@@ -163,8 +168,10 @@
     <ClInclude Include="source\camera.hpp" />
     <ClInclude Include="source\chunk.hpp" />
     <ClInclude Include="source\density.hpp" />
+    <ClInclude Include="source\entity.hpp" />
     <ClInclude Include="source\game.hpp" />
     <ClInclude Include="source\graphics.hpp" />
+    <ClInclude Include="source\LightSource.hpp" />
     <ClInclude Include="source\mathUtil.hpp" />
     <ClInclude Include="source\mesh.hpp" />
     <ClInclude Include="source\model.hpp" />
@@ -173,6 +180,7 @@
     <ClInclude Include="source\qef.hpp" />
     <ClInclude Include="source\resManager.hpp" />
     <ClInclude Include="source\shader.hpp" />
+    <ClInclude Include="source\simple_logger.h" />
     <ClInclude Include="source\svd.hpp" />
     <ClInclude Include="source\texture.hpp" />
     <ClInclude Include="source\voxelManager.hpp" />
@@ -182,8 +190,10 @@
     <ClCompile Include="source\camera.cpp" />
     <ClCompile Include="source\chunk.cpp" />
     <ClCompile Include="source\density.cpp" />
+    <ClCompile Include="source\entity.cpp" />
     <ClCompile Include="source\game.cpp" />
     <ClCompile Include="source\graphics.cpp" />
+    <ClCompile Include="source\LightSource.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\mathUtil.cpp" />
     <ClCompile Include="source\mesh.cpp" />
@@ -192,6 +202,7 @@
     <ClCompile Include="source\qef.cpp" />
     <ClCompile Include="source\resManager.cpp" />
     <ClCompile Include="source\shader.cpp" />
+    <ClCompile Include="source\simple_logger.cpp" />
     <ClCompile Include="source\svd.cpp" />
     <ClCompile Include="source\texture.cpp" />
     <ClCompile Include="source\voxelManager.cpp" />

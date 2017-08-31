@@ -1,17 +1,21 @@
 #version 400 core
+out vec4 FragColor;
 in vec2 UV;
-out vec4 color;
 
-uniform sampler2D screenTexture;
-uniform sampler2D alphaMask;
-//uniform sampler2D heightmap;
+uniform sampler2D depthMap;
+uniform float near_plane;
+uniform float far_plane;
 
+// required when using a perspective projection matrix
+float LinearizeDepth(float depth)
+{
+    float z = depth * 2.0 - 1.0; // Back to NDC 
+    return (2.0 * near_plane * far_plane) / (far_plane + near_plane - z * (far_plane - near_plane));	
+}
 
 void main()
-{ 
-    vec4 minimap = texture(screenTexture, UV);
-
-	float alpha = texture(alphaMask, UV).r;
-
-	color = vec4(minimap.rgb, minimap.a * alpha);
+{             
+    float depthValue = texture(depthMap, UV).r;
+    //FragColor = vec4(vec3(LinearizeDepth(depthValue) / far_plane), 1.0); // perspective
+    FragColor = vec4(vec3(depthValue), 1.0); // orthographic
 }

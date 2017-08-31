@@ -1,10 +1,5 @@
 #include "game.hpp"
 
-#define FP_MODE 1
-#define WIRE_FRAME_MODE 2
-#define SKYBOX_MODE 4
-#define VOXEL_MODE 8
-
 Game * g_game;
 static float g_prevTime;
 
@@ -23,7 +18,7 @@ Game::Game() : m_running(true)
 	g_game = this;
 
 	m_resManager = new ResManager();
-	m_camera = new Camera(glm::vec3(200.f, 200.f, 200.f), glm::vec3(0.f));
+	m_camera = new Camera(glm::vec3(20, 150, 20), glm::vec3(0.f));
 
 	m_graphics = new Graphics(SCREEN_WIDTH, SCREEN_HEIGHT);
 	m_graphics->SetShaders(m_resManager->LoadShaders());
@@ -31,10 +26,14 @@ Game::Game() : m_running(true)
 	m_graphics->SetModel(m_resManager->LoadModels());
 	m_graphics->SetCamera(m_camera);
 
+	m_entitiesList = new Entity[MAX_ENTITIES];
+	for (int i = 0; i < MAX_ENTITIES - 1; i++)
+		m_entitiesList[i].m_nextFree = &m_entitiesList[i + 1];
+
 	m_voxelManager = new VoxelManager();
 	m_voxelManager->Init();
 
-	InitFlags();
+	m_graphics->SetFlag(FP_MODE | SKYBOX_MODE | VOXEL_MODE | MODEL_MODE | SHADOW_MODE);
 	g_prevTime = 0;
 }
 
@@ -44,18 +43,27 @@ Game::~Game()
 	delete m_resManager;
 }
 
+void Game::RenderScene()
+{
+	if (m_flag & VOXEL_MODE) m_graphics->RenderVoxels();
+	if (m_flag & MODEL_MODE) m_graphics->RenderModel("arissa", glm::translate(glm::mat4(1.0f), glm::vec3(600.f)));
+}
+
 void Game::Draw()
 {
 	GLfloat bg_color[] = { 0.3f, 0.3f, 0.3f, 1.f };
 
 	m_graphics->RenderBackground(bg_color);
 
-	if (m_flag &WIRE_FRAME_MODE) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	if (m_flag & WIRE_FRAME_MODE)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
 
-	if(m_flag & SKYBOX_MODE) m_graphics->RenderSkybox();
-	if(m_flag & VOXEL_MODE) m_graphics->RenderVoxels(m_voxelManager);
-	m_graphics->RenderModel("arissa", glm::mat4(1.0f));
+	m_graphics->RenderSkybox();
+	m_graphics->RenderScene();
+
 	m_graphics->Display();
 }
 
@@ -94,16 +102,16 @@ void Game::Input()
 				m_running = false;
 				break;
 			case SDLK_q:				
-				m_flag ^= FP_MODE;
+				m_flag ^=FP_MODE;
 				break;
 			case SDLK_1:
-				m_flag ^= WIRE_FRAME_MODE;
+				m_flag ^=WIRE_FRAME_MODE;
 				break;
 			case SDLK_2:
-				m_flag ^= SKYBOX_MODE;
+				m_graphics->m_flag ^=SKYBOX_MODE;
 				break;
 			case SDLK_3:
-				m_flag ^= VOXEL_MODE;
+				m_graphics->m_flag ^=VOXEL_MODE;
 				break;
 			default:
 				break;
@@ -122,7 +130,3 @@ bool Game::IsRunning()
 	return m_running;
 }
 
-void Game::InitFlags()
-{
-	m_flag = FP_MODE;
-}
