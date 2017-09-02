@@ -18,20 +18,8 @@ uniform vec3 voxelColor;
 
 uniform sampler2D voxelTexture[MAX_TEXTURES];
 uniform sampler2D shadowMap;
-
-vec3 getTriPlanarBlend(vec3 _wNorm){
-	// in wNorm is the world-space normal of the fragment
-	vec3 blending = abs( _wNorm );
-	blending = normalize(max(blending, 0.00001)); // Force weights to sum to 1.0
-	float b = (blending.x + blending.y + blending.z);
-	blending /= vec3(b);
-	return blending;
-}
-
-float when_lt(float x, float y)
-{
-	return max(sign(y - x), 0.0);
-}
+uniform sampler2D normalMap;
+uniform sampler2D depthMap;
 
 float ShadowCalculation(vec4 FragPosLightSpace)
 {
@@ -45,9 +33,19 @@ float ShadowCalculation(vec4 FragPosLightSpace)
 	float currentDepth = projCoords.z;
 	float bias = max(0.05 * (1.0 - dot(fs_in.normal, -lightDirection)), 0.05);
 	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+	
+	//PCF
+	for(int x = -1; x <= 1; ++x)
+	{
+		for(int y = -1; y <= 1; ++y)
+		{
+			float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
+		}    
+	}
 
-	////set shadow to 0 if z coord is > 1.0
-	//shadow *= when_lt(projCoords.z, 1.0);
+	shadow /= 9.0;
 	
 	if(projCoords.z > 1.0)
 		shadow = 0.0;
@@ -56,23 +54,80 @@ float ShadowCalculation(vec4 FragPosLightSpace)
 
 }
 
+vec3 getTriPlanarBlend(vec3 _wNorm){
+	// in wNorm is the world-space normal of the fragment
+	vec3 blending = abs( _wNorm );
+	blending = normalize(max(blending, 0.0000001)); // Force weights to sum to 1.0
+	float b = (blending.x + blending.y + blending.z);
+	blending /= vec3(b);
+	return blending;
+}
+
+vec3 GetTriPlanarTex(vec3 FragPos, vec3 blending, float scale, int index)
+{
+	vec3 xaxis = texture2D( voxelTexture[index], FragPos.yz * scale).rgb;
+	vec3 yaxis = texture2D( voxelTexture[index], FragPos.xz * scale).rgb;
+	vec3 zaxis = texture2D( voxelTexture[index], FragPos.xy * scale).rgb;
+
+	return xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
+}
+
+vec3 perturb_normal(vec3 N, vec3 B, vec3 T, vec2 texcoord)
+{
+	float invmax = 1.0 / sqrt(max(dot(T ,T), dot(B, B)));
+	mat3 TBN =  mat3(T * invmax, B * invmax, N);
+
+	vec3 map = texture2D(normalMap, texcoord).rgb;
+
+	map = map * 2.0 - 1.0f;
+
+	map = map * TBN;
+	map = normalize(map);
+	return map;
+}
+
+//vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
+//{
+//	float height =  texture(depthMap, texCoords).r;
+//	float heightScale = 0.1;
+//    vec2 p = viewDir.xy / viewDir.z * (height * heightScale);
+    
+//	return texCoords - p;    
+//}
+
+vec3 TriPlanarNormal(vec3 FragPos, vec3 normal)
+{
+    vec3 duv1 = dFdx(FragPos);
+    vec3 duv2 = dFdy(FragPos);
+
+    vec3 dp1perp = cross(normal, duv1);
+    vec3 dp2perp = cross(duv2, normal);
+
+	vec3 Tx = dp2perp * duv1.x + dp1perp * duv2.x; 
+    vec3 Ty = dp2perp * duv1.y + dp1perp * duv2.y; 
+    vec3 Tz = dp2perp * duv1.z + dp1perp * duv2.z; 
+
+	vec3 norm1 = perturb_normal(normal, Ty, Tz, FragPos.yz * scale);
+	vec3 norm2 = perturb_normal(normal, Tx, Tz, FragPos.xz * scale);
+	vec3 norm3 = perturb_normal(normal, Tx, Ty, FragPos.xy * scale);
+
+	return norm1 * blending.x + norm2 * blending.y + norm3 * blending.z;
+}
+
 void main(void)
 {	
 	int index = int(fs_in.texID);
 	
 	//calculate texture value at this fragment
-	float scale = .00015f;
+	float scale = .0015f;
 	vec3 blending = getTriPlanarBlend(fs_in.normal);
-	vec3 xaxis = texture2D( voxelTexture[index], fs_in.FragPos.yz * scale).rgb;
-	vec3 yaxis = texture2D( voxelTexture[index], fs_in.FragPos.xz * scale).rgb;
-	vec3 zaxis = texture2D( voxelTexture[index], fs_in.FragPos.xy * scale).rgb;
-	vec3 tex = xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
+	vec3 tex = GetTriPlanarTex(fs_in.FragPos, blending, scale, index);
+
+	vec3 norm = TriPlanarNormal(fs_in.FragPos, fs_in.normal);
 
 	//specular uses direction towards light source
 	/*******SPECULAR ***************/
-
-	vec3 lightDir = normalize(-lightDirection);
-	vec3 norm = normalize(fs_in.normal);
+	vec3 lightDir = normalize(-lightDirection);;
 	vec3 viewDir = normalize(viewPos - fs_in.FragPos);
 	vec3 halfwayDir = normalize(lightDir + viewDir);
 	float spec = pow(max(dot(viewDir, halfwayDir), 0.0), 32);
@@ -80,7 +135,7 @@ void main(void)
 
 	//diffuse uses direction away from light source
 	float diff = max(dot(norm, -lightDir), 0.0);
-	vec3 diffuse = diff * lightColor * .5f;
+	vec3 diffuse = diff * lightColor * .7f;
 	
 	float ambientStrength = 0.2f;
 	vec3 ambient = ambientStrength * lightColor;

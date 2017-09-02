@@ -3,6 +3,16 @@
     "path": "Resources\\textures\\grass\\0206 060x2 gld01.png",
     "normal": "Resources\\textures\\grass\\grass_lush_daisies_01_N.png"
   },
+  "brick": {
+    "path": "Resources\\textures\\bricks2.jpg",
+    "height": "Resources\\textures\\bricks2_disp.jpg",
+    "normal": "Resources\\textures\\bricks2_normal.jpg"
+  },
+  "brickWall": {
+    "path": "Resources\\textures\\brickWall.jpg",
+    "normal": "Resources\\textures\\brickwall_normal.jpg"
+  },
+
   "grass1": {
     "path": "billboard_grass.png"
   },
@@ -13,12 +23,12 @@
     "path": "Resources\\textures\\water2.png"
   },
   "waterdudv": {
-    "path":  "Resources\\textures\\waterdudv.png"
+    "path": "Resources\\textures\\waterdudv.png"
   },
   "snow": {
     "path": "Resources\\textures\\snow.png"
   },
-   "soil": {
+  "soil": {
     "path": "Resources\\textures\\soil.png"
   },
   "billboard_grass": {
@@ -38,6 +48,6 @@
     "path": "Resources\\textures\\health_bar.png"
   },
   "health_bar_grey": {
-    "path":  "Resources\\textures\\health_bar_grey.png"
+    "path": "Resources\\textures\\health_bar_grey.png"
   }
 }

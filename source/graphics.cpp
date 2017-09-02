@@ -338,7 +338,7 @@ void Graphics::RenderScene()
 
 	RenderVoxels();
 
-	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(400.f, 250, 400.0f));
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(400.f, 150, 400.0f));
 	model = glm::scale(model, glm::vec3(1.5f));
 	RenderModel("arissa", model);
 	
@@ -367,16 +367,10 @@ void Graphics::RenderShadowMap()
 	glCullFace(GL_FRONT);
 	//render voxel shadows
 
-	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(400.f, 250, 400.0f));
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(400.f, 150, 400.0f));
 	model = glm::scale(model, glm::vec3(1.5f));
 	shader->SetMat4("model", model);
-	m_modelMap["arissa"]->Draw(shader);
-
-
-
-
-	//shader->SetMat4("model", glm::mat4(1.0f));
-	//g_game->m_voxelManager->Render();
+	m_modelMap["arissa"]->DrawVertices(shader);
 
 	glCullFace(GL_BACK);
 
@@ -393,12 +387,11 @@ void Graphics::RenderToQuad()
 	shader->SetUniform1i("depthMap", 0);
 
 	glBindVertexArray(m_vaoMap["quad"]);
-	m_textureMap["depthMap"]->Bind(0);
+	m_textureMap["brickNormal"]->Bind(0);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	m_textureMap["depthMap"]->Unbind();
+	m_textureMap["brickNormal"]->Unbind();
 	glBindVertexArray(0);
 }
-
 
 void Graphics::RenderCube(glm::mat4 model)
 {
@@ -483,13 +476,16 @@ void Graphics::RenderVoxels()
 	glUniform3fv(shader->Uniform("lightColor"), 1, &light_color[0]);
 	glUniform3fv(shader->Uniform("lightDirection"), 1, &light_dir[0]);
 	
-	m_textureMap["grass"]->Bind(0);
-	
+	m_textureMap["brick"]->Bind(0);
+	m_textureMap["brickNormal"]->Bind(17);
+	shader->SetUniform1i("normalMap", 17);
+	//m_textureMap["brickHeight"]->Bind(6);
 	GLint samplers[] = { 0, 1, 2, 3, 4 };
 	glUniform1iv(shader->Uniform("voxelTexture"), 5, &samplers[0]);
 	g_game->m_voxelManager->Render();
 
-	m_textureMap["grass"]->Unbind();
+	m_textureMap["brick"]->Unbind();
+	m_textureMap["brickNormal"]->Unbind();
 	if (m_flag & SHADOW_MODE) m_textureMap["depthMap"]->Unbind();
 }
 

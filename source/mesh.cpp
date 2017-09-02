@@ -12,8 +12,6 @@ Mesh::Mesh(vector<Vertex>& vertices, vector<GLuint>& indices, vector<Texture>& t
 
 void Mesh::Draw(Shader *shader)
 {
-
-
 	//bind textures
 	glBindVertexArray(this->m_vao);
 
@@ -46,6 +44,19 @@ void Mesh::Draw(Shader *shader)
 	// Unbind the textures after drawing
 	for (auto tex : m_textures)
 		tex.Unbind();
+}
+
+void Mesh::DrawVertices(Shader *shader)
+{
+	//bind textures
+	glBindVertexArray(this->m_vao);
+	//draw the mesh
+	if (m_instanced)
+		glDrawElementsInstanced(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0, m_instanceCount);
+	else
+		glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
+
+	glBindVertexArray(0);
 }
 /**
 * @brief binds all the vertex data to a vertex array object

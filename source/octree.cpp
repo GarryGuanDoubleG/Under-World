@@ -140,11 +140,14 @@ Octree * Octree::BuildTree(glm::vec3 chunkPos, glm::vec3 chunkSize, float voxelS
 	{
 		//floor the noise value
 		float height = (int)noiseValues[GETINDEXXZ(x, z)];
-		if (height < chunkPos.y || height > chunkPos.y + chunkSize.y * voxelSize) continue;
+		if (height < chunkPos.y || height > chunkPos.y + chunkSize.y * voxelSize) 
+			continue;
+
+		float y = (int)height / (int)voxelSize;
 		 
 		//world voxel pos = chunk pos + local pos
 		Octree *leaf = new Octree();
-		leaf->InitNode(glm::vec3(chunkPos.x, height, chunkPos.z) + glm::vec3(x, 0, z) * voxelSize, voxelSize);
+		leaf->InitNode(glm::vec3(chunkPos.x, chunkPos.y, chunkPos.z) + glm::vec3(x, y, z) * voxelSize, voxelSize);
 
 		if (leaf->BuildLeaf())
 			tree.push_back(leaf);

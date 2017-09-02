@@ -70,6 +70,11 @@ map<string, Texture*> ResManager::LoadTextures()
 			texture_map.insert(pair<string, Texture*>(key,skybox));
 		}
 		else {
+			if(obj.find("normal") != obj.end())
+				texture_map.insert(pair<string, Texture*>(key + "Normal", new Texture(obj["normal"].get<string>())));
+			if(obj.find("height") !=obj.end())
+				texture_map.insert(pair<string, Texture*>(key + "Height", new Texture(obj["height"].get<string>())));
+
 			texture_map.insert(pair<string, Texture*>(key, new Texture(obj["path"].get<string>())));
 		}
 	}

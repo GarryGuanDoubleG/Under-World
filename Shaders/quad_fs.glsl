@@ -15,7 +15,9 @@ float LinearizeDepth(float depth)
 
 void main()
 {             
-    float depthValue = texture(depthMap, UV).r;
-    //FragColor = vec4(vec3(LinearizeDepth(depthValue) / far_plane), 1.0); // perspective
-    FragColor = vec4(vec3(depthValue), 1.0); // orthographic
+    //float depthValue = texture(depthMap, UV).r;
+    ////FragColor = vec4(vec3(LinearizeDepth(depthValue) / far_plane), 1.0); // perspective
+    //FragColor = vec4(vec3(depthValue), 1.0); // orthographic
+
+	FragColor = vec4(texture(depthMap, UV).rgb, 1.0f);
 }

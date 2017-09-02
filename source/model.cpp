@@ -116,6 +116,12 @@ void Model::Draw(Shader *shader)
 		this->m_meshes[i].Draw(shader);
 }
 
+void Model::DrawVertices(Shader *shader)
+{
+	for (GLuint i = 0; i < this->m_meshes.size(); i++)
+		this->m_meshes[i].DrawVertices(shader);
+}
+
 void Model::Draw(Shader *shader, string animation, float timeInSeconds)
 {
 	m_animController->SetAnimation(timeInSeconds, animation);

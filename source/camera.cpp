@@ -50,7 +50,7 @@ glm::vec3 Camera::GetRotation()
 void Camera::HandleInput(SDL_Event event)
 {
 	float time = Game::GetDeltaTime();
-	GLfloat cam_speed = 20.0f;
+	GLfloat cam_speed = 60.0f;
 
 	if (event.type == SDL_KEYDOWN)
 	{

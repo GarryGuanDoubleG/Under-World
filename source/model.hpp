@@ -55,6 +55,8 @@ public:
 	*/
 	void Draw(Shader *shader);
 
+	void DrawVertices(Shader * shader);
+
 	/**
 	* @brief renders all the meshes of this model
 	* @param shader compiled shader id to use to render
