@@ -14,6 +14,11 @@ class Chunk
 	//proc mesh
 	GLuint m_vao, m_vbo, m_ebo;
 public:
+	bool m_init;
+	unordered_map<glm::vec3, EdgeInfo> m_hermiteMap;
+	vector<int> m_materialIndices;
+	unordered_map<glm::vec3, Octree*> m_nodeMap;
+
 	vector<VoxelVertex> m_vertices;
 	vector<GLuint> m_triIndices;
 
@@ -24,8 +29,7 @@ public:
 	glm::vec3 GetPosition();
 
 	void GenerateMesh();
-
-	vector<float> CalculateSimplexNoise();
+	void GenerateHermiteField();
 	void BindMesh();
 	
 	void Render();

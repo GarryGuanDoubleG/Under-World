@@ -15,10 +15,14 @@ uniform vec3 lightColor;
 uniform vec3 voxelColor;
 
 #define MAX_TEXTURES 15
+#define GRASS 0
+#define STONE 1
+#define DIRT 2
 
 uniform sampler2D voxelTexture[MAX_TEXTURES];
+uniform sampler2D normalMap[MAX_TEXTURES];
+
 uniform sampler2D shadowMap;
-uniform sampler2D normalMap;
 uniform sampler2D depthMap;
 
 float ShadowCalculation(vec4 FragPosLightSpace)
@@ -65,19 +69,19 @@ vec3 getTriPlanarBlend(vec3 _wNorm){
 
 vec3 GetTriPlanarTex(vec3 FragPos, vec3 blending, float scale, int index)
 {
-	vec3 xaxis = texture2D( voxelTexture[index], FragPos.yz * scale).rgb;
-	vec3 yaxis = texture2D( voxelTexture[index], FragPos.xz * scale).rgb;
-	vec3 zaxis = texture2D( voxelTexture[index], FragPos.xy * scale).rgb;
+	vec3 xaxis = texture2D( voxelTexture[STONE], FragPos.yz * scale).rgb;
+	vec3 yaxis = texture2D( voxelTexture[GRASS], FragPos.xz * scale).rgb;
+	vec3 zaxis = texture2D( voxelTexture[STONE], FragPos.xy * scale).rgb;
 
 	return xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
 }
 
-vec3 perturb_normal(vec3 N, vec3 B, vec3 T, vec2 texcoord)
+vec3 perturb_normal(vec3 N, vec3 B, vec3 T, vec2 texcoord, sampler2D texture)
 {
-	float invmax = 1.0 / sqrt(max(dot(T ,T), dot(B, B)));
+	float invmax = inversesqrt(max(dot(T ,T), dot(B, B)));
 	mat3 TBN =  mat3(T * invmax, B * invmax, N);
 
-	vec3 map = texture2D(normalMap, texcoord).rgb;
+	vec3 map = texture2D(texture, texcoord).rgb;
 
 	map = map * 2.0 - 1.0f;
 
@@ -86,16 +90,8 @@ vec3 perturb_normal(vec3 N, vec3 B, vec3 T, vec2 texcoord)
 	return map;
 }
 
-//vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
-//{
-//	float height =  texture(depthMap, texCoords).r;
-//	float heightScale = 0.1;
-//    vec2 p = viewDir.xy / viewDir.z * (height * heightScale);
-    
-//	return texCoords - p;    
-//}
 
-vec3 TriPlanarNormal(vec3 FragPos, vec3 normal)
+vec3 TriPlanarNormal(vec3 FragPos, vec3 normal, vec3 blending, float scale)
 {
     vec3 duv1 = dFdx(FragPos);
     vec3 duv2 = dFdy(FragPos);
@@ -107,9 +103,9 @@ vec3 TriPlanarNormal(vec3 FragPos, vec3 normal)
     vec3 Ty = dp2perp * duv1.y + dp1perp * duv2.y; 
     vec3 Tz = dp2perp * duv1.z + dp1perp * duv2.z; 
 
-	vec3 norm1 = perturb_normal(normal, Ty, Tz, FragPos.yz * scale);
-	vec3 norm2 = perturb_normal(normal, Tx, Tz, FragPos.xz * scale);
-	vec3 norm3 = perturb_normal(normal, Tx, Ty, FragPos.xy * scale);
+	vec3 norm1 = perturb_normal(normal, Ty, Tz, FragPos.yz * scale, normalMap[STONE]);
+	vec3 norm2 = perturb_normal(normal, Tx, Tz, FragPos.xz * scale, normalMap[GRASS]);
+	vec3 norm3 = perturb_normal(normal, Tx, Ty, FragPos.xy * scale, normalMap[STONE]);
 
 	return norm1 * blending.x + norm2 * blending.y + norm3 * blending.z;
 }
@@ -122,8 +118,7 @@ void main(void)
 	float scale = .0015f;
 	vec3 blending = getTriPlanarBlend(fs_in.normal);
 	vec3 tex = GetTriPlanarTex(fs_in.FragPos, blending, scale, index);
-
-	vec3 norm = TriPlanarNormal(fs_in.FragPos, fs_in.normal);
+	vec3 norm = TriPlanarNormal(fs_in.FragPos, fs_in.normal, blending, scale);
 
 	//specular uses direction towards light source
 	/*******SPECULAR ***************/
@@ -135,9 +130,9 @@ void main(void)
 
 	//diffuse uses direction away from light source
 	float diff = max(dot(norm, -lightDir), 0.0);
-	vec3 diffuse = diff * lightColor * .7f;
+	vec3 diffuse = diff * lightColor * 1.5f;
 	
-	float ambientStrength = 0.2f;
+	float ambientStrength = 0.6f;
 	vec3 ambient = ambientStrength * lightColor;
 
 	float shadow = ShadowCalculation(fs_in.FragPosLightSpace);

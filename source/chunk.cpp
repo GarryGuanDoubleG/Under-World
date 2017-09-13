@@ -1,7 +1,17 @@
 #include "game.hpp"
+
 #define CHUNK_ACTIVE 1
 
-Chunk::Chunk() : m_flag(0)
+
+static const glm::vec3 AXIS_OFFSET[3] =
+{
+	glm::vec3(1.f, 0.f, 0.f),
+	glm::vec3(0.f, 1.f, 0.f),
+	glm::vec3(0.f, 0.f, 1.f)
+};
+
+
+Chunk::Chunk() : m_flag(0), m_init(false)
 {
 }
 
@@ -13,6 +23,8 @@ bool Chunk::Init(glm::ivec3 chunkIndices, glm::vec3 chunkSize, int voxelSize)
 
 	m_position = chunkIndices * voxelSize;
 	m_position *= chunkSize;
+
+	m_init = true;
 
 	GenerateMesh();
 	
@@ -28,11 +40,42 @@ glm::vec3 Chunk::GetPosition()
 
 void Chunk::GenerateMesh()
 {
-	vector<float> noiseValues = CalculateSimplexNoise();
+	m_materialIndices = GetMaterialIndices(m_position, m_chunkSize);
+	GenerateHermiteField();
 
-	Octree node;
-	m_root = node.BuildTree(m_position, m_chunkSize, m_voxelSize, noiseValues);
-	
+	//find active nodes
+	for (int x = 0; x < m_chunkSize.x; x++)
+	{
+		for (int y = 0; y < m_chunkSize.y; y++)
+		{
+			for (int z = 0; z < m_chunkSize.z; z++)
+			{
+				int corners = 0;
+
+				for (int i = 0; i < 8; i++)
+				{
+					glm::ivec3 cornerIndex = glm::vec3(x, y, z) + CHILD_MIN_OFFSETS[i];
+					corners |= (m_materialIndices[GETINDEXCHUNK(glm::ivec3(m_chunkSize + glm::vec3(1.0f)), cornerIndex.x, cornerIndex.y, cornerIndex.z)] << i);
+				}
+
+				if (corners == 0 || corners == 255) continue;
+
+				Octree *node = new Octree;
+
+				glm::vec3 leafPos = m_position + glm::vec3(x, y, z) * (float)m_voxelSize;
+				node->InitNode(leafPos, m_voxelSize, corners);
+				FindEdgeCrossing(node, m_hermiteMap);
+
+				if (node->m_flag & OCTREE_ACTIVE)
+					m_nodeMap.insert(std::pair<glm::vec3, Octree*>(leafPos, node));
+				else
+					delete node;
+			}
+		}
+	}
+
+	m_root = BottomUpTreeGen(m_nodeMap, m_position);
+
 	if (m_root == nullptr)
 	{
 		m_flag = ~CHUNK_ACTIVE;
@@ -42,21 +85,50 @@ void Chunk::GenerateMesh()
 	m_flag |= CHUNK_ACTIVE;
 	m_root->GenerateVertexIndices(m_vertices);
 	m_root->ContourCellProc(m_triIndices);
-	//BindMesh();
+
+	slog("Finished Chunk Index: %i, %i, %i\n", m_chunkIndices.x, m_chunkIndices.y, m_chunkIndices.z);
 }
 
-vector<float> Chunk::CalculateSimplexNoise()
+void Chunk::GenerateHermiteField()
 {
-	vector<float> noiseValues((float)(m_chunkSize.x * m_chunkSize.z));
-
-	for(int x = 0; x < m_chunkSize.x; x++)
-	for(int z = 0; z < m_chunkSize.z; z++)
+	//loop through each voxel and calculate edge crossings
+	for (int x = 0; x <= m_chunkSize.x; x++)
 	{
-		//flat plane in y axis
-		noiseValues[GETINDEXXZ(x,z)] = 150;
+		for (int y = 0; y <= m_chunkSize.y; y++)
+		{
+			for (int z = 0; z <= m_chunkSize.z; z++)
+			{
+			
+
+				for (int axis = 0; axis < 3; axis++)
+				{
+					glm::ivec3 index2 = glm::vec3(x, y, z) + AXIS_OFFSET[axis];
+					
+					if (GETINDEXCHUNK(glm::ivec3(m_chunkSize + glm::vec3(1.0f)), index2.x, index2.y, index2.z) > m_materialIndices.size())
+						continue;
+
+					int m1 = m_materialIndices[GETINDEXCHUNK(glm::ivec3(m_chunkSize + glm::vec3(1.0f)), x, y, z)];
+					int m2 = m_materialIndices[GETINDEXCHUNK(glm::ivec3(m_chunkSize + glm::vec3(1.0f)), index2.x, index2.y, index2.z)];
+
+					//no material change, no edge
+					if (m1 == m2) 
+						continue;
+
+					glm::vec3 p1 = m_position + glm::vec3(x, y, z) * (float)m_voxelSize;
+					glm::vec3 p2 = m_position + (glm::vec3(x, y, z) + AXIS_OFFSET[axis]) * (float)m_voxelSize;
+
+					//get hermite data
+					glm::vec3 p = FindIntersection(p1, p2);
+					glm::vec3 n = CalculateNormals(p);
+
+					//store in map
+					EdgeInfo edge(p, n);
+					m_hermiteMap.insert(std::pair<glm::vec3, EdgeInfo>((p1 + p2) * .5f, edge));
+				}
+			}
+		}
 	}
 
-	return noiseValues;
 }
 
 void Chunk::BindMesh()
@@ -97,7 +169,6 @@ void Chunk::BindMesh()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 }
-
 
 
 void Chunk::Render()

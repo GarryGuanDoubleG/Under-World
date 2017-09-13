@@ -18,6 +18,8 @@ Camera::Camera(glm::vec3 position, glm::vec3 target)
 	m_yaw = 0.0f;
 	m_pitch = 0.0f;
 	m_roll = 0.0f;
+
+	m_speed = 120.0f;
 }
 
 Camera::~Camera()
@@ -50,7 +52,7 @@ glm::vec3 Camera::GetRotation()
 void Camera::HandleInput(SDL_Event event)
 {
 	float time = Game::GetDeltaTime();
-	GLfloat cam_speed = 60.0f;
+	GLfloat cam_speed = m_speed;
 
 	if (event.type == SDL_KEYDOWN)
 	{
@@ -67,6 +69,12 @@ void Camera::HandleInput(SDL_Event event)
 			break;
 		case SDLK_d:
 			m_pos += m_right * cam_speed;
+			break;
+		case SDLK_e:
+			m_speed += 20;
+			break;
+		case SDLK_r:
+			m_speed -= 20;
 			break;
 		default:
 			break;

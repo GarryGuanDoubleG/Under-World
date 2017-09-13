@@ -475,17 +475,27 @@ void Graphics::RenderVoxels()
 	glUniform3fv(shader->Uniform("viewPos"), 1, &m_camera->GetPosition()[0]);
 	glUniform3fv(shader->Uniform("lightColor"), 1, &light_color[0]);
 	glUniform3fv(shader->Uniform("lightDirection"), 1, &light_dir[0]);
+
+	m_textureMap["grass"]->Bind(0);
+	m_textureMap["brick"]->Bind(1);
+
+	m_textureMap["grassNormal"]->Bind(15);
+	m_textureMap["brickNormal"]->Bind(16);
+
 	
-	m_textureMap["brick"]->Bind(0);
-	m_textureMap["brickNormal"]->Bind(17);
-	shader->SetUniform1i("normalMap", 17);
 	//m_textureMap["brickHeight"]->Bind(6);
 	GLint samplers[] = { 0, 1, 2, 3, 4 };
+	GLint samplersNormalMap[] = { 15,16,17,19 };
 	glUniform1iv(shader->Uniform("voxelTexture"), 5, &samplers[0]);
+	glUniform1iv(shader->Uniform("normalMap"), 5, &samplersNormalMap[0]);
 	g_game->m_voxelManager->Render();
 
 	m_textureMap["brick"]->Unbind();
 	m_textureMap["brickNormal"]->Unbind();
+
+	m_textureMap["grass"]->Unbind();
+	m_textureMap["grassNormal"]->Unbind();
+
 	if (m_flag & SHADOW_MODE) m_textureMap["depthMap"]->Unbind();
 }
 

@@ -1,40 +1,23 @@
 #include "game.hpp"
+#include <mutex>
 
-#define OCTREE_ACTIVE 1
-#define OCTREE_INUSE 2
-#define OCTREE_LEAF 4
-#define OCTREE_INNER 8
-#define OCTREE_PSUEDO 16
-
-#define MATERIAL_SOLID 1
-#define MATERIAL_AIR 0
 
 const float QEF_ERROR = 1e-6f;
 const int QEF_SWEEPS = 4;
+mutex g_mutex;
 
-const glm::vec3 CHILD_MIN_OFFSETS[] =
-{
-	// needs to match the vertMap from Dual Contouring impl
-	glm::vec3(0, 0, 0),
-	glm::vec3(0, 0, 1),
-	glm::vec3(0, 1, 0),
-	glm::vec3(0, 1, 1),
-	glm::vec3(1, 0, 0),
-	glm::vec3(1, 0, 1),
-	glm::vec3(1, 1, 0),
-	glm::vec3(1, 1, 1),
-};
-
-// ----------------------------------------------------------------------------
-// data from the original DC impl, drives the contouring process
-const int edgevmap[12][2] =
+const int edgev_map[12][2] =
 {
 	{ 0,4 },{ 1,5 },{ 2,6 },{ 3,7 },	// x-axis 
 	{ 0,2 },{ 1,3 },{ 4,6 },{ 5,7 },	// y-axis
 	{ 0,1 },{ 2,3 },{ 4,5 },{ 6,7 }		// z-axis
 };
+
+// ----------------------------------------------------------------------------
+// data from the original DC impl, drives the contouring process
+
 const int edgemask[3] = { 5, 3, 6 };
-const int vertMap[8][3] =
+const int vert_map[8][3] =
 {
 	{ 0,0,0 },
 	{ 0,0,1 },
@@ -45,7 +28,7 @@ const int vertMap[8][3] =
 	{ 1,1,0 },
 	{ 1,1,1 }
 };
-const int faceMap[6][4] = { { 4, 8, 5, 9 },{ 6, 10, 7, 11 },{ 0, 8, 1, 10 },{ 2, 9, 3, 11 },{ 0, 4, 2, 6 },{ 1, 5, 3, 7 } };
+const int face_map[6][4] = { { 4, 8, 5, 9 },{ 6, 10, 7, 11 },{ 0, 8, 1, 10 },{ 2, 9, 3, 11 },{ 0, 4, 2, 6 },{ 1, 5, 3, 7 } };
 const int cellProcFaceMask[12][3] = { { 0,4,0 },{ 1,5,0 },{ 2,6,0 },{ 3,7,0 },{ 0,2,1 },{ 4,6,1 },{ 1,3,1 },{ 5,7,1 },{ 0,1,2 },{ 2,3,2 },{ 4,5,2 },{ 6,7,2 } };
 const int cellProcEdgeMask[6][5] = { { 0,1,2,3,0 },{ 4,5,6,7,0 },{ 0,4,1,5,1 },{ 2,6,3,7,1 },{ 0,2,4,6,2 },{ 1,3,5,7,2 } };
 const int faceProcFaceMask[3][4][3] = {
@@ -65,33 +48,7 @@ const int edgeProcEdgeMask[3][2][5] = {
 };
 const int g_processEdgeMask[3][4] = { { 3,2,1,0 },{ 7,5,6,4 },{ 11,10,9,8 } };
 
-Octree::Octree() : m_flag (0)
-{
-}
-
-void Octree::InitNode(glm::vec3 minPos, int size)
-{
-	m_minPos = minPos;
-	m_size = size;
-
-	m_flag = OCTREE_INUSE;
-}
-
-void Octree::DestroyNode()
-{
-//	if (m_flag & OCTREE_INNER)
-//	{
-//		for (int i = 0; i < 8; i++)
-//		{
-////			Octree *child = (m_children + sizeof(Octree) * i);
-//			child->DestroyNode();
-//		}
-//	}
-
-	m_flag = m_flag >> 8;
-}
-
-glm::vec3 Octree::FindZeroSurface(const glm::vec3 p0, const glm::vec3 p1)
+glm::vec3 FindIntersection(const glm::vec3 &p0, const glm::vec3 &p1)
 {
 	float minValue = 100000.f;
 	float t = 0.f;
@@ -100,7 +57,7 @@ glm::vec3 Octree::FindZeroSurface(const glm::vec3 p0, const glm::vec3 p1)
 	const float increment = 1.f / (float)steps;
 	while (currentT <= 1.f)
 	{
-		const glm::vec3 p = p0 + ((p1 - p0) * currentT);
+		glm::vec3 p = p0 + ((p1 - p0) * currentT);
 		const float density = glm::abs(Density_Func(p));
 		if (density < minValue)
 		{
@@ -114,14 +71,9 @@ glm::vec3 Octree::FindZeroSurface(const glm::vec3 p0, const glm::vec3 p1)
 	return p0 + ((p1 - p0) * t);
 }
 
-glm::vec3 Octree::CalculateNormals(const glm::vec3 pos)
+glm::vec3 CalculateNormals(const glm::vec3 &pos)
 {
 	const float H = 0.1f;
-
-	if (pos.y <= 1.0f)
-	{
-		return glm::vec3(0.0f, 1.0f, 0.0f);
-	}
 
 	//finite difference method to get partial derivatives
 	const float dx = Density_Func(pos + glm::vec3(H, 0.f, 0.f)) - Density_Func(pos - glm::vec3(H, 0.f, 0.f));
@@ -131,39 +83,79 @@ glm::vec3 Octree::CalculateNormals(const glm::vec3 pos)
 	return glm::normalize(glm::vec3(dx, dy, dz));
 }
 
-Octree * Octree::BuildTree(glm::vec3 chunkPos, glm::vec3 chunkSize, float voxelSize, const vector<float> &noiseValues) 
+void FindEdgeCrossing(Octree *node, const unordered_map<glm::vec3, EdgeInfo> &hermite_map)
 {
-	vector<Octree *> tree;
+	const int MAX_CROSSINGS = 6;
+	int edgeCount = 0;
+	glm::vec3 averageNormal(0.f);
+	svd::QefSolver qef;
 
-	for (int x = 0; x < chunkSize.x; x++)
-	for (int z = 0; z < chunkSize.z; z++)
+	for (int i = 0; i < 12 && edgeCount < MAX_CROSSINGS; i++)
 	{
-		//floor the noise value
-		float height = (int)noiseValues[GETINDEXXZ(x, z)];
-		if (height < chunkPos.y || height > chunkPos.y + chunkSize.y * voxelSize) 
-			continue;
+		const int c1 = edgev_map[i][0];
+		const int c2 = edgev_map[i][1];
 
-		float y = (int)height / (int)voxelSize;
-		 
-		//world voxel pos = chunk pos + local pos
-		Octree *leaf = new Octree();
-		leaf->InitNode(glm::vec3(chunkPos.x, chunkPos.y, chunkPos.z) + glm::vec3(x, y, z) * voxelSize, voxelSize);
+		const int m1 = (node->m_corners >> c1) & 1;
+		const int m2 = (node->m_corners >> c2) & 1;
 
-		if (leaf->BuildLeaf())
-			tree.push_back(leaf);
-		else
+
+		if ((m1 == MATERIAL_AIR && m2 == MATERIAL_AIR) ||
+			(m1 == MATERIAL_SOLID && m2 == MATERIAL_SOLID))
 		{
-			leaf->DestroyNode();
-			delete leaf;
+			continue; //no change in sign density
+		}
+
+		const glm::vec3 p1 = glm::vec3(node->m_minPos + CHILD_MIN_OFFSETS[c1] * (float)node->m_size);
+		const glm::vec3 p2 = glm::vec3(node->m_minPos + CHILD_MIN_OFFSETS[c2] * (float)node->m_size);
+		
+		const glm::vec3 key = (p1 + p2) * .5f;
+
+		const auto iter = hermite_map.find(key);
+		
+		if (iter != hermite_map.end())
+		{
+			EdgeInfo edge = iter->second;
+
+			qef.add(edge.pos.x, edge.pos.y, edge.pos.z, edge.normal.x, edge.normal.y, edge.normal.z);
+
+			averageNormal += edge.normal;
+			edgeCount++;
 		}
 	}
+	
+	if (edgeCount == 0) 
+		return;
+	else 
+		node->m_flag |= OCTREE_ACTIVE | OCTREE_LEAF;
 
-	return BottomUpTreeGen(tree, chunkPos);
+	svd::Vec3 qefPosition;
+	qef.solve(qefPosition, QEF_ERROR, QEF_SWEEPS, QEF_ERROR);
+	qef.getData();
+
+	node->m_position = glm::vec3(qefPosition.x, qefPosition.y, qefPosition.z);
+	node->m_normal = glm::normalize(averageNormal / (float)edgeCount);
+
+	glm::vec3 min = node->m_minPos;
+	glm::vec3 max = node->m_minPos + glm::vec3(node->m_size);
+
+	if (node->m_position.x < min.x || node->m_position.x > max.x ||
+		node->m_position.y < min.y || node->m_position.y > max.y ||
+		node->m_position.z < min.z || node->m_position.z > max.z)
+	{
+		const auto& mp = qef.getMassPoint();
+		node->m_position = glm::vec3(mp.x, mp.y, mp.z);
+	}
+
 }
 
-Octree * Octree::BottomUpTreeGen(vector<Octree *> &tree, const glm::vec3 &chunkPos)
+Octree * BottomUpTreeGen(const unordered_map<glm::vec3, Octree *> &map, const glm::vec3 &chunkPos)
 {
-	if (tree.size() < 1) return nullptr;
+	if (map.size() < 1) return nullptr;
+
+	vector<Octree *> tree;
+
+	for (auto kv : map)
+		tree.push_back(kv.second);
 
 	while (tree.size() > 1)
 	{
@@ -183,7 +175,7 @@ Octree * Octree::BottomUpTreeGen(vector<Octree *> &tree, const glm::vec3 &chunkP
 			int y = currPos.y >= parentPos.y && currPos.y < parentPos.y + currNode->m_size ? 0 : 1;
 			int z = currPos.z >= parentPos.z && currPos.z < parentPos.z + currNode->m_size ? 0 : 1;
 
-			int index = 4 * x + 2 * y + z;
+			int index = GETINDEXXYZ(x, y, z);
 
 			for (vector<Octree *>::iterator it = parents.begin(); it != parents.end(); it++)
 			{
@@ -199,11 +191,10 @@ Octree * Octree::BottomUpTreeGen(vector<Octree *> &tree, const glm::vec3 &chunkP
 			if (!foundParent)
 			{
 				Octree *parent = new Octree();
-				parent->InitNode(parentPos, parentSize);
+				parent->InitNode(parentPos, parentSize, 0);
 				parent->m_flag |= OCTREE_ACTIVE | OCTREE_INNER;
 				parent->m_childMask |= 1 << index;
 				parent->m_children[index] = currNode;
-
 
 				parents.push_back(parent);
 			}
@@ -215,86 +206,34 @@ Octree * Octree::BottomUpTreeGen(vector<Octree *> &tree, const glm::vec3 &chunkP
 	return tree[0];
 }
 
-bool Octree::BuildLeaf()
+Octree::Octree() : m_flag (0)
 {
-	int corners = 0;
+}
 
-	for (int i = 0; i < 8; i++)
-	{
-		glm::ivec3 cornerPos = m_minPos + CHILD_MIN_OFFSETS[i] * (float)m_size;
-		const float density = Density_Func(glm::vec3(cornerPos));
-		const int material = density < 0.f ? MATERIAL_SOLID : MATERIAL_AIR;
-		corners |= (material << i);
-	}
+void Octree::InitNode(glm::vec3 minPos, int size, int corners)
+{
+	m_minPos = minPos;
+	m_size = size;
+	m_corners = corners;
+	m_index = 0;
+	m_childMask = 0;
+	memset(m_children, 0, sizeof(m_children));
 
-	if (corners == 0 || corners == 255)
-	{
-		// voxel is full inside or outside the volume
-		//m_type = Node_Leaf;
-		m_flag &= ~(OCTREE_ACTIVE);
+	m_flag = OCTREE_INUSE;
+}
 
-		return false;
-	}
+void Octree::DestroyNode()
+{
+//	if (m_flag & OCTREE_INNER)
+//	{
+//		for (int i = 0; i < 8; i++)
+//		{
+////			Octree *child = (m_children + sizeof(Octree) * i);
+//			child->DestroyNode();
+//		}
+//	}
 
-	//build leaf node if node contains isosurface
-	const int MAX_CROSSINGS = 6;
-	int edgeCount = 0;
-	glm::vec3 averageNormal(0.f);
-	svd::QefSolver qef;
-
-	for (int i = 0; i < 12 && edgeCount < MAX_CROSSINGS; i++)
-	{
-		const int c1 = edgevmap[i][0];
-		const int c2 = edgevmap[i][1];
-
-		const int m1 = (corners >> c1) & 1;
-		const int m2 = (corners >> c2) & 1;
-
-		if ((m1 == MATERIAL_AIR && m2 == MATERIAL_AIR) ||
-			(m1 == MATERIAL_SOLID && m2 == MATERIAL_SOLID))
-		{
-			continue; //no change in sign density
-		}
-
-		const glm::vec3 p1 = glm::vec3(m_minPos + CHILD_MIN_OFFSETS[c1] * (float)m_size);
-		const glm::vec3 p2 = glm::vec3(m_minPos + CHILD_MIN_OFFSETS[c2] * (float)m_size);
-
-		const glm::vec3 p = FindZeroSurface(p1, p2);
-		const glm::vec3 n = CalculateNormals(p);
-
-		qef.add(p.x, p.y, p.z, n.x, n.y, n.z);
-
-		averageNormal += n;
-
-		edgeCount++;
-	}
-
-	svd::Vec3 qefPosition;
-	qef.solve(qefPosition, QEF_ERROR, QEF_SWEEPS, QEF_ERROR);
-
-	m_drawInfo = new OctreeDrawInfo;
-	m_drawInfo->position = glm::vec3(qefPosition.x, qefPosition.y, qefPosition.z);
-	m_drawInfo->qef = qef.getData();
-
-	const glm::vec3 min = glm::vec3(m_minPos);
-	const glm::vec3 max = glm::vec3(m_minPos + glm::vec3(m_size));
-
-	if (m_drawInfo->position.x < min.x || m_drawInfo->position.x > max.x ||
-		m_drawInfo->position.y < min.y || m_drawInfo->position.y > max.y ||
-		m_drawInfo->position.z < min.z || m_drawInfo->position.z > max.z)
-	{
-		const auto& mp = qef.getMassPoint();
-		m_drawInfo->position = glm::vec3(mp.x, mp.y, mp.z);
-	}
-
-	m_drawInfo->averageNormal = glm::normalize(averageNormal / (float)edgeCount);
-	m_drawInfo->corners = corners;
-	m_drawInfo->type = 0;
-
-	m_flag |= OCTREE_ACTIVE;
-	m_flag |= OCTREE_LEAF;
-
-	return true;
+	m_flag = m_flag >> 8;
 }
 
 void Octree::GenerateVertexIndices(vector<VoxelVertex> &voxelVerts)
@@ -315,14 +254,8 @@ void Octree::GenerateVertexIndices(vector<VoxelVertex> &voxelVerts)
 
 	if (~m_flag & OCTREE_INNER)
 	{
-		if (!m_drawInfo)
-		{
-			printf("Error! Could not add vertex!\n");
-			exit(EXIT_FAILURE);
-		}
-
-		m_drawInfo->index = voxelVerts.size();
-		voxelVerts.push_back(VoxelVertex(m_drawInfo->position, m_drawInfo->averageNormal, m_drawInfo->type));
+		m_index = voxelVerts.size();
+		voxelVerts.push_back(VoxelVertex(m_position, m_normal, m_type));
 	}
 }
 
@@ -337,11 +270,11 @@ void Octree::ContourProcessEdge(std::vector<GLuint> &m_tri_indices, Octree* node
 	for (int i = 0; i < 4; i++)
 	{
 		const int edge = g_processEdgeMask[dir][i];
-		const int c1 = edgevmap[edge][0];
-		const int c2 = edgevmap[edge][1];
+		const int c1 = edgev_map[edge][0];
+		const int c2 = edgev_map[edge][1];
 
-		const int m1 = (node[i]->m_drawInfo->corners >> c1) & 1;
-		const int m2 = (node[i]->m_drawInfo->corners >> c2) & 1;
+		const int m1 = (node[i]->m_corners >> c1) & 1;
+		const int m2 = (node[i]->m_corners >> c2) & 1;
 
 		if (node[i]->m_size < minSize)
 		{
@@ -351,7 +284,7 @@ void Octree::ContourProcessEdge(std::vector<GLuint> &m_tri_indices, Octree* node
 		}
 
 
-		indices[i] = node[i]->m_drawInfo->index;
+		indices[i] = node[i]->m_index;
 
 		signChange[i] =
 			(m1 == MATERIAL_AIR && m2 != MATERIAL_AIR) ||

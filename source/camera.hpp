@@ -22,6 +22,7 @@ class Camera
 	glm::mat4 m_ortho_proj;
 
 	GLfloat m_zoom;
+	GLfloat m_speed;
 
 	glm::vec3 m_ray;
 public:

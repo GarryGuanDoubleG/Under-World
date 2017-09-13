@@ -150,6 +150,9 @@
     <ClInclude Include="source\simple_logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="utility\FastNoise.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\graphics.cpp">
@@ -211,6 +214,9 @@
     </ClCompile>
     <ClCompile Include="source\simple_logger.cpp">
       <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utility\FastNoise.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

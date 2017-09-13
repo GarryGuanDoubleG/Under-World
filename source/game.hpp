@@ -7,11 +7,12 @@ using namespace std;
 #include <fstream>
 #include <vector>
 #include <string.h>
-#include <thread>
+#include <unordered_map>
 #include <GL\glew.h>
 #include <SDL.h>
 #include <SDL_image.h>
 #include <glm/glm.hpp>
+#include <glm/gtx/hash.hpp>
 #include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
 #include <glm/gtc/constants.hpp> // glm::pi
 #include <glm/gtc/type_ptr.hpp>
@@ -22,6 +23,7 @@ using namespace std;
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <omp.h>
 
 #include "simple_logger.h"
 #include "mathUtil.hpp"

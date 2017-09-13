@@ -61,7 +61,7 @@ void Game::Draw()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	
 
-	m_graphics->RenderSkybox();
+	//m_graphics->RenderSkybox();
 	m_graphics->RenderScene();
 
 	m_graphics->Display();

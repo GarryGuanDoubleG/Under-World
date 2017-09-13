@@ -101,6 +101,8 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\Users\GarryG\source\repos\UnderWorld\UnderWorld\utility;C:\Users\GarryG\source\SDL2\SDL2-2.0.5\include;C:\Users\GarryG\source\assimp\assimp-3.3.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <OpenMPSupport>true</OpenMPSupport>
+      <AdditionalOptions>/openmp </AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>C:\Users\GarryG\source\SDL2\SDL2-2.0.5\lib\x64;C:\Users\GarryG\source\SDL2\SDL2_image-2.0.1\lib\x64;C:\Users\GarryG\source\assimp\assimp-3.3.1\build2\code\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -124,12 +126,14 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\Users\GarryG\source\repos\UnderWorld\UnderWorld\utility;C:\Users\GarryG\source\SDL2\SDL2-2.0.5\include;C:\Users\GarryG\source\assimp\assimp-3.3.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <OpenMPSupport>true</OpenMPSupport>
+      <AdditionalOptions>/openmp </AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -184,6 +188,7 @@
     <ClInclude Include="source\svd.hpp" />
     <ClInclude Include="source\texture.hpp" />
     <ClInclude Include="source\voxelManager.hpp" />
+    <ClInclude Include="utility\FastNoise.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\animController.cpp" />
@@ -206,6 +211,7 @@
     <ClCompile Include="source\svd.cpp" />
     <ClCompile Include="source\texture.cpp" />
     <ClCompile Include="source\voxelManager.cpp" />
+    <ClCompile Include="utility\FastNoise.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

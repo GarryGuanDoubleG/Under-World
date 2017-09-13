@@ -7,42 +7,37 @@ VoxelManager::VoxelManager()
 
 void VoxelManager::Init()
 {
-	m_voxelSize = 64.f;
+	m_voxelSize = 256;
 	m_renderRange = 3;
 	m_chunkSize = 16;
 	 
 	std::cout << "Voxel Init\n";
-	float time = g_game->GetElapsedTime();
+	float time = g_game->GetElapsedTime() ;
 
-	//draw chunks within render range of player
-	glm::ivec3 playerChunkIndex = g_game->GetPlayerPosition();
-	playerChunkIndex /= (m_chunkSize * m_voxelSize);
+	glm::ivec3 playerChunkIndex = glm::ivec3(0, 0, 0);
 
 	int x_range = 2 * m_renderRange + 1;
 	int z_range = x_range;
-	int y_range = 1;
+	int y_range = 3;
 
 	m_chunks = vector<Chunk>(x_range * y_range * z_range);
+
+	DensitySetVoxelSize(m_voxelSize);
 	
+	//omp_set_num_threads(8);
 	int i = 0;
-	std::vector<std::thread> threads;
 	for (int x = -m_renderRange; x <= m_renderRange; x++)
-	for (int z = -m_renderRange; z <= m_renderRange; z++)
-	for (int y = 0; y <= 0; y++)
-	{
-		threads.push_back(thread([&](Chunk *chunk) { chunk->Init(playerChunkIndex + glm::ivec3(x, y, z), glm::vec3(m_chunkSize), m_voxelSize); }, &m_chunks[i++]));
-		if (threads.size() >= 4)
+	{ 
+		for (int z = -m_renderRange; z <= m_renderRange; z++)
 		{
-			for (auto &t : threads)
-				t.join();
-			threads.clear();
+			#pragma omp parallel for
+			for (int y = -1; y <= 1; y++)
+			{
+				int chunkIndex = (y_range * x_range) * (x + m_renderRange) + y_range * (z + m_renderRange) + (y + 1);
+				m_chunks[chunkIndex].Init(playerChunkIndex + glm::ivec3(x, y, z), glm::vec3(m_chunkSize), m_voxelSize);
+			}
 		}
-		//m_chunks[i++].Init(playerChunkIndex + glm::ivec3(x, y, z), glm::vec3(m_chunkSize), m_voxelSize);
 	}
-
-	for (auto &t : threads)
-		t.join();
-
 
 	int verts = 0, triangles = 0;
 	for (auto &chunk : m_chunks) {
@@ -52,6 +47,7 @@ void VoxelManager::Init()
 	}
 
 	std::cout << "Time to Generate (milisecond): " << g_game->GetElapsedTime() - time << endl;
+	std::cout << "Density Time: " << g_time << endl;
 	std::cout << "Vertices: " << verts << endl << "Triangles: " << triangles << endl;
 }
 
