@@ -22,6 +22,12 @@
     <Filter Include="Header Files\Voxels">
       <UniqueIdentifier>{2da63bd7-0d5b-4b1d-a9d9-77131993e1ae}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\FastNoise">
+      <UniqueIdentifier>{3976a62c-d512-48dc-8719-1bd1e7ae6012}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\FastNoise">
+      <UniqueIdentifier>{2e7ad105-3af5-408e-a9ed-eab61f561b53}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -150,8 +156,8 @@
     <ClInclude Include="source\simple_logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utility\FastNoise.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="utility\FastNoiseSIMD.h">
+      <Filter>Header Files\FastNoise</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -215,8 +221,26 @@
     <ClCompile Include="source\simple_logger.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="utility\FastNoise.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="utility\FastNoiseSIMD.cpp">
+      <Filter>Source Files\FastNoise</Filter>
+    </ClCompile>
+    <ClCompile Include="utility\FastNoiseSIMD_avx2.cpp">
+      <Filter>Source Files\FastNoise</Filter>
+    </ClCompile>
+    <ClCompile Include="utility\FastNoiseSIMD_avx512.cpp">
+      <Filter>Source Files\FastNoise</Filter>
+    </ClCompile>
+    <ClCompile Include="utility\FastNoiseSIMD_internal.cpp">
+      <Filter>Source Files\FastNoise</Filter>
+    </ClCompile>
+    <ClCompile Include="utility\FastNoiseSIMD_neon.cpp">
+      <Filter>Source Files\FastNoise</Filter>
+    </ClCompile>
+    <ClCompile Include="utility\FastNoiseSIMD_sse2.cpp">
+      <Filter>Source Files\FastNoise</Filter>
+    </ClCompile>
+    <ClCompile Include="utility\FastNoiseSIMD_sse41.cpp">
+      <Filter>Source Files\FastNoise</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

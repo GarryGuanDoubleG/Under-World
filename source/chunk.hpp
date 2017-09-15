@@ -30,6 +30,9 @@ public:
 
 	void GenerateMesh();
 	void GenerateHermiteField();
+	void ApplyMetaBall(glm::vec3 localVoxelPos, float sphereRadius);
+	void ApplyMetaBallHermite(glm::vec3 localVoxelPos, float radius);
+	void GenerateCaves();
 	void BindMesh();
 	
 	void Render();

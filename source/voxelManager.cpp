@@ -12,7 +12,7 @@ void VoxelManager::Init()
 	m_chunkSize = 16;
 	 
 	std::cout << "Voxel Init\n";
-	float time = g_game->GetElapsedTime() ;
+	float time = g_game->GetElapsedTime();
 
 	glm::ivec3 playerChunkIndex = glm::ivec3(0, 0, 0);
 

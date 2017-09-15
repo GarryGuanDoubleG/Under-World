@@ -62,8 +62,17 @@ struct OctreeDrawInfo
 
 class Octree;
 
+glm::vec3 FindCaveIntersection(const glm::vec3 & p0, const glm::vec3 & p1);
+
+glm::vec3 CalculateNormalsCave(const glm::vec3 & pos);
+
+glm::vec3 FindIntersectionMetaBall(const glm::vec3 &p0, const glm::vec3 &p1, const glm::vec3 &origin);
+glm::vec3 CalculateNormalsMetaBall(const glm::vec3 &pos, const glm::vec3 &origin);
+
 glm::vec3 FindIntersection(const glm::vec3 &p0, const glm::vec3 &p1);
 glm::vec3 CalculateNormals(const glm::vec3 &pos);
+
+
 void FindEdgeCrossing(Octree *node, const unordered_map<glm::vec3, EdgeInfo> &hermite_map);
 
 Octree * BottomUpTreeGen(const unordered_map<glm::vec3, Octree *> &unordered_map, const glm::vec3 &chunkPos);

@@ -48,6 +48,82 @@ const int edgeProcEdgeMask[3][2][5] = {
 };
 const int g_processEdgeMask[3][4] = { { 3,2,1,0 },{ 7,5,6,4 },{ 11,10,9,8 } };
 
+
+glm::vec3 FindCaveIntersection(const glm::vec3 & p0, const glm::vec3 & p1)
+{
+	float minValue = 100000.f;
+	float t = 0.f;
+	float currentT = 0.f;
+	const int steps = 8;
+	const float increment = 1.f / (float)steps;
+	while (currentT <= 1.f)
+	{
+		glm::vec3 p = p0 + ((p1 - p0) * currentT);
+		const float density = glm::abs(glm::max(Density_Func(p), -GetCaveNoise(p)));
+		if (density < minValue)
+		{
+			minValue = density;
+			t = currentT;
+		}
+
+		currentT += increment;
+	}
+
+	return p0 + ((p1 - p0) * t);
+}
+
+glm::vec3 CalculateNormalsCave(const glm::vec3 & pos)
+{
+	const float H = 0.1f;
+
+	////finite difference method to get partial derivatives
+	//const float dx = MetaBall(pos + glm::vec3(H, 0.f, 0.f), origin) - MetaBall(pos - glm::vec3(H, 0.f, 0.f), origin);
+	//const float dy = MetaBall(pos + glm::vec3(0.f, H, 0.f), origin) - MetaBall(pos - glm::vec3(0.f, H, 0.f), origin);
+	//const float dz = MetaBall(pos + glm::vec3(0.f, 0.f, H), origin) - MetaBall(pos - glm::vec3(0.f, 0.f, H), origin);
+
+	//return glm::normalize(glm::vec3(dx, dy, dz));
+
+	return glm::vec3(0, 1.0f, 0);
+}
+
+
+glm::vec3 FindIntersectionMetaBall(const glm::vec3 & p0, const glm::vec3 & p1, const glm::vec3 & origin)
+{
+	float minValue = 100000.f;
+	float t = 0.f;
+	float currentT = 0.f;
+	const int steps = 8;
+	const float increment = 1.f / (float)steps;
+	while (currentT <= 1.f)
+	{
+		glm::vec3 p = p0 + ((p1 - p0) * currentT);
+		const float density = glm::abs(Sphere(p, origin, 2048));
+		if (density < minValue)
+		{
+			minValue = density;
+			t = currentT;
+		}
+
+		currentT += increment;
+	}
+
+	return p0 + ((p1 - p0) * t);
+}
+
+glm::vec3 CalculateNormalsMetaBall(const glm::vec3 & pos, const glm::vec3 & origin)
+{
+	const float H = 0.1f;
+
+	////finite difference method to get partial derivatives
+	//const float dx = MetaBall(pos + glm::vec3(H, 0.f, 0.f), origin) - MetaBall(pos - glm::vec3(H, 0.f, 0.f), origin);
+	//const float dy = MetaBall(pos + glm::vec3(0.f, H, 0.f), origin) - MetaBall(pos - glm::vec3(0.f, H, 0.f), origin);
+	//const float dz = MetaBall(pos + glm::vec3(0.f, 0.f, H), origin) - MetaBall(pos - glm::vec3(0.f, 0.f, H), origin);
+
+	//return glm::normalize(glm::vec3(dx, dy, dz));
+
+	return glm::vec3(0, 1.0f, 0);
+}
+
 glm::vec3 FindIntersection(const glm::vec3 &p0, const glm::vec3 &p1)
 {
 	float minValue = 100000.f;
