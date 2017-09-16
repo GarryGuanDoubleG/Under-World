@@ -22,10 +22,8 @@ void VoxelManager::Init()
 
 	m_chunks = vector<Chunk>(x_range * y_range * z_range);
 
-	DensitySetVoxelSize(m_voxelSize);
-	
-	//omp_set_num_threads(8);
-	int i = 0;
+	Density::SetVoxelSize(m_voxelSize);
+
 	for (int x = -m_renderRange; x <= m_renderRange; x++)
 	{ 
 		for (int z = -m_renderRange; z <= m_renderRange; z++)
@@ -47,7 +45,7 @@ void VoxelManager::Init()
 	}
 
 	std::cout << "Time to Generate (milisecond): " << g_game->GetElapsedTime() - time << endl;
-	std::cout << "Density Time: " << g_time << endl;
+	std::cout << "Density Time: " << Density::densityGenTime << endl;
 	std::cout << "Vertices: " << verts << endl << "Triangles: " << triangles << endl;
 }
 

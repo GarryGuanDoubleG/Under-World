@@ -25,8 +25,9 @@ bool Chunk::Init(glm::ivec3 chunkIndices, glm::vec3 chunkSize, int voxelSize)
 	m_position *= chunkSize;
 
 	m_init = true;
-
-	GenerateMaterialIndices(m_position, m_chunkSize, m_materialIndices);
+	
+	m_densityType = m_position.y >= 0 ? Density::Terrain : Density::Cave;
+	Density::GenerateMaterialIndices(m_densityType, m_position, m_chunkSize, m_materialIndices);
 	GenerateHermiteField();
 	//GenerateCaves();
 	GenerateMesh();
@@ -117,8 +118,8 @@ void Chunk::GenerateHermiteField()
 					glm::vec3 p2 = m_position + (glm::vec3(x, y, z) + AXIS_OFFSET[axis]) * (float)m_voxelSize;
 
 					//get hermite data
-					glm::vec3 p = FindIntersection(p1, p2);
-					glm::vec3 n = CalculateNormals(p);
+					glm::vec3 p = FindIntersection(m_densityType, p1, p2);
+					glm::vec3 n = CalculateNormals(m_densityType, p);
 
 					//store in map
 					EdgeInfo edge(p, n);
@@ -128,172 +129,6 @@ void Chunk::GenerateHermiteField()
 		}
 	}
 
-}
-
-void Chunk::ApplyMetaBall(glm::vec3 localVoxelPos, float radius)
-{
-	//radius is in voxel space
-	glm::vec3 origin = m_position + localVoxelPos * (float)m_voxelSize;
-
-	float minCaveThreshold = -0.1f;
-
-	for (int x = -radius; x < radius; x++)
-	{
-		for (int y = -radius; y < radius; y++)
-		{
-			for (int z = -radius; z <= radius; z++)
-			{
-				glm::vec3 localPos = localVoxelPos + glm::vec3(x, y, z);
-				if (localPos.x < 0 || localPos.y < 0 || localPos.z < 0||
-					localPos.x > m_chunkSize.x + 1|| localPos.y > m_chunkSize.y + 1 || localPos.z > m_chunkSize.z + 1)
-					continue;
-
-				glm::vec3 worldPosition = m_position + (float)m_voxelSize * localPos;
-
-				float metaBallDensity = MetaBall(worldPosition, origin);
-				//update corners using metaball
-				//if voxel inside ball, set material to air
-				if (metaBallDensity < 0)
-					m_materialIndices[GETINDEXCHUNK((m_chunkSize + glm::vec3(1.0f)), localPos.x, localPos.y, localPos.z)] = MATERIAL_AIR;
-
-			}
-		}
-	}
-
-	for (int x = -radius; x < radius; x++)
-	{
-		for (int y = -radius; y < radius; y++)
-		{
-			for (int z = -radius; z <= radius; z++)
-			{
-				glm::vec3 localPos = localVoxelPos + glm::vec3(x, y, z);
-				if (localPos.x < 0 || localPos.y < 0 || localPos.z < 0) continue;
-
-				for (int axis = 0; axis < 3; axis++)
-				{
-					glm::ivec3 index2 = localVoxelPos + glm::vec3(x, y, z) + AXIS_OFFSET[axis];
-					int chunkIndex2 = GETINDEXCHUNK(glm::ivec3(m_chunkSize + glm::vec3(1.0f)), index2.x, index2.y, index2.z);
-					if (chunkIndex2 > m_materialIndices.size() || chunkIndex2 < 0)
-						continue;
-
-					int m1 = m_materialIndices[GETINDEXCHUNK(glm::ivec3(m_chunkSize + glm::vec3(1.0f)), localVoxelPos.x, localVoxelPos.y, localVoxelPos.z)];
-					int m2 = m_materialIndices[chunkIndex2];
-
-					//no material change, no edge
-					if (m1 == m2)
-						continue;
-
-					glm::vec3 p1 = m_position + glm::vec3(x, y, z) * (float)m_voxelSize;
-					glm::vec3 p2 = m_position + (glm::vec3(x, y, z) + AXIS_OFFSET[axis]) * (float)m_voxelSize;
-
-					//get hermite data
-					glm::vec3 p = FindIntersectionMetaBall(p1, p2, origin);
-					glm::vec3 n = CalculateNormalsMetaBall(p, origin);
-
-					//store in map
-					EdgeInfo edge(p, n);
-					m_hermiteMap[(p1 + p2) *.5f] = edge;
-				}
-			}
-		}
-	}
-
-}
-
-void Chunk::GenerateCaves()
-{
-	if (m_position.y >= 0) return;
-
-	float caveThreshold = 0.1f;
-
-	for (int x = 0; x <= m_chunkSize.x; x++)
-	{
-		for (int y = 0; y <= m_chunkSize.y; y++)
-		{
-			for (int z = 0; z <= m_chunkSize.z; z++)
-			{
-				glm::vec3 worldPos = m_position + glm::vec3(x, y, z) * (float)m_voxelSize;
-
-				if (m_materialIndices[GETINDEXCHUNK((m_chunkSize + glm::vec3(1.0f)), x, y, z)] == MATERIAL_SOLID)
-				{				
-					float noise = GetCaveNoise(worldPos);
-
-					if (GetCaveNoise(worldPos) > caveThreshold)
-					{
-						m_materialIndices[GETINDEXCHUNK((m_chunkSize + glm::vec3(1.0f)), x, y, z)] = MATERIAL_AIR;
-					} 
-				}
-			}
-		}
-	}
-
-	for (int x = 0; x <= m_chunkSize.x; x++)
-	{
-		for (int y = 0; y <= m_chunkSize.y; y++)
-		{
-			for (int z = 0; z <= m_chunkSize.z; z++)
-			{
-				for (int axis = 0; axis < 3; axis++)
-				{
-					glm::ivec3 index2 = glm::vec3(x, y, z) + AXIS_OFFSET[axis];
-
-					//check if edge is within chunk
-					if (index2.x > m_chunkSize.x || index2.y > m_chunkSize.y || index2.z > m_chunkSize.z)
-						continue;
-
-					int m1 = m_materialIndices[GETINDEXCHUNK(glm::ivec3(m_chunkSize + glm::vec3(1.0f)), x, y, z)];
-					int m2 = m_materialIndices[GETINDEXCHUNK(glm::ivec3(m_chunkSize + glm::vec3(1.0f)), index2.x, index2.y, index2.z)];
-
-					//no material change, no edge
-					if (m1 == m2) continue;
-
-					glm::vec3 p1 = m_position + glm::vec3(x, y, z) * (float)m_voxelSize;
-					glm::vec3 p2 = m_position + (glm::vec3(x, y, z) + AXIS_OFFSET[axis]) * (float)m_voxelSize;
-
-					//get hermite data
-					glm::vec3 p = FindCaveIntersection(p1, p2);
-					glm::vec3 n = CalculateNormalsCave(p);
-
-					//store in map
-					EdgeInfo edge(p, n);
-					m_hermiteMap[(p1 + p2) *.5f] = edge;
-				}
-			}
-		}
-	}
-
-	//solid if below threshold
-	//air if above
-
-	//float caveThreshold = 0.8f;
-	//float minCaveThreshold = .0f;
-	//float caveLength = 10.0f * m_voxelSize;
-	//float radius = 5.0f;
-	//vector<glm::vec3> caveSpheres;
-
-	//for (int x = 0; x <= m_chunkSize.x; x++)
-	//{
-	//	for (int y = 0; y <= m_chunkSize.y; y++)
-	//	{
-	//		for (int z = 0; z <= m_chunkSize.z; z++)
-	//		{
-	//			glm::vec3 position = m_position + glm::vec3(x, y, z) * (float)m_voxelSize;				
-	//			if (position.y > m_voxelSize) continue;
-
-	//			float noise = GetCaveNoise(position);
-	//			if (noise > caveThreshold)
-	//			{
-	//				glm::vec3 localVoxelPos = glm::vec3(x, y, z);
-	//				caveSpheres.push_back(localVoxelPos);
-	//			}				
-	//		}
-	//	}
-	//}
-
-	//for (const auto &spheres : caveSpheres)
-	//{
-	//	ApplyMetaBall(spheres, radius);
-	//}
 }
 
 void Chunk::BindMesh()

@@ -27,6 +27,9 @@ using namespace std;
 
 #include "simple_logger.h"
 #include "mathUtil.hpp"
+#include <FastNoiseSIMD.h>
+#include <FastNoise.h>
+
 #include "shader.hpp"
 #include "texture.hpp"
 #include "camera.hpp"

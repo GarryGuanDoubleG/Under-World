@@ -59,7 +59,7 @@ glm::vec3 FindCaveIntersection(const glm::vec3 & p0, const glm::vec3 & p1)
 	while (currentT <= 1.f)
 	{
 		glm::vec3 p = p0 + ((p1 - p0) * currentT);
-		const float density = glm::abs(glm::max(Density_Func(p), -GetCaveNoise(p)));
+		const float density = glm::abs(Density::GetCaveNoise(p));
 		if (density < minValue)
 		{
 			minValue = density;
@@ -86,77 +86,59 @@ glm::vec3 CalculateNormalsCave(const glm::vec3 & pos)
 	return glm::vec3(0, 1.0f, 0);
 }
 
-
-glm::vec3 FindIntersectionMetaBall(const glm::vec3 & p0, const glm::vec3 & p1, const glm::vec3 & origin)
+glm::vec3 FindIntersection(Density::DensityType type, const glm::vec3 &p0, const glm::vec3 &p1)
 {
 	float minValue = 100000.f;
 	float t = 0.f;
 	float currentT = 0.f;
 	const int steps = 8;
 	const float increment = 1.f / (float)steps;
-	while (currentT <= 1.f)
+	
+	vector<glm::vec3> positions(steps + 1);
+	for (int i = 0; i <= steps; i++)
 	{
-		glm::vec3 p = p0 + ((p1 - p0) * currentT);
-		const float density = glm::abs(Sphere(p, origin, 2048));
+		positions[i] = p0 + ((p1 - p0) * currentT);
+		currentT += increment;
+	}
+	
+	float *noiseSet = Density::GetDensitySet(type, positions);
+	for (int i = 0; i <= steps; i++)
+	{
+		float density = glm::abs(noiseSet[i]);
 		if (density < minValue)
 		{
 			minValue = density;
-			t = currentT;
+			t = increment * i;
 		}
-
-		currentT += increment;
 	}
+
+	Density::FreeSet(noiseSet);
 
 	return p0 + ((p1 - p0) * t);
 }
 
-glm::vec3 CalculateNormalsMetaBall(const glm::vec3 & pos, const glm::vec3 & origin)
+glm::vec3 CalculateNormals(Density::DensityType type, const glm::vec3 &pos)
 {
 	const float H = 0.1f;
 
-	////finite difference method to get partial derivatives
-	//const float dx = MetaBall(pos + glm::vec3(H, 0.f, 0.f), origin) - MetaBall(pos - glm::vec3(H, 0.f, 0.f), origin);
-	//const float dy = MetaBall(pos + glm::vec3(0.f, H, 0.f), origin) - MetaBall(pos - glm::vec3(0.f, H, 0.f), origin);
-	//const float dz = MetaBall(pos + glm::vec3(0.f, 0.f, H), origin) - MetaBall(pos - glm::vec3(0.f, 0.f, H), origin);
-
-	//return glm::normalize(glm::vec3(dx, dy, dz));
-
-	return glm::vec3(0, 1.0f, 0);
-}
-
-glm::vec3 FindIntersection(const glm::vec3 &p0, const glm::vec3 &p1)
-{
-	float minValue = 100000.f;
-	float t = 0.f;
-	float currentT = 0.f;
-	const int steps = 8;
-	const float increment = 1.f / (float)steps;
-	while (currentT <= 1.f)
-	{
-		glm::vec3 p = p0 + ((p1 - p0) * currentT);
-		const float density = glm::abs(Density_Func(p));
-		if (density < minValue)
-		{
-			minValue = density;
-			t = currentT;
-		}
-
-		currentT += increment;
-	}
-
-	return p0 + ((p1 - p0) * t);
-}
-
-glm::vec3 CalculateNormals(const glm::vec3 &pos)
-{
-	const float H = 0.1f;
+	vector<glm::vec3> positions(6);
 
 	//finite difference method to get partial derivatives
-	const float dx = Density_Func(pos + glm::vec3(H, 0.f, 0.f)) - Density_Func(pos - glm::vec3(H, 0.f, 0.f));
-	const float dy = Density_Func(pos + glm::vec3(0.f, H, 0.f)) - Density_Func(pos - glm::vec3(0.f, H, 0.f));
-	const float dz = Density_Func(pos + glm::vec3(0.f, 0.f, H)) - Density_Func(pos - glm::vec3(0.f, 0.f, H));
+	positions[0] = pos + glm::vec3(H, 0.f, 0.f);
+	positions[1] = pos + glm::vec3(0.f, H, 0.f);
+	positions[2] = pos + glm::vec3(0.f, 0.f, H);
 
-	return glm::normalize(glm::vec3(dx, dy, dz));
+	positions[3] = pos - glm::vec3(H, 0.f, 0.f);
+	positions[4] = pos - glm::vec3(0.f, H, 0.f);
+	positions[5] = pos - glm::vec3(0.f, 0.f, H);
+
+	float *noiseSet = Density::GetDensitySet(type, positions);
+
+	glm::vec3 d1(noiseSet[0], noiseSet[1], noiseSet[2]);
+	glm::vec3 d2(noiseSet[3], noiseSet[4], noiseSet[5]);
+
+	Density::FreeSet(noiseSet);
+	return glm::normalize(d1 - d2);
 }
 
 void FindEdgeCrossing(Octree *node, const unordered_map<glm::vec3, EdgeInfo> &hermite_map)

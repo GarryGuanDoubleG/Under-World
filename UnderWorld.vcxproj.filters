@@ -159,6 +159,9 @@
     <ClInclude Include="utility\FastNoiseSIMD.h">
       <Filter>Header Files\FastNoise</Filter>
     </ClInclude>
+    <ClInclude Include="utility\FastNoise.h">
+      <Filter>Header Files\FastNoise</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\graphics.cpp">
@@ -240,6 +243,9 @@
       <Filter>Source Files\FastNoise</Filter>
     </ClCompile>
     <ClCompile Include="utility\FastNoiseSIMD_sse41.cpp">
+      <Filter>Source Files\FastNoise</Filter>
+    </ClCompile>
+    <ClCompile Include="utility\FastNoise.cpp">
       <Filter>Source Files\FastNoise</Filter>
     </ClCompile>
   </ItemGroup>

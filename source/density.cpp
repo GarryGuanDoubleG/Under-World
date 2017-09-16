@@ -1,127 +1,165 @@
 #include "game.hpp"
-#include "FastNoiseSIMD.h"
 static float g_voxelSize = 32.0f;
-static FastNoiseSIMD *fn;
-static FastNoiseSIMD *caveGen1;
-static FastNoiseSIMD *caveGen2;
 
-float g_time = 0.0f;
+float Density::densityGenTime;
+FastNoise Density::terrainFN;
+FastNoiseSIMD *Density::terrainFNSIMD;
+FastNoiseSIMD *Density::caveFNSIMD;
+
 omp_lock_t g_thread_lock;
 
-const int g_maxHeight = 64.0f;
+const int g_maxHeight = 32.0f;
 
-float MetaBall(const glm::vec3& worldPosition, const glm::vec3& origin)
+
+void Density::SetVoxelSize(const float & voxelSize)
 {
-	/*float radius = glm::length(worldPosition - origin);
-	float radiusSQ = radius * radius;
-	if (radius == 0) return 1.0f;
-	return 1.0f / radiusSQ;*/
+	g_voxelSize = voxelSize;
+	omp_init_lock(&g_thread_lock);
 
-	float radius = 256 * 2;
 
-	return Sphere(worldPosition, origin, radius);
+	terrainFN.SetFractalOctaves(8);
+	terrainFN.SetFrequency(0.02f);
+	terrainFN.SetFractalLacunarity(2.0f);
+	terrainFN.SetFractalType(terrainFN.FBM);
+	terrainFN.SetFractalGain(0.5);
+	terrainFN.SetNoiseType(terrainFN.SimplexFractal);
+
+	terrainFNSIMD = FastNoiseSIMD::NewFastNoiseSIMD();
+	terrainFNSIMD->SetFractalOctaves(8);
+	terrainFNSIMD->SetFrequency(0.02f);
+	terrainFNSIMD->SetFractalLacunarity(2.0f);
+	terrainFNSIMD->SetFractalType(terrainFNSIMD->FBM);
+	terrainFNSIMD->SetFractalGain(0.5);
+	terrainFNSIMD->SetNoiseType(terrainFNSIMD->SimplexFractal);
+
+	caveFNSIMD = FastNoiseSIMD::NewFastNoiseSIMD();
+	caveFNSIMD->SetFrequency(0.03);
+	caveFNSIMD->SetSeed(12345);
+	caveFNSIMD->SetNoiseType(caveFNSIMD->Cellular);
+	caveFNSIMD->SetCellularReturnType(caveFNSIMD->Distance2Cave);
+	caveFNSIMD->SetCellularDistanceFunction(caveFNSIMD->Natural);
+	caveFNSIMD->SetCellularJitter(0.4f);
+	caveFNSIMD->SetPerturbAmp(caveFNSIMD->Gradient);
+	caveFNSIMD->SetPerturbFrequency(0.6f);
 }
 
-float Sphere(const glm::vec3& worldPosition, const glm::vec3& origin, float radius)
+float Density::GetSphere(const glm::vec3& worldPosition, const glm::vec3& origin, float radius)
 {
 	return glm::length(worldPosition - origin) - radius;
 }
 
-float Density_Func(const glm::vec3 & worldPosition)
+float Density::GetTerrainDensity(const glm::vec3& worldPosition, float noise3D, float noise2D)
+{
+	float terrain = 0.0f;
+	
+	if (worldPosition.y <= 1)
+		terrain = worldPosition.y - 1.f;
+	else if (worldPosition.y > (noise2D + noise3D) * g_voxelSize * g_maxHeight)
+		terrain = worldPosition.y - noise2D * g_voxelSize * g_maxHeight;
+	else if (worldPosition.y > 1.0f)
+		terrain = worldPosition.y - (noise2D + noise3D) * g_maxHeight * g_voxelSize;
+
+	return terrain;
+}
+
+float Density::GetTerrain(const glm::vec3 & worldPosition)
 {
 	float time = SDL_GetTicks();
 
 	float noise3D, noise2D;
 	float noise = 0.0f;
-	float minHeight = 1.0f;
-	float noiseMin3D = -0.6f;
-	float noiseMax3D = -0.4f;
 
 	glm::vec3 voxelPosition = worldPosition / g_voxelSize;
 
-	////noise2D =  fn.GetSimplex(voxelPosition.x, voxelPosition.z);
-	float *noise3DSet = fn->GetSimplexFractalSet(voxelPosition.x, voxelPosition.y, voxelPosition.z, 1, 1, 1, 1.0f);
-	noise3D = noise3DSet[0];
-	FastNoiseSIMD::FreeNoiseSet(noise3DSet);
-	//noise3D =  fn->GetSimplexFractal(voxelPosition.x, voxelPosition.y, voxelPosition.z);
-	noise2D = .7989 * noise3D;
+	noise3D = terrainFN.GetSimplexFractal(voxelPosition.x, voxelPosition.y, voxelPosition.z);
+	noise2D = noise3D * .7989;
+	//noise2D = terrainFN.GetSimplex(voxelPosition.x, voxelPosition.z);
+	noise = GetTerrainDensity(worldPosition, noise3D, noise2D);
 
-	if (worldPosition.y <= 1)
-		noise = worldPosition.y - 1.f;
-	if (worldPosition.y > 0 && worldPosition.y > (noise2D + noise3D) * g_voxelSize * g_maxHeight)
-		noise = worldPosition.y - noise2D * g_voxelSize * g_maxHeight;
-	else if (worldPosition.y > 1.0f)
-		noise = worldPosition.y - (noise2D + noise3D) * g_maxHeight * g_voxelSize;
-
-
-	//noise = GetCaveNoise(voxelPosition);
-	//noise = 1.0f - noise;
-	//noise = noise * 2 - 1;
-
-	//noise = worldPosition.y - noise * g_maxHeight * g_voxelSize;
 	omp_set_lock(&g_thread_lock);
-	g_time += SDL_GetTicks() - time;
+	densityGenTime += SDL_GetTicks() - time;
 	omp_unset_lock(&g_thread_lock);
 
 	return noise;
 }
 
-void DensitySetVoxelSize(const float & voxelSize)
+float Density::GetDensity(DensityType type, const glm::vec3 & worldPosition)
 {
-	g_voxelSize = voxelSize;
-	omp_init_lock(&g_thread_lock);
-
-	fn = FastNoiseSIMD::NewFastNoiseSIMD();
-	fn->SetFractalOctaves(8);
-	fn->SetFrequency(0.02f);
-	fn->SetFractalLacunarity(2.0f);
-	fn->SetFractalType(fn->FBM);
-	fn->SetFractalGain(0.5);
-	fn->SetNoiseType(fn->SimplexFractal);
-
-	//caveGen1->SetFrequency(0.04);
-	////caveGen1->SetFractalType(caveGen1->RigidMulti);
-	//caveGen1->SetSeed(12345);
-	//caveGen1->SetNoiseType(caveGen1->Cellular);
-	//caveGen1->SetCellularReturnType(caveGen1->Distance2Div);
-	//caveGen1->SetCellularDistanceFunction(caveGen1->Euclidean);
-	//caveGen1->SetCellularJitter(0.3f);
-
-	//caveGen2 = caveGen1;
-	//caveGen2->SetSeed(54321);
-
+	switch(type)
+	{
+	case Terrain:
+		return GetTerrain(worldPosition);
+		break;
+	case Cave:
+		return GetCaveNoise(worldPosition);
+		break;
+	default:
+		break;
+	}
 }
 
-float GetCaveNoise(glm::vec3 worldPosition)
+float *Density::GetDensitySet(DensityType type, const vector<glm::vec3> & positions)
 {
-	float frequency = 0.02;
+	float *set = FastNoiseSIMD::GetEmptySet(positions.size());
+	FastNoiseVectorSet positionSet(positions.size());
 
+	for (int i = 0; i < positions.size(); i++)
+	{
+		positionSet.xSet[i] = positions[i].x / g_voxelSize;
+		positionSet.ySet[i] = positions[i].y / g_voxelSize;
+		positionSet.zSet[i] = positions[i].z / g_voxelSize;
+	}
+
+	switch (type)
+	{
+	case Terrain:
+	{
+		terrainFNSIMD->FillNoiseSet(set, &positionSet);
+		for (int i = 0; i < positions.size(); i++)
+		{
+			set[i] = GetTerrainDensity(positions[i], set[i], set[i] * .7989);
+		}
+		break;
+	}
+	case Cave:
+		caveFNSIMD->FillNoiseSet(set, &positionSet);
+		break;
+	default:
+		break;
+	}
+
+	positionSet.Free();
+	return set;
+}
+
+void Density::FreeSet(float *set)
+{
+	FastNoiseSIMD::FreeNoiseSet(set);
+}
+
+float Density::GetCaveNoise(glm::vec3 worldPosition)
+{
 	glm::vec3 voxelPosition = worldPosition / g_voxelSize;
 
-	float noise1 = 0.0f;
-	/*float noise1 = caveGen1.GetCellular(voxelPosition.x, voxelPosition.y, voxelPosition.z);
+	float noise = 0.0f;
 
-	if (noise1 < 0)
-	{
-		float a = 1;
-	}*/
+	float *noiseSet = caveFNSIMD->GetNoiseSet(voxelPosition.x, voxelPosition.y, voxelPosition.z, 1, 1, 1, 1.0f);
+	noise = noiseSet[0];
+	FastNoiseSIMD::FreeNoiseSet(noiseSet);
 
-	noise1 = 1.0f - noise1;
-	noise1 = noise1 * 2 - 1;
-	return noise1;
-	/*glm::vec3 worldPos2 = worldPosition + glm::vec3(frequency * 0.5f);
-	float noise2 = caveGen2.GetCellular(worldPos2.x, worldPos2.y, worldPos2.z);
-
-	return glm::min(noise1, noise2);*/
+	return noise;
 }
 
-void GenerateMaterialIndices(const glm::vec3 &chunkPos, const glm::vec3 &chunkSize, vector<int> &materialIndices)
+void Density::GenerateTerrainIndices(const glm::vec3 &chunkPos, const glm::vec3 &chunkSize, vector<int> &materialIndices)
 {
+	float time = SDL_GetTicks();
+
 	materialIndices.resize((chunkSize.x + 1) *  (chunkSize.y + 1) * (chunkSize.z + 1), -1);
 	
 	glm::vec3 voxelPos = chunkPos / g_voxelSize;
 	glm::vec3 setSize = chunkSize + glm::vec3(1.0f);
-	float *noiseSet = fn->GetNoiseSet(voxelPos.x, voxelPos.y, voxelPos.z, setSize.x, setSize.y, setSize.z, 1.0f);
+	
+	float *noiseSet = terrainFNSIMD->GetNoiseSet(voxelPos.x, voxelPos.y, voxelPos.z, setSize.x, setSize.y, setSize.z);
 
 	for (int x = 0; x <= chunkSize.x; x++)
 	{
@@ -129,13 +167,65 @@ void GenerateMaterialIndices(const glm::vec3 &chunkPos, const glm::vec3 &chunkSi
 		{
 			for (int z = 0; z <= chunkSize.z; z++)
 			{
-				glm::vec3 worldPosition = chunkPos + glm::vec3(x, y, z) * g_voxelSize;
-
 				int index = GETINDEXCHUNK(glm::ivec3(chunkSize + glm::vec3(1.0f)), x, y, z);
-				materialIndices[index] = worldPosition.y - noiseSet[index] * g_maxHeight * g_voxelSize >= 0 ? MATERIAL_AIR : MATERIAL_SOLID;
+				glm::vec3 worldPosition = chunkPos + glm::vec3(x, y, z) * g_voxelSize;
+				
+				float density = GetTerrainDensity(worldPosition, noiseSet[index], noiseSet[index] * .7989);
+				materialIndices[index] = density > 0 ? MATERIAL_AIR : MATERIAL_SOLID;
 			}
 		}
 	}
 
 	FastNoiseSIMD::FreeNoiseSet(noiseSet);
+
+
+	omp_set_lock(&g_thread_lock);
+	densityGenTime += SDL_GetTicks() - time;
+	omp_unset_lock(&g_thread_lock);
+}
+
+void Density::GenerateCaveIndices(const glm::vec3 &chunkPos, const glm::vec3 &chunkSize, vector<int> &materialIndices)
+{
+	float time = SDL_GetTicks();
+
+	materialIndices.resize((chunkSize.x + 1) *  (chunkSize.y + 1) * (chunkSize.z + 1), -1);
+
+	glm::vec3 voxelPos = chunkPos / g_voxelSize;
+	glm::vec3 setSize = chunkSize + glm::vec3(1.0f);
+
+	float *noiseSet = caveFNSIMD->GetNoiseSet(voxelPos.x, voxelPos.y, voxelPos.z, setSize.x, setSize.y, setSize.z);
+	float caveThreshold = 0.75f;
+
+	for (int x = 0; x <= chunkSize.x; x++)
+	{
+		for (int y = 0; y <= chunkSize.y; y++)
+		{
+			for (int z = 0; z <= chunkSize.z; z++)
+			{
+				int index = GETINDEXCHUNK(glm::ivec3(chunkSize + glm::vec3(1.0f)), x, y, z);				
+				materialIndices[index] = noiseSet[index] > caveThreshold ? MATERIAL_AIR : MATERIAL_SOLID;
+			}
+		}
+	}
+
+	FastNoiseSIMD::FreeNoiseSet(noiseSet);
+
+	omp_set_lock(&g_thread_lock);
+	densityGenTime += SDL_GetTicks() - time;
+	omp_unset_lock(&g_thread_lock);
+}
+
+void Density::GenerateMaterialIndices(DensityType type, const glm::vec3 &chunkPos, const glm::vec3 &chunkSize, vector<int> &materialIndices)
+{
+	switch (type)
+	{
+	case DensityType::Terrain:
+		GenerateTerrainIndices(chunkPos, chunkSize, materialIndices);
+		break;
+	case Cave:
+		GenerateCaveIndices(chunkPos, chunkSize, materialIndices);
+		break;
+	default:
+		break;
+	}
 }

@@ -6,6 +6,7 @@ class Chunk
 
 	int m_flag;
 	int m_voxelSize;
+	Density::DensityType m_densityType;
 
 	glm::vec3 m_chunkSize;
 	glm::vec3 m_position;
@@ -30,8 +31,6 @@ public:
 
 	void GenerateMesh();
 	void GenerateHermiteField();
-	void ApplyMetaBall(glm::vec3 localVoxelPos, float sphereRadius);
-	void ApplyMetaBallHermite(glm::vec3 localVoxelPos, float radius);
 	void GenerateCaves();
 	void BindMesh();
 	
