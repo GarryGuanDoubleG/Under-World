@@ -17,6 +17,6 @@ int main(int argc, char **argv)
 	}
 
 	g_game->Close();
-
+	delete g_game;
 	return 0;
 }

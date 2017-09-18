@@ -62,13 +62,6 @@ struct OctreeDrawInfo
 
 class Octree;
 
-glm::vec3 FindCaveIntersection(const glm::vec3 & p0, const glm::vec3 & p1);
-
-glm::vec3 CalculateNormalsCave(const glm::vec3 & pos);
-
-glm::vec3 FindIntersectionMetaBall(const glm::vec3 &p0, const glm::vec3 &p1, const glm::vec3 &origin);
-glm::vec3 CalculateNormalsMetaBall(const glm::vec3 &pos, const glm::vec3 &origin);
-
 glm::vec3 FindIntersection(Density::DensityType type, const glm::vec3 &p0, const glm::vec3 &p1);
 glm::vec3 CalculateNormals(Density::DensityType type, const glm::vec3 &pos);
 

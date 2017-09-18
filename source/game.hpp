@@ -25,10 +25,11 @@ using namespace std;
 #include <assimp/postprocess.h>
 #include <omp.h>
 
-#include "simple_logger.h"
-#include "mathUtil.hpp"
+
 #include <FastNoiseSIMD.h>
 #include <FastNoise.h>
+#include "simple_logger.h"
+#include "mathUtil.hpp"
 
 #include "shader.hpp"
 #include "texture.hpp"
@@ -39,6 +40,7 @@ using namespace std;
 #include "entity.hpp"
 #include "LightSource.hpp"
 #include "resManager.hpp"
+#include "tables.hpp"
 #include "density.hpp"
 #include "octree.hpp"
 #include "chunk.hpp"

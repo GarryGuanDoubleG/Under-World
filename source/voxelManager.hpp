@@ -12,6 +12,7 @@ public:
 	VoxelManager();
 
 	void Init();
+	void Close();
 	void Update();
 	void Render();
 };

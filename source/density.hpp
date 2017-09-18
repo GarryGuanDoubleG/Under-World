@@ -5,6 +5,10 @@
 
 class Density
 {
+	static float voxelSize;
+	static float invVoxelSize;
+	static float maxHeight;
+
 	static FastNoise terrainFN;
 
 	static FastNoiseSIMD *terrainFNSIMD;

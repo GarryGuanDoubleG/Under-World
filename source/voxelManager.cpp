@@ -49,6 +49,11 @@ void VoxelManager::Init()
 	std::cout << "Vertices: " << verts << endl << "Triangles: " << triangles << endl;
 }
 
+void VoxelManager::Close()
+{
+	m_chunks.empty();
+}
+
 void VoxelManager::Update()
 {
 

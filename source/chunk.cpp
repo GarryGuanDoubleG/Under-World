@@ -37,6 +37,11 @@ bool Chunk::Init(glm::ivec3 chunkIndices, glm::vec3 chunkSize, int voxelSize)
 	return true;
 }
 
+bool Chunk::Close()
+{
+	
+}
+
 glm::vec3 Chunk::GetPosition()
 {
 	return m_position;

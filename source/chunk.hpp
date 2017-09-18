@@ -26,7 +26,7 @@ public:
 	Chunk();
 
 	bool Init(glm::ivec3 chunkIndices, glm::vec3 chunkSize, int voxelSize);
-
+	bool Close();
 	glm::vec3 GetPosition();
 
 	void GenerateMesh();

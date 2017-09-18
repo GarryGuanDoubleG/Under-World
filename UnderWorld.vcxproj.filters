@@ -162,6 +162,9 @@
     <ClInclude Include="utility\FastNoise.h">
       <Filter>Header Files\FastNoise</Filter>
     </ClInclude>
+    <ClInclude Include="source\tables.hpp">
+      <Filter>Header Files\Voxels</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\graphics.cpp">
@@ -247,6 +250,9 @@
     </ClCompile>
     <ClCompile Include="utility\FastNoise.cpp">
       <Filter>Source Files\FastNoise</Filter>
+    </ClCompile>
+    <ClCompile Include="source\tables.cpp">
+      <Filter>Source Files\Voxels</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

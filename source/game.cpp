@@ -41,6 +41,7 @@ Game::~Game()
 {
 	delete m_graphics;
 	delete m_resManager;
+	delete m_voxelManager;
 }
 
 void Game::RenderScene()
@@ -80,6 +81,7 @@ void Game::Update()
 
 void Game::Close()
 {
+	m_voxelManager->Close();
 	m_graphics->Cleanup();
 }
 

@@ -190,6 +190,7 @@
     <ClInclude Include="source\shader.hpp" />
     <ClInclude Include="source\simple_logger.h" />
     <ClInclude Include="source\svd.hpp" />
+    <ClInclude Include="source\tables.hpp" />
     <ClInclude Include="source\texture.hpp" />
     <ClInclude Include="source\voxelManager.hpp" />
     <ClInclude Include="utility\FastNoise.h" />
@@ -299,6 +300,7 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="source\tables.cpp" />
     <ClCompile Include="source\texture.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotSet</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotSet</EnableEnhancedInstructionSet>
