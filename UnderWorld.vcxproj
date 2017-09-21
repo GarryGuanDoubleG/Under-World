@@ -185,14 +185,15 @@
     <ClInclude Include="source\model.hpp" />
     <ClInclude Include="source\octree.hpp" />
     <ClInclude Include="source\player.hpp" />
-    <ClInclude Include="source\qef.hpp" />
+    <ClInclude Include="source\QEFSolver.h" />
     <ClInclude Include="source\resManager.hpp" />
     <ClInclude Include="source\shader.hpp" />
     <ClInclude Include="source\simple_logger.h" />
-    <ClInclude Include="source\svd.hpp" />
+    <ClInclude Include="source\SVD.h" />
     <ClInclude Include="source\tables.hpp" />
     <ClInclude Include="source\texture.hpp" />
     <ClInclude Include="source\voxelManager.hpp" />
+    <ClInclude Include="source\VoxelVertex.hpp" />
     <ClInclude Include="utility\FastNoise.h" />
     <ClInclude Include="utility\FastNoiseSIMD.h" />
   </ItemGroup>
@@ -275,12 +276,7 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="source\qef.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotSet</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotSet</EnableEnhancedInstructionSet>
-      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>
-      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
-    </ClCompile>
+    <ClCompile Include="source\QEFSolver.cpp" />
     <ClCompile Include="source\resManager.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotSet</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotSet</EnableEnhancedInstructionSet>
@@ -294,12 +290,7 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="source\simple_logger.cpp" />
-    <ClCompile Include="source\svd.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotSet</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotSet</EnableEnhancedInstructionSet>
-      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>
-      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
-    </ClCompile>
+    <ClCompile Include="source\SVD.cpp" />
     <ClCompile Include="source\tables.cpp" />
     <ClCompile Include="source\texture.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotSet</EnableEnhancedInstructionSet>
@@ -313,6 +304,7 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="source\VoxelVertex.cpp" />
     <ClCompile Include="utility\FastNoise.cpp">
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>

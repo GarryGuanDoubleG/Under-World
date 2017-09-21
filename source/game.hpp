@@ -25,7 +25,6 @@ using namespace std;
 #include <assimp/postprocess.h>
 #include <omp.h>
 
-
 #include <FastNoiseSIMD.h>
 #include <FastNoise.h>
 #include "simple_logger.h"
@@ -41,6 +40,9 @@ using namespace std;
 #include "LightSource.hpp"
 #include "resManager.hpp"
 #include "tables.hpp"
+#include "SVD.h"
+#include "QEFSolver.h"
+#include "VoxelVertex.hpp"
 #include "density.hpp"
 #include "octree.hpp"
 #include "chunk.hpp"

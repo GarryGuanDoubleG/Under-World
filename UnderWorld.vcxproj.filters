@@ -22,11 +22,17 @@
     <Filter Include="Header Files\Voxels">
       <UniqueIdentifier>{2da63bd7-0d5b-4b1d-a9d9-77131993e1ae}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\FastNoise">
-      <UniqueIdentifier>{3976a62c-d512-48dc-8719-1bd1e7ae6012}</UniqueIdentifier>
+    <Filter Include="Source Files\Utility">
+      <UniqueIdentifier>{aed173df-76ce-4160-a476-319192f25aad}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\FastNoise">
+    <Filter Include="Source Files\Utility\FastNoise">
       <UniqueIdentifier>{2e7ad105-3af5-408e-a9ed-eab61f561b53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utility">
+      <UniqueIdentifier>{676263a3-a52e-4487-9aae-1f8e77a77112}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utility\FastNoise">
+      <UniqueIdentifier>{3976a62c-d512-48dc-8719-1bd1e7ae6012}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -138,12 +144,6 @@
     <ClInclude Include="source\player.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\svd.hpp">
-      <Filter>Header Files\Voxels</Filter>
-    </ClInclude>
-    <ClInclude Include="source\qef.hpp">
-      <Filter>Header Files\Voxels</Filter>
-    </ClInclude>
     <ClInclude Include="source\density.hpp">
       <Filter>Header Files\Voxels</Filter>
     </ClInclude>
@@ -157,12 +157,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="utility\FastNoiseSIMD.h">
-      <Filter>Header Files\FastNoise</Filter>
+      <Filter>Header Files\Utility\FastNoise</Filter>
     </ClInclude>
     <ClInclude Include="utility\FastNoise.h">
-      <Filter>Header Files\FastNoise</Filter>
+      <Filter>Header Files\Utility\FastNoise</Filter>
     </ClInclude>
     <ClInclude Include="source\tables.hpp">
+      <Filter>Header Files\Voxels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\VoxelVertex.hpp">
+      <Filter>Header Files\Voxels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\QEFSolver.h">
+      <Filter>Header Files\Voxels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\SVD.h">
       <Filter>Header Files\Voxels</Filter>
     </ClInclude>
   </ItemGroup>
@@ -209,12 +218,6 @@
     <ClCompile Include="source\voxelManager.cpp">
       <Filter>Source Files\Voxels</Filter>
     </ClCompile>
-    <ClCompile Include="source\svd.cpp">
-      <Filter>Source Files\Voxels</Filter>
-    </ClCompile>
-    <ClCompile Include="source\qef.cpp">
-      <Filter>Source Files\Voxels</Filter>
-    </ClCompile>
     <ClCompile Include="source\density.cpp">
       <Filter>Source Files\Voxels</Filter>
     </ClCompile>
@@ -228,30 +231,39 @@
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="utility\FastNoiseSIMD.cpp">
-      <Filter>Source Files\FastNoise</Filter>
+      <Filter>Source Files\Utility\FastNoise</Filter>
     </ClCompile>
     <ClCompile Include="utility\FastNoiseSIMD_avx2.cpp">
-      <Filter>Source Files\FastNoise</Filter>
+      <Filter>Source Files\Utility\FastNoise</Filter>
     </ClCompile>
     <ClCompile Include="utility\FastNoiseSIMD_avx512.cpp">
-      <Filter>Source Files\FastNoise</Filter>
+      <Filter>Source Files\Utility\FastNoise</Filter>
     </ClCompile>
     <ClCompile Include="utility\FastNoiseSIMD_internal.cpp">
-      <Filter>Source Files\FastNoise</Filter>
+      <Filter>Source Files\Utility\FastNoise</Filter>
     </ClCompile>
     <ClCompile Include="utility\FastNoiseSIMD_neon.cpp">
-      <Filter>Source Files\FastNoise</Filter>
+      <Filter>Source Files\Utility\FastNoise</Filter>
     </ClCompile>
     <ClCompile Include="utility\FastNoiseSIMD_sse2.cpp">
-      <Filter>Source Files\FastNoise</Filter>
+      <Filter>Source Files\Utility\FastNoise</Filter>
     </ClCompile>
     <ClCompile Include="utility\FastNoiseSIMD_sse41.cpp">
-      <Filter>Source Files\FastNoise</Filter>
+      <Filter>Source Files\Utility\FastNoise</Filter>
     </ClCompile>
     <ClCompile Include="utility\FastNoise.cpp">
-      <Filter>Source Files\FastNoise</Filter>
+      <Filter>Source Files\Utility\FastNoise</Filter>
     </ClCompile>
     <ClCompile Include="source\tables.cpp">
+      <Filter>Source Files\Voxels</Filter>
+    </ClCompile>
+    <ClCompile Include="source\VoxelVertex.cpp">
+      <Filter>Source Files\Voxels</Filter>
+    </ClCompile>
+    <ClCompile Include="source\QEFSolver.cpp">
+      <Filter>Source Files\Voxels</Filter>
+    </ClCompile>
+    <ClCompile Include="source\SVD.cpp">
       <Filter>Source Files\Voxels</Filter>
     </ClCompile>
   </ItemGroup>

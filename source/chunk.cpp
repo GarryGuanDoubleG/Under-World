@@ -29,7 +29,6 @@ bool Chunk::Init(glm::ivec3 chunkIndices, glm::vec3 chunkSize, int voxelSize)
 	m_densityType = m_position.y >= 0 ? Density::Terrain : Density::Cave;
 	Density::GenerateMaterialIndices(m_densityType, m_position, m_chunkSize, m_materialIndices);
 	GenerateHermiteField();
-	//GenerateCaves();
 	GenerateMesh();
 	
 	if (m_root == nullptr) return false;
@@ -64,7 +63,7 @@ void Chunk::GenerateMesh()
 					corners |= (m_materialIndices[GETINDEXCHUNK(glm::ivec3(m_chunkSize + glm::vec3(1.0f)), cornerIndex.x, cornerIndex.y, cornerIndex.z)] << i);
 				}
 
-				//no material change. Isosurface inactive
+				//no material change. Isosurface not in voxel
 				if (corners == 0 || corners == 255) continue;
 
 				Octree *node = new Octree;
@@ -90,8 +89,12 @@ void Chunk::GenerateMesh()
 	}
 
 	m_flag |= CHUNK_ACTIVE;
-	m_root->GenerateVertexIndices(m_vertices);
-	m_root->ContourCellProc(m_triIndices);
+
+	
+	//m_root->ClusterCellBase(2000000.f);
+	m_root->GenerateVertexBuffer(m_vertices);
+	m_root->ProcessCell(m_triIndices, 2000000.f);
+
 
 	slog("Finished Chunk Index: %i, %i, %i\n", m_chunkIndices.x, m_chunkIndices.y, m_chunkIndices.z);
 }
@@ -123,8 +126,8 @@ void Chunk::GenerateHermiteField()
 					glm::vec3 p2 = m_position + (glm::vec3(x, y, z) + AXIS_OFFSET[axis]) * (float)m_voxelSize;
 
 					//get hermite data
-					glm::vec3 p = FindIntersection(m_densityType, p1, p2);
-					glm::vec3 n = CalculateNormals(m_densityType, p);
+					glm::vec3 p = Density::FindIntersection(m_densityType, p1, p2);
+					glm::vec3 n = Density::CalculateNormals(m_densityType, p);
 
 					//store in map
 					EdgeInfo edge(p, n);
@@ -161,7 +164,7 @@ void Chunk::BindMesh()
 
 	//location 0 should be verts
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VoxelVertex), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VoxelVertex), (GLvoid*)offsetof(VoxelVertex, position));
 	//now normals
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VoxelVertex), (GLvoid*)offsetof(VoxelVertex, normal));
@@ -174,7 +177,6 @@ void Chunk::BindMesh()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 }
-
 
 void Chunk::Render()
 {

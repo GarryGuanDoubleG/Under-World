@@ -31,7 +31,6 @@ public:
 
 	void GenerateMesh();
 	void GenerateHermiteField();
-	void GenerateCaves();
 	void BindMesh();
 	
 	void Render();

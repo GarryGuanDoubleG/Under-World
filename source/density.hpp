@@ -21,6 +21,10 @@ public:
 public:
 	static void SetVoxelSize(const float & voxelSize);
 
+	static glm::vec3 FindIntersection(Density::DensityType type, const glm::vec3 &p0, const glm::vec3 &p1);
+	static glm::vec3 CalculateNormals(Density::DensityType type, const glm::vec3 &pos);
+
+
 	static float GetSphere(const glm::vec3& worldPosition, const glm::vec3& origin, float radius);
 	static float GetTerrainDensity(const glm::vec3& worldPosition, float noise3D, float noise2D = 0);
 	static float GetTerrain(const glm::vec3 & worldPosition);

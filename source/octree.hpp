@@ -1,5 +1,4 @@
 #pragma once
-#include "qef.hpp"
 
 #define OCTREE_ACTIVE 1
 #define OCTREE_INUSE 2
@@ -25,17 +24,6 @@ const glm::vec3 CHILD_MIN_OFFSETS[] =
 	glm::vec3(1, 1, 1),
 };
 
-typedef struct VoxelVertex_S
-{
-	VoxelVertex_S() {};
-	VoxelVertex_S(glm::vec3 pos, glm::vec3 norm) : position(pos), normal(norm) {};
-	VoxelVertex_S(glm::vec3 pos, glm::vec3 norm, int type) : position(pos), normal(norm), textureID(type) {};
-
-	glm::vec3 position;
-	glm::vec3 normal;
-	int textureID;
-}VoxelVertex;
-
 struct EdgeInfo
 {
 	EdgeInfo() {};
@@ -44,26 +32,8 @@ struct EdgeInfo
 	glm::vec3 normal;
 };
 
-struct OctreeDrawInfo
-{
-	OctreeDrawInfo()
-		: index(-1)
-		, corners(0)
-	{
-	}
-
-	int    index;
-	int    corners;
-	GLint	type;
-	glm::vec3   position;
-	glm::vec3   averageNormal;
-	svd::QefData	qef;
-};
 
 class Octree;
-
-glm::vec3 FindIntersection(Density::DensityType type, const glm::vec3 &p0, const glm::vec3 &p1);
-glm::vec3 CalculateNormals(Density::DensityType type, const glm::vec3 &pos);
 
 
 void FindEdgeCrossing(Octree *node, const unordered_map<glm::vec3, EdgeInfo> &hermite_map);
@@ -74,12 +44,12 @@ class Octree
 {
 public:
 	int m_index;
-	int m_corners;
-	glm::vec3 m_position;
-	glm::vec3 m_normal;
-	GLint m_type;
+	unsigned char m_child_index;
+	unsigned char m_corners;
+	unsigned char m_vertex_count;
 
 	Octree * m_children[8];
+	VoxelVertex *m_vertices;
 
 	Uint8 m_flag;
 	Uint8 m_childMask;
@@ -92,9 +62,17 @@ public:
 	void InitNode(glm::vec3 minPos, int size, int corners);
 	void DestroyNode();
 
-	void GenerateVertexIndices(vector<VoxelVertex>& voxelVerts);
-	void ContourProcessEdge(std::vector<GLuint>& m_tri_indices, Octree * node[4], int dir);
-	void ContourEdgeProc(std::vector<GLuint>& m_tri_indices, Octree * node[4], int dir);
-	void ContourFaceProc(std::vector<GLuint>& m_tri_indices, Octree * node[2], int dir);
-	void ContourCellProc(std::vector<GLuint>& m_tri_indices);
+	
+	void GenerateVertexBuffer(std::vector<VoxelVertex>& v_out);
+
+	void ProcessCell(std::vector<unsigned int>& indexes, float threshold);
+	void ProcessFace(Octree ** nodes, int direction, std::vector<unsigned int>& indexes, float threshold);
+	void ProcessEdge(Octree ** nodes, int direction, std::vector<unsigned int>& indexes, float threshold);
+	void ProcessIndexes(Octree ** nodes, int direction, std::vector<unsigned int>& indexes, float threshold);
+	void ClusterCellBase(float error);
+	void ClusterCell(float error);
+	void ClusterFace(Octree ** nodes, int direction, int & surface_index, std::vector<VoxelVertex*>& collected_vertices);
+	void ClusterEdge(Octree ** nodes, int direction, int & surface_index, std::vector<VoxelVertex*>& collected_vertices);
+	void ClusterIndexes(Octree ** nodes, int direction, int & max_surface_index, std::vector<VoxelVertex*>& collected_vertices);
+	void AssignSurface(std::vector<VoxelVertex*>& vertices, int from, int to);
 };
