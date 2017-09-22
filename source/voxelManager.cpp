@@ -23,6 +23,8 @@ void VoxelManager::Init()
 	m_chunks = vector<Chunk>(x_range * y_range * z_range);
 
 	Density::SetVoxelSize(m_voxelSize);
+	Density::SetMaxVoxelHeight(m_chunkSize * (y_range / 2 + 1));
+	Density::Initialize();
 
 	for (int x = -m_renderRange; x <= m_renderRange; x++)
 	{ 

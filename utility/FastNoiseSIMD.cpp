@@ -82,13 +82,13 @@ int GetFastestSIMD()
 #if defined(__aarch64__) || defined(FN_IOS)
 	return FN_NEON;
 #else
-	if (android_getCpuFamily() == ANDROID_CPU_FAMILY_ARM)
+	if(android_getCpuFamily() == ANDROID_CPU_FAMILY_ARM)
 	{
 		auto cpuFeatures = android_getCpuFeatures();
 		
-		if (cpuFeatures & ANDROID_CPU_ARM_FEATURE_NEON)
+		if(cpuFeatures & ANDROID_CPU_ARM_FEATURE_NEON)
 #ifdef FN_USE_FMA
-			if (cpuFeatures & ANDROID_CPU_ARM_FEATURE_NEON_FMA)
+			if(cpuFeatures & ANDROID_CPU_ARM_FEATURE_NEON_FMA)
 #endif
 				return FN_NEON;
 	}
@@ -126,17 +126,17 @@ int GetFastestSIMD()
 	cpuid(cpuInfo, 0);
 	int nIds = cpuInfo[0];
 
-	if (nIds < 0x00000001)
+	if(nIds < 0x00000001)
 		return FN_NO_SIMD_FALLBACK;
 
 	cpuid(cpuInfo, 0x00000001);
 
 	// SSE2
-	if ((cpuInfo[3] & 1 << 26) == 0)
+	if((cpuInfo[3] & 1 << 26) == 0)
 		return FN_NO_SIMD_FALLBACK;
 
 	// SSE41
-	if ((cpuInfo[2] & 1 << 19) == 0)
+	if((cpuInfo[2] & 1 << 19) == 0)
 		return FN_SSE2;
 
 	// AVX
@@ -144,17 +144,17 @@ int GetFastestSIMD()
 	bool osAVXSuport = (cpuInfo[2] & 1 << 27) != 0;
 	bool cpuAVXSuport = (cpuInfo[2] & 1 << 28) != 0;
 
-	if (cpuXSaveSuport && osAVXSuport && cpuAVXSuport)
+	if(cpuXSaveSuport && osAVXSuport && cpuAVXSuport)
 	{
 		uint64_t xcrFeatureMask = xgetbv(_XCR_XFEATURE_ENABLED_MASK);
-		if ((xcrFeatureMask & 0x6) != 0x6)
+		if((xcrFeatureMask & 0x6) != 0x6)
 			return FN_SSE41;
 	}
 	else
 		return FN_SSE41;
 
 	// AVX2 FMA3
-	if (nIds < 0x00000007)
+	if(nIds < 0x00000007)
 		return FN_SSE41;
 
 #ifdef FN_USE_FMA
@@ -167,14 +167,14 @@ int GetFastestSIMD()
 
 	bool cpuAVX2Support = (cpuInfo[1] & 1 << 5) != 0;
 
-	if (!cpuFMA3Support || !cpuAVX2Support)
+	if(!cpuFMA3Support || !cpuAVX2Support)
 		return FN_SSE41;
 
 	// AVX512
 	bool cpuAVX512Support = (cpuInfo[1] & 1 << 16) != 0;		
 	bool oxAVX512Support = (xgetbv(_XCR_XFEATURE_ENABLED_MASK) & 0xe6) == 0xe6;
 
-	if (!cpuAVX512Support || !oxAVX512Support)
+	if(!cpuAVX512Support || !oxAVX512Support)
 		return FN_AVX2;
 
 	return FN_AVX512;	
@@ -187,29 +187,29 @@ FastNoiseSIMD* FastNoiseSIMD::NewFastNoiseSIMD(int seed)
 
 #ifdef FN_COMPILE_NEON
 #ifdef FN_COMPILE_NO_SIMD_FALLBACK
-	if (s_currentSIMDLevel >= FN_NEON)
+	if(s_currentSIMDLevel >= FN_NEON)
 #endif
 		return new FastNoiseSIMD_internal::FASTNOISE_SIMD_CLASS(FN_NEON)(seed);
 #endif
 
 #ifdef FN_COMPILE_AVX512
-	if (s_currentSIMDLevel >= FN_AVX512)
+	if(s_currentSIMDLevel >= FN_AVX512)
 		return new FastNoiseSIMD_internal::FASTNOISE_SIMD_CLASS(FN_AVX512)(seed);
 #endif
 
 #ifdef FN_COMPILE_AVX2
-	if (s_currentSIMDLevel >= FN_AVX2)
+	if(s_currentSIMDLevel >= FN_AVX2)
 		return new FastNoiseSIMD_internal::FASTNOISE_SIMD_CLASS(FN_AVX2)(seed);
 #endif
 
 #ifdef FN_COMPILE_SSE41
-	if (s_currentSIMDLevel >= FN_SSE41)
+	if(s_currentSIMDLevel >= FN_SSE41)
 		return new FastNoiseSIMD_internal::FASTNOISE_SIMD_CLASS(FN_SSE41)(seed);
 #endif
 
 #ifdef FN_COMPILE_SSE2
 #ifdef FN_COMPILE_NO_SIMD_FALLBACK
-	if (s_currentSIMDLevel >= FN_SSE2)
+	if(s_currentSIMDLevel >= FN_SSE2)
 #endif
 		return new FastNoiseSIMD_internal::FASTNOISE_SIMD_CLASS(FN_SSE2)(seed);
 #endif
@@ -221,7 +221,7 @@ FastNoiseSIMD* FastNoiseSIMD::NewFastNoiseSIMD(int seed)
 
 int FastNoiseSIMD::GetSIMDLevel()
 {
-	if (s_currentSIMDLevel < 0)
+	if(s_currentSIMDLevel < 0)
 		s_currentSIMDLevel = GetFastestSIMD();
 
 	return s_currentSIMDLevel;
@@ -232,7 +232,7 @@ void FastNoiseSIMD::FreeNoiseSet(float* floatArray)
 #ifdef FN_ALIGNED_SETS
 	GetSIMDLevel();
 
-	if (s_currentSIMDLevel > FN_NO_SIMD_FALLBACK)
+	if(s_currentSIMDLevel > FN_NO_SIMD_FALLBACK)
 #ifdef _WIN32
 		_aligned_free(floatArray);
 #else
@@ -249,22 +249,22 @@ int FastNoiseSIMD::AlignedSize(int size)
 	GetSIMDLevel();
 
 #ifdef FN_COMPILE_NEON
-	if (s_currentSIMDLevel >= FN_NEON)
+	if(s_currentSIMDLevel >= FN_NEON)
 		return FastNoiseSIMD_internal::FASTNOISE_SIMD_CLASS(FN_NEON)::AlignedSize(size);
 #endif
 
 #ifdef FN_COMPILE_AVX512
-	if (s_currentSIMDLevel >= FN_AVX512)
+	if(s_currentSIMDLevel >= FN_AVX512)
 		return FastNoiseSIMD_internal::FASTNOISE_SIMD_CLASS(FN_AVX512)::AlignedSize(size);
 #endif
 
 #ifdef FN_COMPILE_AVX2
-	if (s_currentSIMDLevel >= FN_AVX2)
+	if(s_currentSIMDLevel >= FN_AVX2)
 		return FastNoiseSIMD_internal::FASTNOISE_SIMD_CLASS(FN_AVX2)::AlignedSize(size);
 #endif
 
 #ifdef FN_COMPILE_SSE2
-	if (s_currentSIMDLevel >= FN_SSE2)
+	if(s_currentSIMDLevel >= FN_SSE2)
 		return FastNoiseSIMD_internal::FASTNOISE_SIMD_CLASS(FN_SSE2)::AlignedSize(size);
 #endif
 #endif
@@ -277,22 +277,22 @@ float* FastNoiseSIMD::GetEmptySet(int size)
 	GetSIMDLevel();
 
 #ifdef FN_COMPILE_NEON
-	if (s_currentSIMDLevel >= FN_NEON)
+	if(s_currentSIMDLevel >= FN_NEON)
 		return FastNoiseSIMD_internal::FASTNOISE_SIMD_CLASS(FN_NEON)::GetEmptySet(size);
 #endif
 
 #ifdef FN_COMPILE_AVX512
-	if (s_currentSIMDLevel >= FN_AVX512)
+	if(s_currentSIMDLevel >= FN_AVX512)
 		return FastNoiseSIMD_internal::FASTNOISE_SIMD_CLASS(FN_AVX512)::GetEmptySet(size);
 #endif
 
 #ifdef FN_COMPILE_AVX2
-	if (s_currentSIMDLevel >= FN_AVX2)
+	if(s_currentSIMDLevel >= FN_AVX2)
 		return FastNoiseSIMD_internal::FASTNOISE_SIMD_CLASS(FN_AVX2)::GetEmptySet(size);
 #endif
 
 #ifdef FN_COMPILE_SSE2
-	if (s_currentSIMDLevel >= FN_SSE2)
+	if(s_currentSIMDLevel >= FN_SSE2)
 		return FastNoiseSIMD_internal::FASTNOISE_SIMD_CLASS(FN_SSE2)::GetEmptySet(size);
 #endif
 #endif
@@ -341,7 +341,7 @@ void FastNoiseSIMD::FillSamplingVectorSet(FastNoiseVectorSet* vectorSet, int sam
 {
 	assert(vectorSet);
 
-	if (sampleScale <= 0)
+	if(sampleScale <= 0)
 	{
 		FillVectorSet(vectorSet, xSize, ySize, zSize);
 		return;
@@ -358,13 +358,13 @@ void FastNoiseSIMD::FillSamplingVectorSet(FastNoiseVectorSet* vectorSet, int sam
 	int ySizeSample = ySize;
 	int zSizeSample = zSize;
 
-	if (xSizeSample & sampleMask)
+	if(xSizeSample & sampleMask)
 		xSizeSample = (xSizeSample & ~sampleMask) + sampleSize;
 
-	if (ySizeSample & sampleMask)
+	if(ySizeSample & sampleMask)
 		ySizeSample = (ySizeSample & ~sampleMask) + sampleSize;
 
-	if (zSizeSample & sampleMask)
+	if(zSizeSample & sampleMask)
 		zSizeSample = (zSizeSample & ~sampleMask) + sampleSize;
 
 	xSizeSample = (xSizeSample >> sampleScale) + 1;

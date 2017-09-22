@@ -142,7 +142,7 @@ QEFData QEFSolver::getData()
 
 float QEFSolver::getError()
 {
-	if (!this->hasSolution) {
+	if(!this->hasSolution) {
 		throw std::runtime_error("illegal state");
 	}
 
@@ -151,7 +151,7 @@ float QEFSolver::getError()
 
 float QEFSolver::getError(const Vec3 &pos)
 {
-	if (!this->hasSolution) {
+	if(!this->hasSolution) {
 		this->setAta();
 		this->setAtb();
 	}
@@ -183,7 +183,7 @@ void QEFSolver::setAtb()
 float QEFSolver::solve(Vec3 &outx, const float svd_tol,
 	const int svd_sweeps, const float pinv_tol)
 {
-	if (this->data.numPoints == 0) {
+	if(this->data.numPoints == 0) {
 		throw std::invalid_argument("...");
 	}
 
@@ -198,7 +198,7 @@ float QEFSolver::solve(Vec3 &outx, const float svd_tol,
 	this->x.clear();
 	const float result = Svd::solveSymmetric(this->ata, this->atb,
 		this->x, svd_tol, svd_sweeps, pinv_tol);
-	if (isnan(result))
+	if(isnan(result))
 		this->x.set(this->massPoint);
 	else
 		VecUtils::addScaled(this->x, 1, this->massPoint);

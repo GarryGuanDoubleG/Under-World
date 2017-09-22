@@ -63,7 +63,7 @@ void Model::LoadModel(string model_path)
 {
 	m_scene = m_importer.ReadFile(model_path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
-	if (!m_scene || m_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !m_scene->mRootNode)
+	if(!m_scene || m_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !m_scene->mRootNode)
 	{
 		cout << "ASSIMP ERROR: " << m_importer.GetErrorString() << endl;
 		return;
@@ -88,7 +88,7 @@ void Model::LoadModel(string model_path, const vector<string> &animations, const
 {
 	m_scene = m_importer.ReadFile(model_path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
-	if (!m_scene || m_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !m_scene->mRootNode)
+	if(!m_scene || m_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !m_scene->mRootNode)
 	{
 		cout << "ASSIMP ERROR: %s" << m_importer.GetErrorString() << endl;
 		return;
@@ -152,13 +152,13 @@ vector<Texture> Model::LoadMaterials(aiMaterial *mat, aiTextureType type, string
 		mat->GetTexture(type, i, &path);
 
 		//texture is embedded
-		if (path.data[0] == '*')
+		if(path.data[0] == '*')
 			tex = LoadEmbeddedTexture(path);
 		else
 			tex = Texture(path.C_Str(), directory.c_str());
 
 		//check if load failed
-		if (tex.GetTexID() != 0)
+		if(tex.GetTexID() != 0)
 		{
 			tex.SetTexType(type);
 			textures.push_back(tex);
@@ -200,7 +200,7 @@ void Model::LoadBones(aiMesh*mesh, vector<glm::ivec4> &boneIds, vector<glm::vec4
 	//	int boneIndex = 0;
 	//	string boneName(mesh->mBones[i]->mName.data);
 
-	//	if (m_animController->m_boneMap.find(boneName) == m_animController->m_boneMap.end())
+	//	if(m_animController->m_boneMap.find(boneName) == m_animController->m_boneMap.end())
 	//	{
 	//		boneIndex = m_animController->m_boneCount;
 	//		++m_animController->m_boneCount;
@@ -225,7 +225,7 @@ void Model::LoadBones(aiMesh*mesh, vector<glm::ivec4> &boneIds, vector<glm::vec4
 	//		//find unused weight and assign
 	//		for (int k = 0; k < 4; k++)
 	//		{
-	//			if (weights[vertexID][k] == 0)
+	//			if(weights[vertexID][k] == 0)
 	//			{
 	//				boneIds[vertexID][k] = boneIndex;
 	//				weights[vertexID][k] = weight;
@@ -256,7 +256,7 @@ vector<Vertex> LoadVertices(aiMesh*mesh)
 		normal.y = mesh->mNormals[i].y;
 		normal.z = mesh->mNormals[i].z;
 
-		if (mesh->mTextureCoords[0])
+		if(mesh->mTextureCoords[0])
 		{
 			uv.x = mesh->mTextureCoords[0][i].x;
 			uv.y = mesh->mTextureCoords[0][i].y;
@@ -293,7 +293,7 @@ vector<Vertex> LoadVertices(aiMesh*mesh)
 //		normal.y = mesh->mNormals[i].y;
 //		normal.z = mesh->mNormals[i].z;
 //
-//		if (mesh->mTextureCoords[0])
+//		if(mesh->mTextureCoords[0])
 //		{
 //			uv.x = mesh->mTextureCoords[0][i].x;
 //			uv.y = mesh->mTextureCoords[0][i].y;
@@ -339,7 +339,7 @@ Mesh Model::ProcessMesh(aiMesh *mesh, string directory)
 			indices.push_back(face.mIndices[j]);
 		}
 	}
-	if (mesh->mMaterialIndex >= 0)
+	if(mesh->mMaterialIndex >= 0)
 	{
 		aiMaterial *material = m_scene->mMaterials[mesh->mMaterialIndex];
 
@@ -351,7 +351,7 @@ Mesh Model::ProcessMesh(aiMesh *mesh, string directory)
 	}
 
 	//load skeletal data
-	/*if (mesh->HasBones())
+	/*if(mesh->HasBones())
 	{
 		rigged = true;
 		LoadBones(mesh, boneIds, weights);

@@ -20,13 +20,13 @@ Texture::Texture(aiTexture * texture)
 {
 	m_type = Tex2D;
 
-	if (!texture) return;
+	if(!texture) return;
 
 	//now generate texture with data
 	glGenTextures(1, &m_texID);
 	glBindTexture(GL_TEXTURE_2D, m_texID);
 
-	if (texture->mHeight == 0)
+	if(texture->mHeight == 0)
 	{
 		SDL_RWops *rw = SDL_RWFromMem(texture->pcData, texture->mWidth);
 		SDL_Surface *surface = IMG_Load_RW(rw, 1);
@@ -55,7 +55,7 @@ void Texture::LoadTexture(string filepath)
 	SDL_Surface *texture = IMG_Load(filepath.c_str());
 	m_type = Tex2D;
 
-	if (!texture)
+	if(!texture)
 	{
 		cout << "Could not load image " << filepath << endl;
 		return;
@@ -63,7 +63,7 @@ void Texture::LoadTexture(string filepath)
 
 	int mode = GL_RGB;
 
-	if (texture->format->BytesPerPixel == 4) {
+	if(texture->format->BytesPerPixel == 4) {
 		mode = GL_RGBA;
 	}
 	//now generate texture with data
@@ -84,12 +84,12 @@ void Texture::LoadSkybox(string filepath)
 {
 	const std::string faces[6] =
 	{
-		"right.jpg",
-		"left.jpg",
-		"top.jpg",
-		"bottom.jpg",
-		"back.jpg",
-		"front.jpg"
+		"right.png",
+		"left.png",
+		"top.png",
+		"bottom.png",
+		"back.png",
+		"front.png"
 	};
 
 
@@ -107,7 +107,7 @@ void Texture::LoadSkybox(string filepath)
 		string filename = filepath + faces[i];
 		SDL_Surface *texture = IMG_Load(filename.c_str());
 
-		if (!texture)
+		if(!texture)
 		{
 			cout << "Could not load image " << filename << endl;
 			cout << IMG_GetError() << endl;
@@ -116,13 +116,15 @@ void Texture::LoadSkybox(string filepath)
 
 		int mode = GL_RGB;
 
-		if (texture->format->BytesPerPixel == 4) {
+		if(texture->format->BytesPerPixel == 4) {
 			mode = GL_RGBA;
 		}
 
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB,
 			texture->w, texture->h, 0, mode,
 			GL_UNSIGNED_BYTE, texture->pixels);
+
+		SlogCheckGLError("Skybox");
 
 		SDL_FreeSurface(texture);
 	}
@@ -179,7 +181,21 @@ void Texture::Bind(GLuint activeTex)
 void Texture::Unbind()
 {
 	glActiveTexture(GL_TEXTURE0 + m_activeTex); // Active proper texture unit before binding									  
-	glBindTexture(GL_TEXTURE_2D, 0);
+	switch (m_type)
+	{
+	case Tex2D:
+		glBindTexture(GL_TEXTURE_2D, 0);
+		break;
+	case Skybox:
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		break;
+	case DepthMap:
+		glBindTexture(GL_TEXTURE_2D, 0);
+		break;
+	default:
+		glBindTexture(GL_TEXTURE_2D, 0);
+		break;
+	}
 }
 
 void Texture::SetTexType(TextureType type)

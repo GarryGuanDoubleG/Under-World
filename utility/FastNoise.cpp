@@ -1092,13 +1092,13 @@ FN_DECIMAL FastNoise::SingleSimplex(unsigned char offset, FN_DECIMAL x, FN_DECIM
 	int i1, j1, k1;
 	int i2, j2, k2;
 
-	if (x0 >= y0)
+	if(x0 >= y0)
 	{
-		if (y0 >= z0)
+		if(y0 >= z0)
 		{
 			i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 1; k2 = 0;
 		}
-		else if (x0 >= z0)
+		else if(x0 >= z0)
 		{
 			i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 0; k2 = 1;
 		}
@@ -1109,11 +1109,11 @@ FN_DECIMAL FastNoise::SingleSimplex(unsigned char offset, FN_DECIMAL x, FN_DECIM
 	}
 	else // x0 < y0
 	{
-		if (y0 < z0)
+		if(y0 < z0)
 		{
 			i1 = 0; j1 = 0; k1 = 1; i2 = 0; j2 = 1; k2 = 1;
 		}
-		else if (x0 < z0)
+		else if(x0 < z0)
 		{
 			i1 = 0; j1 = 1; k1 = 0; i2 = 0; j2 = 1; k2 = 1;
 		}
@@ -1136,7 +1136,7 @@ FN_DECIMAL FastNoise::SingleSimplex(unsigned char offset, FN_DECIMAL x, FN_DECIM
 	FN_DECIMAL n0, n1, n2, n3;
 
 	t = FN_DECIMAL(0.6) - x0*x0 - y0*y0 - z0*z0;
-	if (t < 0) n0 = 0;
+	if(t < 0) n0 = 0;
 	else
 	{
 		t *= t;
@@ -1144,7 +1144,7 @@ FN_DECIMAL FastNoise::SingleSimplex(unsigned char offset, FN_DECIMAL x, FN_DECIM
 	}
 
 	t = FN_DECIMAL(0.6) - x1*x1 - y1*y1 - z1*z1;
-	if (t < 0) n1 = 0;
+	if(t < 0) n1 = 0;
 	else
 	{
 		t *= t;
@@ -1152,7 +1152,7 @@ FN_DECIMAL FastNoise::SingleSimplex(unsigned char offset, FN_DECIMAL x, FN_DECIM
 	}
 
 	t = FN_DECIMAL(0.6) - x2*x2 - y2*y2 - z2*z2;
-	if (t < 0) n2 = 0;
+	if(t < 0) n2 = 0;
 	else
 	{
 		t *= t;
@@ -1160,7 +1160,7 @@ FN_DECIMAL FastNoise::SingleSimplex(unsigned char offset, FN_DECIMAL x, FN_DECIM
 	}
 
 	t = FN_DECIMAL(0.6) - x3*x3 - y3*y3 - z3*z3;
-	if (t < 0) n3 = 0;
+	if(t < 0) n3 = 0;
 	else
 	{
 		t *= t;
@@ -1286,7 +1286,7 @@ FN_DECIMAL FastNoise::SingleSimplex(unsigned char offset, FN_DECIMAL x, FN_DECIM
 	FN_DECIMAL y0 = y - Y0;
 
 	int i1, j1;
-	if (x0 > y0)
+	if(x0 > y0)
 	{
 		i1 = 1; j1 = 0;
 	}
@@ -1303,7 +1303,7 @@ FN_DECIMAL FastNoise::SingleSimplex(unsigned char offset, FN_DECIMAL x, FN_DECIM
 	FN_DECIMAL n0, n1, n2;
 
 	t = FN_DECIMAL(0.5) - x0*x0 - y0*y0;
-	if (t < 0) n0 = 0;
+	if(t < 0) n0 = 0;
 	else
 	{
 		t *= t;
@@ -1311,7 +1311,7 @@ FN_DECIMAL FastNoise::SingleSimplex(unsigned char offset, FN_DECIMAL x, FN_DECIM
 	}
 
 	t = FN_DECIMAL(0.5) - x1*x1 - y1*y1;
-	if (t < 0) n1 = 0;
+	if(t < 0) n1 = 0;
 	else
 	{
 		t *= t;
@@ -1319,7 +1319,7 @@ FN_DECIMAL FastNoise::SingleSimplex(unsigned char offset, FN_DECIMAL x, FN_DECIM
 	}
 
 	t = FN_DECIMAL(0.5) - x2*x2 - y2*y2;
-	if (t < 0) n2 = 0;
+	if(t < 0) n2 = 0;
 	else
 	{
 		t *= t;
@@ -1406,31 +1406,31 @@ FN_DECIMAL FastNoise::SingleSimplex(unsigned char offset, FN_DECIMAL x, FN_DECIM
 	FN_DECIMAL w4 = w0 - 1 + 4*G4;
 
 	t = FN_DECIMAL(0.6) - x0*x0 - y0*y0 - z0*z0 - w0*w0;
-	if (t < 0) n0 = 0;
+	if(t < 0) n0 = 0;
 	else {
 		t *= t;
 		n0 = t * t * GradCoord4D(offset, i, j, k, l, x0, y0, z0, w0);
 	}
 	t = FN_DECIMAL(0.6) - x1*x1 - y1*y1 - z1*z1 - w1*w1;
-	if (t < 0) n1 = 0;
+	if(t < 0) n1 = 0;
 	else {
 		t *= t;
 		n1 = t * t * GradCoord4D(offset, i + i1, j + j1, k + k1, l + l1, x1, y1, z1, w1);
 	}
 	t = FN_DECIMAL(0.6) - x2*x2 - y2*y2 - z2*z2 - w2*w2;
-	if (t < 0) n2 = 0;
+	if(t < 0) n2 = 0;
 	else {
 		t *= t;
 		n2 = t * t * GradCoord4D(offset, i + i2, j + j2, k + k2, l + l2, x2, y2, z2, w2);
 	}
 	t = FN_DECIMAL(0.6) - x3*x3 - y3*y3 - z3*z3 - w3*w3;
-	if (t < 0) n3 = 0;
+	if(t < 0) n3 = 0;
 	else {
 		t *= t;
 		n3 = t * t * GradCoord4D(offset, i + i3, j + j3, k + k3, l + l3, x3, y3, z3, w3);
 	}
 	t = FN_DECIMAL(0.6) - x4*x4 - y4*y4 - z4*z4 - w4*w4;
-	if (t < 0) n4 = 0;
+	if(t < 0) n4 = 0;
 	else {
 		t *= t;
 		n4 = t * t * GradCoord4D(offset, i + 1, j + 1, k + 1, l + 1, x4, y4, z4, w4);
@@ -1721,7 +1721,7 @@ FN_DECIMAL FastNoise::SingleCellular(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z) c
 
 					FN_DECIMAL newDistance = vecX * vecX + vecY * vecY + vecZ * vecZ;
 
-					if (newDistance < distance)
+					if(newDistance < distance)
 					{
 						distance = newDistance;
 						xc = xi;
@@ -1747,7 +1747,7 @@ FN_DECIMAL FastNoise::SingleCellular(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z) c
 
 					FN_DECIMAL newDistance = FastAbs(vecX) + FastAbs(vecY) + FastAbs(vecZ);
 
-					if (newDistance < distance)
+					if(newDistance < distance)
 					{
 						distance = newDistance;
 						xc = xi;
@@ -1773,7 +1773,7 @@ FN_DECIMAL FastNoise::SingleCellular(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z) c
 
 					FN_DECIMAL newDistance = (FastAbs(vecX) + FastAbs(vecY) + FastAbs(vecZ)) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
 
-					if (newDistance < distance)
+					if(newDistance < distance)
 					{
 						distance = newDistance;
 						xc = xi;
@@ -1943,7 +1943,7 @@ FN_DECIMAL FastNoise::SingleCellular(FN_DECIMAL x, FN_DECIMAL y) const
 															
 				FN_DECIMAL newDistance = vecX * vecX + vecY * vecY;
 
-				if (newDistance < distance)
+				if(newDistance < distance)
 				{
 					distance = newDistance;
 					xc = xi;
@@ -1964,7 +1964,7 @@ FN_DECIMAL FastNoise::SingleCellular(FN_DECIMAL x, FN_DECIMAL y) const
 
 				FN_DECIMAL newDistance = (FastAbs(vecX) + FastAbs(vecY));
 
-				if (newDistance < distance)
+				if(newDistance < distance)
 				{
 					distance = newDistance;
 					xc = xi;
@@ -1985,7 +1985,7 @@ FN_DECIMAL FastNoise::SingleCellular(FN_DECIMAL x, FN_DECIMAL y) const
 
 				FN_DECIMAL newDistance = (FastAbs(vecX) + FastAbs(vecY)) + (vecX * vecX + vecY * vecY);
 
-				if (newDistance < distance)
+				if(newDistance < distance)
 				{
 					distance = newDistance;
 					xc = xi;

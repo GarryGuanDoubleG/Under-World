@@ -17,12 +17,12 @@ void FindEdgeCrossing(Octree *node, const unordered_map<glm::vec3, EdgeInfo> &he
 	{
 		int code = edge_table[node->m_corners][e];
 
-		if (code == -2)
+		if(code == -2)
 		{
 			v_edges[v_index++][e_index] = -1;
 			break;
 		}
-		if (code == -1)
+		if(code == -1)
 		{
 			v_edges[v_index++][e_index] = -1;
 			e_index = 0;
@@ -36,7 +36,7 @@ void FindEdgeCrossing(Octree *node, const unordered_map<glm::vec3, EdgeInfo> &he
 	node->m_vertex_count = v_index;
 
 
-	if (node->m_vertex_count > 0)
+	if(node->m_vertex_count > 0)
 		node->m_flag |= OCTREE_ACTIVE | OCTREE_LEAF;
 
 	for (int i = 0; i < v_index; i++)
@@ -58,7 +58,7 @@ void FindEdgeCrossing(Octree *node, const unordered_map<glm::vec3, EdgeInfo> &he
 			glm::vec3 edgePos = (a + b) * .5f;
 
 			const auto iter = hermite_map.find(edgePos);
-			if (iter != hermite_map.end())
+			if(iter != hermite_map.end())
 			{
 				EdgeInfo edge = iter->second;
 
@@ -76,8 +76,8 @@ void FindEdgeCrossing(Octree *node, const unordered_map<glm::vec3, EdgeInfo> &he
 		averageNormal /= (float)edgeCount;
 		averageNormal = glm::normalize(averageNormal);
 
-		//Vec3 p;
-		//qef.solve(p, 1e-6, 4, 1e-6);
+		Vec3 p;
+		qef.solve(p, 1e-6, 4, 1e-6);
 
 		node->m_vertices[i].index = -1; //set during vertex buffer gen
 		node->m_vertices[i].parent = 0;
@@ -87,7 +87,7 @@ void FindEdgeCrossing(Octree *node, const unordered_map<glm::vec3, EdgeInfo> &he
 		node->m_vertices[i].in_cell = node->m_child_index;
 		node->m_vertices[i].flags |= VoxelVertexFlags::COLLAPSIBLE | VoxelVertexFlags::FACEPROP2;
 		node->m_vertices[i].textureID = 0;
-		//node->m_vertices[i].position = glm::vec3(p.x, p.y, p.z);
+		node->m_vertices[i].position = glm::vec3(p.x, p.y, p.z);
 		//node->m_vertices[i].position = averagePos;
 
 
@@ -98,7 +98,7 @@ void FindEdgeCrossing(Octree *node, const unordered_map<glm::vec3, EdgeInfo> &he
 
 Octree * BottomUpTreeGen(const unordered_map<glm::vec3, Octree *> &map, const glm::vec3 &chunkPos)
 {
-	if (map.size() < 1) return nullptr;
+	if(map.size() < 1) return nullptr;
 
 	vector<Octree *> tree;
 
@@ -128,7 +128,7 @@ Octree * BottomUpTreeGen(const unordered_map<glm::vec3, Octree *> &map, const gl
 			for (vector<Octree *>::iterator it = parents.begin(); it != parents.end(); it++)
 			{
 				Octree * parent = *it;
-				if (parent->m_minPos == parentPos)
+				if(parent->m_minPos == parentPos)
 				{
 					foundParent = true;
 					parent->m_children[index] = currNode;
@@ -136,7 +136,7 @@ Octree * BottomUpTreeGen(const unordered_map<glm::vec3, Octree *> &map, const gl
 					break;
 				}
 			}
-			if (!foundParent)
+			if(!foundParent)
 			{
 				Octree *parent = new Octree();
 				parent->InitNode(parentPos, parentSize, 0);
@@ -172,7 +172,7 @@ void Octree::InitNode(glm::vec3 minPos, int size, int corners)
 
 void Octree::DestroyNode()
 {
-//	if (m_flag & OCTREE_INNER)
+//	if(m_flag & OCTREE_INNER)
 //	{
 //		for (int i = 0; i < 8; i++)
 //		{
@@ -186,16 +186,16 @@ void Octree::DestroyNode()
 
 void Octree::GenerateVertexBuffer(std::vector<VoxelVertex>& v_out)
 {
-	if (~m_flag & OCTREE_LEAF)
+	if(~m_flag & OCTREE_LEAF)
 	{
 		for (int i = 0; i < 8; i++)
 		{
-			if (m_children[i])
+			if(m_children[i])
 				m_children[i]->GenerateVertexBuffer(v_out);
 		}
 	}
 
-	if (!m_vertices || m_vertex_count == 0)
+	if(!m_vertices || m_vertex_count == 0)
 		return;
 
 	for (int i = 0; i < m_vertex_count; i++)
@@ -215,12 +215,12 @@ void Octree::GenerateVertexBuffer(std::vector<VoxelVertex>& v_out)
 
 void Octree::ProcessCell(std::vector<unsigned int>& indexes, float threshold)
 {
-	if (m_flag & OCTREE_LEAF)
+	if(m_flag & OCTREE_LEAF)
 		return;
 
 	for (int i = 0; i < 8; i++)
 	{
-		if (m_children[i])
+		if(m_children[i])
 			m_children[i]->ProcessCell(indexes, threshold);
 	}
 
@@ -247,10 +247,10 @@ void Octree::ProcessCell(std::vector<unsigned int>& indexes, float threshold)
 
 void Octree::ProcessFace(Octree ** nodes, int direction, std::vector<unsigned int>& indexes, float threshold)
 {
-	if (!nodes[0] || !nodes[1])
+	if(!nodes[0] || !nodes[1])
 		return;
 
-	if (~nodes[0]->m_flag & OCTREE_LEAF || ~nodes[1]->m_flag & OCTREE_LEAF)
+	if(~nodes[0]->m_flag & OCTREE_LEAF || ~nodes[1]->m_flag & OCTREE_LEAF)
 	{
 		Octree* face_nodes[2];
 		Octree* edge_nodes[4];
@@ -258,7 +258,7 @@ void Octree::ProcessFace(Octree ** nodes, int direction, std::vector<unsigned in
 		{
 			for (int j = 0; j < 2; j++)
 			{
-				if (nodes[j]->m_flag & OCTREE_LEAF)
+				if(nodes[j]->m_flag & OCTREE_LEAF)
 					face_nodes[j] = nodes[j];
 				else
 					face_nodes[j] = nodes[j]->m_children[face_proc_face_mask[direction][i][j]];
@@ -277,7 +277,7 @@ void Octree::ProcessFace(Octree ** nodes, int direction, std::vector<unsigned in
 		{
 			for (int j = 0; j < 4; j++)
 			{
-				if (nodes[orders[face_proc_edge_mask[direction][i][0]][j]]->m_flag & OCTREE_LEAF)
+				if(nodes[orders[face_proc_edge_mask[direction][i][0]][j]]->m_flag & OCTREE_LEAF)
 					edge_nodes[j] = nodes[orders[face_proc_edge_mask[direction][i][0]][j]];
 				else
 					edge_nodes[j] = nodes[orders[face_proc_edge_mask[direction][i][0]][j]]->m_children[face_proc_edge_mask[direction][i][1 + j]];
@@ -290,10 +290,10 @@ void Octree::ProcessFace(Octree ** nodes, int direction, std::vector<unsigned in
 
 void Octree::ProcessEdge(Octree ** nodes, int direction, std::vector<unsigned int>& indexes, float threshold)
 {
-	if (!nodes[0] || !nodes[1] || !nodes[2] || !nodes[3])
+	if(!nodes[0] || !nodes[1] || !nodes[2] || !nodes[3])
 		return;
 
-	if (nodes[0]->m_flag & OCTREE_LEAF && nodes[1]->m_flag & OCTREE_LEAF && nodes[2]->m_flag & OCTREE_LEAF && nodes[3]->m_flag & OCTREE_LEAF)
+	if(nodes[0]->m_flag & OCTREE_LEAF && nodes[1]->m_flag & OCTREE_LEAF && nodes[2]->m_flag & OCTREE_LEAF && nodes[3]->m_flag & OCTREE_LEAF)
 		ProcessIndexes(nodes, direction, indexes, threshold);
 	else
 	{
@@ -302,7 +302,7 @@ void Octree::ProcessEdge(Octree ** nodes, int direction, std::vector<unsigned in
 		{
 			for (int j = 0; j < 4; j++)
 			{
-				if (nodes[j]->m_flag & OCTREE_LEAF)
+				if(nodes[j]->m_flag & OCTREE_LEAF)
 					edge_nodes[j] = nodes[j];
 				else
 					edge_nodes[j] = nodes[j]->m_children[edge_proc_edge_mask[direction][i][j]];
@@ -315,7 +315,7 @@ void Octree::ProcessEdge(Octree ** nodes, int direction, std::vector<unsigned in
 
 void Octree::ProcessIndexes(Octree ** nodes, int direction, std::vector<unsigned int>& indexes, float threshold)
 {
-	unsigned short min_size = 65535;
+	unsigned int min_size = 100000000;
 	unsigned int indices[4] = { -1,-1,-1,-1 };
 	bool flip = false;
 	bool sign_changed = false;
@@ -329,7 +329,7 @@ void Octree::ProcessIndexes(Octree ** nodes, int direction, std::vector<unsigned
 		int m1 = (nodes[i]->m_corners >> c1) & 1;
 		int m2 = (nodes[i]->m_corners >> c2) & 1;
 
-		if (nodes[i]->m_size < min_size)
+		if(nodes[i]->m_size < min_size)
 		{
 			min_size = nodes[i]->m_size;
 			flip = m2 == 1;
@@ -341,30 +341,30 @@ void Octree::ProcessIndexes(Octree ** nodes, int direction, std::vector<unsigned
 		for (int k = 0; k < 16; k++)
 		{
 			int e = edge_table[nodes[i]->m_corners][k];
-			if (e == -1)
+			if(e == -1)
 			{
 				index++;
 				continue;
 			}
-			if (e == -2)
+			if(e == -2)
 			{
 				skip = true;
 				break;
 			}
-			if (e == edge)
+			if(e == edge)
 				break;
 		}
 
-		if (skip)
+		if(skip)
 			continue;
-		if (index >= nodes[i]->m_vertex_count)
+		if(index >= nodes[i]->m_vertex_count)
 			return;
 
 		VoxelVertex* v = &nodes[i]->m_vertices[index];
 		VoxelVertex* highest = v;
 		while (highest->parent)
 		{
-			if ((highest->parent->error <= threshold && highest->parent->IsManifold()))
+			if((highest->parent->error <= threshold && highest->parent->IsManifold()))
 			{
 				highest = highest->parent;
 				v = highest;
@@ -375,18 +375,18 @@ void Octree::ProcessIndexes(Octree ** nodes, int direction, std::vector<unsigned
 		indices[i] = v->index;
 	}
 
-	if (sign_changed)
+	if(sign_changed)
 	{
-		if (!flip)
+		if(!flip)
 		{
-			if (indices[0] != -1 && indices[1] != -1 && indices[2] != -1 && indices[0] != indices[1] && indices[1] != indices[3])
+			if(indices[0] != -1 && indices[1] != -1 && indices[2] != -1 && indices[0] != indices[1] && indices[1] != indices[3])
 			{
 				indexes.push_back(indices[0]);
 				indexes.push_back(indices[1]);
 				indexes.push_back(indices[3]);
 			}
 
-			if (indices[0] != -1 && indices[2] != -1 && indices[3] != -1 && indices[0] != indices[2] && indices[2] != indices[3])
+			if(indices[0] != -1 && indices[2] != -1 && indices[3] != -1 && indices[0] != indices[2] && indices[2] != indices[3])
 			{
 				indexes.push_back(indices[0]);
 				indexes.push_back(indices[3]);
@@ -395,14 +395,14 @@ void Octree::ProcessIndexes(Octree ** nodes, int direction, std::vector<unsigned
 		}
 		else
 		{
-			if (indices[0] != -1 && indices[3] != -1 && indices[1] != -1 && indices[0] != indices[1] && indices[1] != indices[3])
+			if(indices[0] != -1 && indices[3] != -1 && indices[1] != -1 && indices[0] != indices[1] && indices[1] != indices[3])
 			{
 				indexes.push_back(indices[0]);
 				indexes.push_back(indices[3]);
 				indexes.push_back(indices[1]);
 			}
 
-			if (indices[0] != -1 && indices[2] != -1 && indices[3] != -1 && indices[0] != indices[2] && indices[2] != indices[3])
+			if(indices[0] != -1 && indices[2] != -1 && indices[3] != -1 && indices[0] != indices[2] && indices[2] != indices[3])
 			{
 				indexes.push_back(indices[0]);
 				indexes.push_back(indices[2]);
@@ -414,12 +414,12 @@ void Octree::ProcessIndexes(Octree ** nodes, int direction, std::vector<unsigned
 
 void Octree::ClusterCellBase(float error)
 {
-	if (m_flag & OCTREE_LEAF)
+	if(m_flag & OCTREE_LEAF)
 		return;
 
 	for (int i = 0; i < 8; i++)
 	{
-		if (!m_children[i])
+		if(!m_children[i])
 			continue;
 		m_children[i]->ClusterCell(error);
 	}
@@ -427,12 +427,12 @@ void Octree::ClusterCellBase(float error)
 
 void Octree::ClusterCell(float error)
 {
-	if (m_flag & OCTREE_LEAF)
+	if(m_flag & OCTREE_LEAF)
 		return;
 
 	for (int i = 0; i < 8; i++)
 	{
-		if (~m_childMask & 1 << i || m_children[i]->m_flag & OCTREE_LEAF)
+		if(~m_childMask & 1 << i || m_children[i]->m_flag & OCTREE_LEAF)
 			continue;
 		m_children[i]->ClusterCell(error);
 	}
@@ -469,19 +469,19 @@ void Octree::ClusterCell(float error)
 	}
 
 	int highest_index = surface_index;
-	if (highest_index == -1)
+	if(highest_index == -1)
 		highest_index = 0;
 
 	for (int i = 0; i < 8; i++)
 	{
-		if (~m_childMask & 1 << i)
+		if(~m_childMask & 1 << i)
 			continue;
 		for (int k = 0; k < m_children[i]->m_vertex_count; k++)
 		{
 			VoxelVertex* v = &m_children[i]->m_vertices[k];
-			if (!v)
+			if(!v)
 				continue;
-			if (v->surface_index == -1)
+			if(v->surface_index == -1)
 			{
 				v->surface_index = highest_index++;
 				collected_vertices.push_back(v);
@@ -489,18 +489,19 @@ void Octree::ClusterCell(float error)
 		}
 	}
 
-	if (collected_vertices.size() > 0)
+	if(collected_vertices.size() > 0)
 	{
 		std::set<int> surface_set;
 		for (auto& v : collected_vertices)
 		{
 			surface_set.insert(v->surface_index);
 		}
-		if (surface_set.size() == 0)
+		if(surface_set.size() == 0)
 			return;
 
-		if (this->m_vertices)
+		if(this->m_vertices)
 			delete[] this->m_vertices;
+
 		this->m_vertices = new VoxelVertex[surface_set.size()];
 		this->m_vertex_count = surface_set.size();
 
@@ -517,10 +518,10 @@ void Octree::ClusterCell(float error)
 			/* manifold criterion */
 			for (auto& v : collected_vertices)
 			{
-				if (v->surface_index == i)
+				if(v->surface_index == i)
 				{
-					if (v->position == glm::vec3(0.0f)) 
-						continue;
+					//if(v->position == glm::vec3(0.0f)) 
+					//	continue;
 
 					for (int k = 0; k < 3; k++)
 					{
@@ -541,7 +542,7 @@ void Octree::ClusterCell(float error)
 				}
 			}
 
-			if (count == 0)
+			if(count == 0)
 				continue;
 
 			bool face_prop2 = true;
@@ -552,7 +553,7 @@ void Octree::ClusterCell(float error)
 				{
 					intersections += edges[faces[f][ei]];
 				}
-				if (!(intersections == 0 || intersections == 2))
+				if(!(intersections == 0 || intersections == 2))
 					face_prop2 = false;
 			}
 
@@ -572,9 +573,9 @@ void Octree::ClusterCell(float error)
 			qef.solve(p_out, 1e-6f, 4, 1e-6f);
 			//new_vertex.position = glm::vec3(p_out.x, p_out.y, p_out.z);
 			new_vertex.error = qef.getError();
-			if (new_vertex.error <= error)
+			if(new_vertex.error <= error)
 				new_vertex.flags |= VoxelVertexFlags::COLLAPSIBLE;
-			if (face_prop2)
+			if(face_prop2)
 				new_vertex.flags |= VoxelVertexFlags::FACEPROP2;
 			new_vertex.flags |= 8;
 
@@ -582,9 +583,9 @@ void Octree::ClusterCell(float error)
 
 			for (auto& v : collected_vertices)
 			{
-				if (v->surface_index == i)
+				if(v->surface_index == i)
 				{
-					if (v != &new_vertex)
+					if(v != &new_vertex)
 						v->parent = &this->m_vertices[new_vertices.size() - 1];
 					else
 						v->parent = 0;
@@ -605,19 +606,19 @@ void Octree::ClusterCell(float error)
 
 void Octree::ClusterFace(Octree ** nodes, int direction, int & surface_index, std::vector<VoxelVertex*>& collected_vertices)
 {
-	if (!nodes[0] || !nodes[1])
+	if(!nodes[0] || !nodes[1])
 		return;
 
-	if (~nodes[0]->m_flag & OCTREE_LEAF || ~nodes[1]->m_flag & OCTREE_LEAF)
+	if(~nodes[0]->m_flag & OCTREE_LEAF || ~nodes[1]->m_flag & OCTREE_LEAF)
 	{
 		for (int i = 0; i < 4; i++)
 		{
 			Octree* face_nodes[2] = { 0, 0 };
 			for (int j = 0; j < 2; j++)
 			{
-				if (!nodes[j])
+				if(!nodes[j])
 					continue;
-				if (nodes[j]->m_flag & OCTREE_LEAF)
+				if(nodes[j]->m_flag & OCTREE_LEAF)
 					face_nodes[j] = nodes[j];
 				else
 					face_nodes[j] = nodes[j]->m_children[face_proc_face_mask[direction][i][j]];
@@ -638,9 +639,9 @@ void Octree::ClusterFace(Octree ** nodes, int direction, int & surface_index, st
 		Octree* edge_nodes[4] = { 0, 0, 0, 0 };
 		for (int j = 0; j < 4; j++)
 		{
-			if (!nodes[orders[face_proc_edge_mask[direction][i][0]][j]])
+			if(!nodes[orders[face_proc_edge_mask[direction][i][0]][j]])
 				continue;
-			if (nodes[orders[face_proc_edge_mask[direction][i][0]][j]]->m_flag & OCTREE_LEAF)
+			if(nodes[orders[face_proc_edge_mask[direction][i][0]][j]]->m_flag & OCTREE_LEAF)
 				edge_nodes[j] = nodes[orders[face_proc_edge_mask[direction][i][0]][j]];
 			else
 				edge_nodes[j] = nodes[orders[face_proc_edge_mask[direction][i][0]][j]]->m_children[face_proc_edge_mask[direction][i][1 + j]];
@@ -652,7 +653,7 @@ void Octree::ClusterFace(Octree ** nodes, int direction, int & surface_index, st
 
 void Octree::ClusterEdge(Octree ** nodes, int direction, int & surface_index, std::vector<VoxelVertex*>& collected_vertices)
 {
-	if ((!nodes[0] || nodes[0]->m_flag & OCTREE_LEAF) && (!nodes[1] || nodes[1]->m_flag & OCTREE_LEAF) && (!nodes[2] || nodes[2]->m_flag & OCTREE_LEAF) && (!nodes[3] || nodes[3]->m_flag & OCTREE_LEAF))
+	if((!nodes[0] || nodes[0]->m_flag & OCTREE_LEAF) && (!nodes[1] || nodes[1]->m_flag & OCTREE_LEAF) && (!nodes[2] || nodes[2]->m_flag & OCTREE_LEAF) && (!nodes[3] || nodes[3]->m_flag & OCTREE_LEAF))
 		ClusterIndexes(nodes, direction, surface_index, collected_vertices);
 	else
 	{
@@ -661,9 +662,9 @@ void Octree::ClusterEdge(Octree ** nodes, int direction, int & surface_index, st
 			Octree* edge_nodes[4] = { 0, 0, 0, 0 };
 			for (int j = 0; j < 4; j++)
 			{
-				if (!nodes[j])
+				if(!nodes[j])
 					continue;
-				if (nodes[j]->m_flag & OCTREE_LEAF)
+				if(nodes[j]->m_flag & OCTREE_LEAF)
 					edge_nodes[j] = nodes[j];
 				else
 					edge_nodes[j] = nodes[j]->m_children[edge_proc_edge_mask[direction][i][j]];
@@ -676,7 +677,7 @@ void Octree::ClusterEdge(Octree ** nodes, int direction, int & surface_index, st
 
 void Octree::ClusterIndexes(Octree ** nodes, int direction, int & max_surface_index, std::vector<VoxelVertex*>& collected_vertices)
 {
-	if (!nodes[0] && !nodes[1] && !nodes[2] && !nodes[3])
+	if(!nodes[0] && !nodes[1] && !nodes[2] && !nodes[3])
 		return;
 
 	VoxelVertex* vertices[4] = { 0, 0, 0, 0 };
@@ -685,7 +686,7 @@ void Octree::ClusterIndexes(Octree ** nodes, int direction, int & max_surface_in
 
 	for (int i = 0; i < 4; i++)
 	{
-		if (!nodes[i])
+		if(!nodes[i])
 			continue;
 
 		int corners = nodes[i]->m_corners;
@@ -701,22 +702,22 @@ void Octree::ClusterIndexes(Octree ** nodes, int direction, int & max_surface_in
 		for (int k = 0; k < 16; k++)
 		{
 			int e = edge_table[corners][k];
-			if (e == -1)
+			if(e == -1)
 			{
 				index++;
 				continue;
 			}
-			if (e == -2)
+			if(e == -2)
 			{
-				if (!((m1 == 0 && m2 != 0) || (m1 != 0 && m2 == 0)))
+				if(!((m1 == 0 && m2 != 0) || (m1 != 0 && m2 == 0)))
 					skip = true;
 				break;
 			}
-			if (e == edge)
+			if(e == edge)
 				break;
 		}
 
-		if (!skip && index < nodes[i]->m_vertex_count)
+		if(!skip && index < nodes[i]->m_vertex_count)
 		{
 			vertices[i] = &nodes[i]->m_vertices[index];
 			while (vertices[i]->parent)
@@ -725,7 +726,7 @@ void Octree::ClusterIndexes(Octree ** nodes, int direction, int & max_surface_in
 		}
 	}
 
-	if (!v_count)
+	if(!v_count)
 		return;
 
 	int surface_index = -1;
@@ -733,25 +734,25 @@ void Octree::ClusterIndexes(Octree ** nodes, int direction, int & max_surface_in
 	for (int i = 0; i < 4; i++)
 	{
 		VoxelVertex* v = vertices[i];
-		if (!v)
+		if(!v)
 			continue;
-		if (v->surface_index != -1)
+		if(v->surface_index != -1)
 		{
-			if (surface_index != -1 && surface_index != v->surface_index)
+			if(surface_index != -1 && surface_index != v->surface_index)
 				AssignSurface(collected_vertices, v->surface_index, surface_index);
-			else if (surface_index == -1)
+			else if(surface_index == -1)
 				surface_index = v->surface_index;
 		}
 	}
 
-	if (surface_index == -1)
+	if(surface_index == -1)
 		surface_index = max_surface_index++;
 	for (int i = 0; i < 4; i++)
 	{
 		VoxelVertex* v = vertices[i];
-		if (!v)
+		if(!v)
 			continue;
-		if (v->surface_index == -1)
+		if(v->surface_index == -1)
 			collected_vertices.push_back(v);
 		v->surface_index = surface_index;
 	}
@@ -761,7 +762,7 @@ void Octree::AssignSurface(std::vector<VoxelVertex*>& vertices, int from, int to
 {
 	for (auto& v : vertices)
 	{
-		if (v && v->surface_index == from)
+		if(v && v->surface_index == from)
 			v->surface_index = to;
 	}
 }

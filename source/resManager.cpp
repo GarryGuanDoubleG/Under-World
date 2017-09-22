@@ -8,7 +8,7 @@ static ResManager *g_resManager;
 
 ResManager::ResManager()
 {
-	if (g_resManager)
+	if(g_resManager)
 	{
 		cout << "Error: Resource Manager has already been initialized\n";
 		return;
@@ -29,7 +29,7 @@ void ResManager::LoadResources()
 	//parse json file into json obj
 	//loads the location of resource files
 	ifstream in(RESOURCE_PATH);
-	if (!in.is_open()) return;
+	if(!in.is_open()) return;
 
 	in >> m_resources;
 	in.close();
@@ -51,7 +51,7 @@ map<string, Texture*> ResManager::LoadTextures()
 	map<string, Texture*> texture_map;
 
 	ifstream in(m_resources["textures"].get<string>());
-	if (!in.is_open()) {
+	if(!in.is_open()) {
 		cout << "Incorrect filename: " << m_resources["textures"].get<string>() << endl;
 		return texture_map;
 	}
@@ -64,10 +64,18 @@ map<string, Texture*> ResManager::LoadTextures()
 		Json obj = it.value();
 		string key = it.key();
 
-		if (key == "skybox") {
-			Texture *skybox = new Texture();
-			skybox->LoadSkybox(obj["path"].get<string>());
-			texture_map.insert(pair<string, Texture*>(key,skybox));
+		if(key == "skybox") {
+			Json jsonSkybox = obj["day"];
+			Texture *daySkybox = new Texture();
+			key = "daySkybox";
+			daySkybox->LoadSkybox(jsonSkybox["path"].get<string>());
+			texture_map.insert(pair<string, Texture*>(key, daySkybox));
+
+			jsonSkybox = obj["night"];
+			Texture *nightSkybox= new Texture();
+			key = "nightSkybox";
+			nightSkybox->LoadSkybox(jsonSkybox["path"].get<string>());
+			texture_map.insert(pair<string, Texture*>(key, nightSkybox));
 		}
 		else {
 			if(obj.find("normal") != obj.end())
@@ -90,7 +98,7 @@ map<string, Shader *> ResManager::LoadShaders()
 	map<string, Shader*> shader_map;
 	ifstream in(m_resources["shaders"].get<string>());
 	
-	if (!in.is_open()) {
+	if(!in.is_open()) {
 		cout << "Incorrect filename: " << m_resources["shaders"].get<string>() << endl;
 		return shader_map;
 	}
@@ -116,7 +124,7 @@ map<string, Model*> ResManager::LoadModels()
 	map<string, Model*> model_map;
 	ifstream i(m_resources["models"].get<string>());
 
-	if (!i.is_open()) {
+	if(!i.is_open()) {
 		cout << "Incorrect filename: " << m_resources["shaders"].get<string>() << endl;
 		return model_map;
 	}

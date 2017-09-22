@@ -34,7 +34,7 @@ void Mesh::Draw(Shader *shader)
 	}
 
 	//draw the mesh
-	if (m_instanced)
+	if(m_instanced)
 		glDrawElementsInstanced(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0, m_instanceCount);
 	else
 		glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
@@ -51,7 +51,7 @@ void Mesh::DrawVertices(Shader *shader)
 	//bind textures
 	glBindVertexArray(this->m_vao);
 	//draw the mesh
-	if (m_instanced)
+	if(m_instanced)
 		glDrawElementsInstanced(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0, m_instanceCount);
 	else
 		glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);

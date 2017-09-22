@@ -8,7 +8,7 @@ FILE * __log_file = NULL;
 
 void close_logger()
 {
-	if (__log_file != NULL)
+	if(__log_file != NULL)
 	{
 		fclose(__log_file);
 		__log_file = NULL;
@@ -17,7 +17,7 @@ void close_logger()
 
 void init_logger(const char *log_file_path)
 {
-	if (log_file_path == NULL)
+	if(log_file_path == NULL)
 	{
 		__log_file = fopen("output.log", "a");
 	}
@@ -43,7 +43,7 @@ void _slog(char *f, int l, char *msg, ...)
 	while (tok)
 	{
 		char * temp = strtok(NULL, "\\");
-		if (!temp)
+		if(!temp)
 			break;
 		tok = temp;
 	}
@@ -52,7 +52,7 @@ void _slog(char *f, int l, char *msg, ...)
 	vfprintf(stdout, msg, ap);
 	fprintf(stdout, "\n");
 	va_end(ap);
-	if (__log_file != NULL)
+	if(__log_file != NULL)
 	{
 		va_start(ap, msg);
 		fprintf(__log_file, "%s:%i: ", tok, l);
@@ -90,7 +90,7 @@ void CheckGLError()
 	while (GL_TRUE)
 	{
 		const GLenum err = glGetError();
-		if (GL_NO_ERROR == err)
+		if(GL_NO_ERROR == err)
 			break;
 		printf("GL ERROR %i: %s\n", ++err_count, GetGLErrorStr(err));
 	}
@@ -108,7 +108,7 @@ void _SlogCheckGLError(char *f, int l)
 	{
 		char buffer[128];
 		const GLenum err = glGetError();
-		if (GL_NO_ERROR == err)
+		if(GL_NO_ERROR == err)
 			break;
 		sprintf(buffer, "GL ERROR %i: %s\n", ++err_count, GetGLErrorStr(err));
 		_slog(f, l, buffer);

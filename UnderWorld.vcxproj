@@ -189,6 +189,7 @@
     <ClInclude Include="source\resManager.hpp" />
     <ClInclude Include="source\shader.hpp" />
     <ClInclude Include="source\simple_logger.h" />
+    <ClInclude Include="source\skydome.hpp" />
     <ClInclude Include="source\SVD.h" />
     <ClInclude Include="source\tables.hpp" />
     <ClInclude Include="source\texture.hpp" />
@@ -290,6 +291,7 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="source\simple_logger.cpp" />
+    <ClCompile Include="source\skydome.cpp" />
     <ClCompile Include="source\SVD.cpp" />
     <ClCompile Include="source\tables.cpp" />
     <ClCompile Include="source\texture.cpp">

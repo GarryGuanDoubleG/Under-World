@@ -35,19 +35,11 @@
     "path": "Resources\\textures\\billboard_grass.png"
   },
   "skybox": {
-    "path": "Resources\\textures\\skybox\\"
-  },
-
-  "skybox1": {
-    "path": "Resources\\textures\\skybox\\front.jpg"
-  },
-  "minimap_alpha": {
-    "path": "Resources\\textures\\minimap_alpha.png"
-  },
-  "health_bar": {
-    "path": "Resources\\textures\\health_bar.png"
-  },
-  "health_bar_grey": {
-    "path": "Resources\\textures\\health_bar_grey.png"
+    "day": {
+      "path": "Resources\\textures\\skybox\\day\\"
+    },
+    "night": {
+      "path": "Resources\\textures\\skybox\\night\\"
+    }
   }
 }

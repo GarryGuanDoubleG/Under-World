@@ -54,7 +54,7 @@ void Camera::HandleInput(SDL_Event event)
 	float time = Game::GetDeltaTime();
 	GLfloat cam_speed = m_speed;
 
-	if (event.type == SDL_KEYDOWN)
+	if(event.type == SDL_KEYDOWN)
 	{
 		switch (event.key.keysym.sym)
 		{
@@ -80,7 +80,7 @@ void Camera::HandleInput(SDL_Event event)
 			break;
 		}
 	}
-	else if (event.type == SDL_MOUSEMOTION)
+	else if(event.type == SDL_MOUSEMOTION)
 	{
 		GLfloat sensitivity = 0.05f; // mouse sensitivity
 
@@ -94,9 +94,9 @@ void Camera::HandleInput(SDL_Event event)
 		m_yaw += xoffset;
 		m_pitch -= yoffset;
 
-		if (m_pitch > 89.0f)
+		if(m_pitch > 89.0f)
 			m_pitch = 89.0f;
-		else if (m_pitch < -89.0f)
+		else if(m_pitch < -89.0f)
 			m_pitch = -89.0f;
 
 		glm::vec3 front;

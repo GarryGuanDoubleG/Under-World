@@ -44,27 +44,19 @@ Game::~Game()
 	delete m_voxelManager;
 }
 
-void Game::RenderScene()
-{
-	if (m_flag & VOXEL_MODE) m_graphics->RenderVoxels();
-	if (m_flag & MODEL_MODE) m_graphics->RenderModel("arissa", glm::translate(glm::mat4(1.0f), glm::vec3(600.f)));
-}
-
 void Game::Draw()
 {
 	GLfloat bg_color[] = { 0.3f, 0.3f, 0.3f, 1.f };
 
 	m_graphics->RenderBackground(bg_color);
 
-	if (m_flag & WIRE_FRAME_MODE)
+	if(m_flag & WIRE_FRAME_MODE)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	else
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	
 
-	//m_graphics->RenderSkybox();
 	m_graphics->RenderScene();
-
 	m_graphics->Display();
 }
 
@@ -74,7 +66,7 @@ void Game::Update()
 
 	m_voxelManager->Update();
 
-	if (m_flag & FP_MODE) {
+	if(m_flag & FP_MODE) {
 		SDL_WarpMouseInWindow(m_graphics->GetWindow(), SCREEN_WIDTH * .5f, SCREEN_HEIGHT * .5f);
 	}
 }
@@ -93,10 +85,10 @@ void Game::Input()
 	{
 		m_camera->HandleInput(event);
 
-		if (event.type == SDL_QUIT)
+		if(event.type == SDL_QUIT)
 			m_running = false;
 
-		if (event.type == SDL_KEYDOWN)
+		if(event.type == SDL_KEYDOWN)
 		{
 			switch (event.key.keysym.sym)
 			{

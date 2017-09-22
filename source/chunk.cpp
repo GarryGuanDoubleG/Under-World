@@ -31,7 +31,7 @@ bool Chunk::Init(glm::ivec3 chunkIndices, glm::vec3 chunkSize, int voxelSize)
 	GenerateHermiteField();
 	GenerateMesh();
 	
-	if (m_root == nullptr) return false;
+	if(m_root == nullptr) return false;
 
 	return true;
 }
@@ -64,7 +64,7 @@ void Chunk::GenerateMesh()
 				}
 
 				//no material change. Isosurface not in voxel
-				if (corners == 0 || corners == 255) continue;
+				if(corners == 0 || corners == 255) continue;
 
 				Octree *node = new Octree;
 
@@ -72,7 +72,7 @@ void Chunk::GenerateMesh()
 				node->InitNode(leafPos, m_voxelSize, corners);
 				FindEdgeCrossing(node, m_hermiteMap);
 
-				if (node->m_flag & OCTREE_ACTIVE)
+				if(node->m_flag & OCTREE_ACTIVE)
 					m_nodeMap.insert(std::pair<glm::vec3, Octree*>(leafPos, node));
 				else
 					delete node;
@@ -82,7 +82,7 @@ void Chunk::GenerateMesh()
 
 	m_root = BottomUpTreeGen(m_nodeMap, m_position);
 
-	if (m_root == nullptr)
+	if(m_root == nullptr)
 	{
 		m_flag = ~CHUNK_ACTIVE;
 		return;
@@ -91,7 +91,7 @@ void Chunk::GenerateMesh()
 	m_flag |= CHUNK_ACTIVE;
 
 	
-	//m_root->ClusterCellBase(2000000.f);
+	m_root->ClusterCellBase(2000000.f);
 	m_root->GenerateVertexBuffer(m_vertices);
 	m_root->ProcessCell(m_triIndices, 2000000.f);
 
@@ -112,14 +112,14 @@ void Chunk::GenerateHermiteField()
 				{
 					glm::ivec3 index2 = glm::vec3(x, y, z) + AXIS_OFFSET[axis];
 					
-					if (GETINDEXCHUNK(glm::ivec3(m_chunkSize + glm::vec3(1.0f)), index2.x, index2.y, index2.z) > m_materialIndices.size())
+					if(GETINDEXCHUNK(glm::ivec3(m_chunkSize + glm::vec3(1.0f)), index2.x, index2.y, index2.z) > m_materialIndices.size())
 						continue;
 
 					int m1 = m_materialIndices[GETINDEXCHUNK(glm::ivec3(m_chunkSize + glm::vec3(1.0f)), x, y, z)];
 					int m2 = m_materialIndices[GETINDEXCHUNK(glm::ivec3(m_chunkSize + glm::vec3(1.0f)), index2.x, index2.y, index2.z)];
 
 					//no material change, no edge
-					if (m1 == m2) 
+					if(m1 == m2) 
 						continue;
 
 					glm::vec3 p1 = m_position + glm::vec3(x, y, z) * (float)m_voxelSize;
@@ -145,7 +145,7 @@ void Chunk::BindMesh()
 	glDeleteBuffers(1, &m_vbo);
 	glDeleteBuffers(1, &m_ebo);
 
-	if ((m_vertices.size() == 0) || m_triIndices.size() == 0)
+	if((m_vertices.size() == 0) || m_triIndices.size() == 0)
 	{
 		m_flag = ~CHUNK_ACTIVE;
 		return;
@@ -180,7 +180,7 @@ void Chunk::BindMesh()
 
 void Chunk::Render()
 {
-	if (~m_flag & CHUNK_ACTIVE) return;
+	if(~m_flag & CHUNK_ACTIVE) return;
 
 	glBindVertexArray(m_vao);
 	glDrawElements(GL_TRIANGLES, m_triIndices.size(), GL_UNSIGNED_INT, 0);

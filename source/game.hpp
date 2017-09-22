@@ -39,6 +39,7 @@ using namespace std;
 #include "entity.hpp"
 #include "LightSource.hpp"
 #include "resManager.hpp"
+#include "skydome.hpp"
 #include "tables.hpp"
 #include "SVD.h"
 #include "QEFSolver.h"
@@ -86,8 +87,6 @@ public:
 
 	Game();
 	~Game();
-
-	void RenderScene();
 
 	void Draw();
 	void Update();

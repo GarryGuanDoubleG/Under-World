@@ -12,7 +12,7 @@
 
 Graphics::Graphics(int winWidth, int winHeight)
 {
-	if (!InitGraphics(winWidth, winHeight))
+	if(!InitGraphics(winWidth, winHeight))
 	{
 		Cleanup();
 		exit(1);
@@ -29,7 +29,7 @@ Graphics::~Graphics()
 
 bool Graphics::InitGraphics(int winWidth, int winHeight)
 {
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+	if(SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf(stderr, "Window Initialization Failed: %s\n", SDL_GetError());
 		return false;
 	}
@@ -37,7 +37,7 @@ bool Graphics::InitGraphics(int winWidth, int winHeight)
 	m_window = SDL_CreateWindow("Under World", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 		winWidth, winHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 	
-	if (!m_window)
+	if(!m_window)
 	{
 		cout << "Unable to create Window \n";
 		CheckSDLError(__LINE__);
@@ -46,7 +46,7 @@ bool Graphics::InitGraphics(int winWidth, int winHeight)
 
 	m_context = SDL_GL_CreateContext(m_window);
 
-	if (m_context == NULL)
+	if(m_context == NULL)
 	{
 		CheckSDLError();
 		return false;
@@ -69,7 +69,7 @@ bool Graphics::InitGraphics(int winWidth, int winHeight)
 
 	//intialze SDL2_image
 	int imgFlags = IMG_INIT_JPG | IMG_INIT_PNG;
-	if (!(IMG_Init(imgFlags) & imgFlags)) printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
+	if(!(IMG_Init(imgFlags) & imgFlags)) printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
@@ -300,12 +300,38 @@ void Graphics::RenderBackground(GLfloat bg_color[4])
 
 void Graphics::RenderSkybox()
 {
-	if (~m_flag & SKYBOX_MODE) return;
+	if(~m_flag & SKYBOX_MODE) return;
+
+	float time = g_game->GetElapsedTime();
+	float rotate_speed = glm::radians(0.001f);
+	float rotation = rotate_speed * g_game->GetElapsedTime();
+	float timeCycle = glm::mod(time, 16000.f);
+	float blend = 0.f;
+
+	if (timeCycle < 4000)
+	{
+		blend = 0;
+	}
+	else if (timeCycle < 8000)
+	{
+		blend = (timeCycle - 4000) / 4000;
+	}
+	else if( timeCycle < 12000)
+	{
+		blend = 1.0f;
+	}
+	else
+	{
+		blend = 1.0f - ((timeCycle - 12000) / 4000.0f);
+	}
 
 	Shader *shader = m_shaderMap["skybox"];
 	shader->Use();
 
+	slog("blend: %5f \n", blend);
+
 	glm::mat4 view = glm::mat4(glm::mat3(m_camera->GetViewMat()));
+	view = glm::rotate(view, rotation, glm::vec3(0, 1.0f, 0));
 
 	GLint depthMode;
 	glGetIntegerv(GL_DEPTH_FUNC, &depthMode);
@@ -315,13 +341,19 @@ void Graphics::RenderSkybox()
 	glUniformMatrix4fv(shader->Uniform("view"), 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(shader->Uniform("projection"), 1, GL_FALSE, &m_camera->GetProj()[0][0]);
 
-	Texture  *texture = m_textureMap["skybox"];
-	texture->Bind(0);
+	Texture  *daySkybox = m_textureMap["daySkybox"];
+	daySkybox->Bind(0);
 
-	glUniform1i(shader->Uniform("skybox"), 0);
+	Texture  *nightSkybox = m_textureMap["nightSkybox"];
+	nightSkybox->Bind(1);
+
+	glUniform1i(shader->Uniform("daySkybox"), 0);
+	glUniform1i(shader->Uniform("nightSkybox"), 1);
+	glUniform1f(shader->Uniform("blendFactor"), blend);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
-	texture->Unbind();
+	daySkybox->Unbind();
+	nightSkybox->Unbind();
 
 	glBindVertexArray(0);
 
@@ -330,23 +362,18 @@ void Graphics::RenderSkybox()
 
 void Graphics::RenderScene()
 {
-	if (m_flag & SHADOW_MODE)
-	{
-		RenderShadowMap();
-		//RenderToQuad();
-	}
-
-	RenderVoxels();
+	if(m_flag & SKYBOX_MODE) RenderSkybox();
+	if(m_flag & SHADOW_MODE) RenderShadowMap();
+	if(m_flag & VOXEL_MODE) RenderVoxels();
 
 	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(400.f, 150, 400.0f));
 	model = glm::scale(model, glm::vec3(1.5f));
-	RenderModel("arissa", model);
-	
+
+	if(m_flag & MODEL_MODE) RenderModel("arissa", model);
 }
 
 void Graphics::RenderShadowMap()
 {
-
 	glBindFramebuffer(GL_FRAMEBUFFER, m_depthMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	 
@@ -422,7 +449,7 @@ void Graphics::RenderCube(glm::mat4 model)
 
 void Graphics::RenderModel(const string &name, const glm::mat4 &modelMat)
 {
-	if (~m_flag & MODEL_MODE) return;
+	if(~m_flag & MODEL_MODE) return;
 
 	Model * model = m_modelMap["arissa"];
 	Shader *shader = m_shaderMap["object"];
@@ -444,12 +471,12 @@ void Graphics::RenderModel(const string &name, const glm::mat4 &modelMat)
 
 void Graphics::RenderVoxels()
 {
-	if (~m_flag & VOXEL_MODE) return;
+	if(~m_flag & VOXEL_MODE) return;
 
 	Shader *shader = m_shaderMap["voxelTex"];
 	shader->Use();
 
-	if (m_flag & SHADOW_MODE)
+	if(m_flag & SHADOW_MODE)
 	{
 		float near_plane = 1.0f;
 		float far_plane = 1000.f;
@@ -496,7 +523,7 @@ void Graphics::RenderVoxels()
 	m_textureMap["grass"]->Unbind();
 	m_textureMap["grassNormal"]->Unbind();
 
-	if (m_flag & SHADOW_MODE) m_textureMap["depthMap"]->Unbind();
+	if(m_flag & SHADOW_MODE) m_textureMap["depthMap"]->Unbind();
 }
 
 void Graphics::Display()
@@ -508,11 +535,11 @@ void Graphics::CheckSDLError(int line)
 {
 	string error = SDL_GetError();
 
-	if (error != "")
+	if(error != "")
 	{
 		cout << "SLD Error : " << error << endl;
 
-		if (line != -1)
+		if(line != -1)
 			cout << "\nLine : " << line << endl;
 
 		SDL_ClearError();

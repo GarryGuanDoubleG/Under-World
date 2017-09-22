@@ -14,7 +14,7 @@ GLuint check_shader_err(char *name, GLuint shader)
 
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
 
-	if (!result)
+	if(!result)
 	{
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &InfoLogLength);
 		glGetShaderInfoLog(shader, InfoLogLength, &InfoLogLength, infoLog);
@@ -36,7 +36,7 @@ bool read_file(char *name, string &out)
 	ifstream in(name, ifstream::in);
 	string input;
 
-	if (!in.is_open())
+	if(!in.is_open())
 	{
 		cout << "Read_File: Failed to open file " << name << endl;
 		return false;
@@ -57,7 +57,7 @@ bool compile_attach_shader(string filename, GLuint type, GLuint program)
 	string shader_str;
 	const char * shader_src;
 
-	if (!read_file((char *)filename.c_str(), shader_str)) return false;
+	if(!read_file((char *)filename.c_str(), shader_str)) return false;
 
 	shader_src = shader_str.c_str();
 
@@ -66,7 +66,7 @@ bool compile_attach_shader(string filename, GLuint type, GLuint program)
 	glCompileShader(shader);
 
 	//check if compiled successfully
-	if (check_shader_err((char *)filename.c_str(), shader))
+	if(check_shader_err((char *)filename.c_str(), shader))
 	{
 		glAttachShader(program, shader);
 		glDeleteShader(shader);
@@ -97,7 +97,7 @@ GLuint compile_shaders(string &vs_shader, string &fs_shader)
 	glLinkProgram(program);
 	glGetProgramiv(program, GL_LINK_STATUS, &result);
 
-	if (!result)
+	if(!result)
 	{
 		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &InfoLogLength);
 		glGetProgramInfoLog(program, InfoLogLength, &InfoLogLength, infoLog);
@@ -119,7 +119,7 @@ Shader::~Shader()
 
 void Shader::Use()
 {
-	if (m_shaderID)
+	if(m_shaderID)
 	{
 		glUseProgram(m_shaderID);
 	}
@@ -147,7 +147,7 @@ void Shader::SetUniform2fv(string uniform, glm::vec2 value)
 
 GLuint Shader::Uniform(string uniformName)
 {
-	if (glGetUniformLocation(m_shaderID, uniformName.c_str()) < 0)
+	if(glGetUniformLocation(m_shaderID, uniformName.c_str()) < 0)
 		cout << "Shader could not find " << uniformName << endl;
 
 	return glGetUniformLocation(m_shaderID, uniformName.c_str());

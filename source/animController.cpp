@@ -43,7 +43,7 @@ const aiNodeAnim* AnimController::FindNodeAnim(const aiAnimation* anim, const st
 	for (int i = 0; i < anim->mNumChannels; i++) {
 		const aiNodeAnim* animNode = anim->mChannels[i];
 
-		if (string(animNode->mNodeName.data) == NodeName) {
+		if(string(animNode->mNodeName.data) == NodeName) {
 			return animNode;
 		}
 	}
@@ -53,12 +53,12 @@ const aiNodeAnim* AnimController::FindNodeAnim(const aiAnimation* anim, const st
 
 void AnimController::InterpolateScaling(aiVector3D &out, float animTime, const aiNodeAnim *animNode)
 {
-	if (animNode->mNumScalingKeys == 0)
+	if(animNode->mNumScalingKeys == 0)
 	{
 		out = aiVector3D(1, 1, 1);
 		return;
 	}
-	if (animNode->mNumScalingKeys == 1) {
+	if(animNode->mNumScalingKeys == 1) {
 		out = animNode->mScalingKeys[0].mValue;
 		return;
 	}
@@ -68,7 +68,7 @@ void AnimController::InterpolateScaling(aiVector3D &out, float animTime, const a
 
 	for (int i = 0; i < animNode->mNumScalingKeys - 1; i++)
 	{
-		if (animTime < (float)animNode->mScalingKeys[i + 1].mTime)
+		if(animTime < (float)animNode->mScalingKeys[i + 1].mTime)
 		{
 			scalingIndex = i;
 			break;
@@ -91,7 +91,7 @@ void AnimController::InterpolateScaling(aiVector3D &out, float animTime, const a
 
 void AnimController::InterpolateRotation(aiQuaternion & out, float animTime, const aiNodeAnim* animNode)
 {
-	if (animNode->mNumRotationKeys == 0)
+	if(animNode->mNumRotationKeys == 0)
 	{
 		cout << "num keys = 0\n";
 		assert(0);
@@ -100,7 +100,7 @@ void AnimController::InterpolateRotation(aiQuaternion & out, float animTime, con
 
 
 	// we need at least two values to interpolate...
-	if (animNode->mNumRotationKeys == 1) {
+	if(animNode->mNumRotationKeys == 1) {
 		out = animNode->mRotationKeys[0].mValue;
 		return;
 	}
@@ -110,7 +110,7 @@ void AnimController::InterpolateRotation(aiQuaternion & out, float animTime, con
 
 	for (int i = 0; i < animNode->mNumRotationKeys - 1; i++)
 	{
-		if (animTime < (float)animNode->mRotationKeys[i + 1].mTime) {
+		if(animTime < (float)animNode->mRotationKeys[i + 1].mTime) {
 			rotationIndex = i;
 			break;
 		}
@@ -130,12 +130,12 @@ void AnimController::InterpolateRotation(aiQuaternion & out, float animTime, con
 
 void AnimController::InterpolatePosition(aiVector3D& out, float animTime, const aiNodeAnim* animNode)
 {
-	if (animNode->mNumPositionKeys == 0)
+	if(animNode->mNumPositionKeys == 0)
 	{
 		assert(0);
 		return;
 	}
-	if (animNode->mNumPositionKeys == 1) {
+	if(animNode->mNumPositionKeys == 1) {
 		out = animNode->mPositionKeys[0].mValue;
 		return;
 	}
@@ -144,7 +144,7 @@ void AnimController::InterpolatePosition(aiVector3D& out, float animTime, const 
 
 	for (int i = 0; i < animNode->mNumPositionKeys - 1; i++) {
 
-		if (animTime < animNode->mPositionKeys[i + 1].mTime) {
+		if(animTime < animNode->mPositionKeys[i + 1].mTime) {
 			positionIndex = i;
 			break;
 		}
@@ -172,7 +172,7 @@ void AnimController::CalculateHeiarchyTransform(float animTime, aiNode *node, gl
 
 	glm::mat4 nodeTransform(1.0f);
 
-	if (animNode)
+	if(animNode)
 	{
 		aiVector3D scale;
 		InterpolateScaling(scale, animTime, animNode);
@@ -199,7 +199,7 @@ void AnimController::CalculateHeiarchyTransform(float animTime, aiNode *node, gl
 
 	glm::mat4 globalTransform = parentTransform *nodeTransform;
 
-	if (m_boneMap.find(nodeName) != m_boneMap.end())
+	if(m_boneMap.find(nodeName) != m_boneMap.end())
 	{
 		int boneIndex = m_boneMap[nodeName];
 		m_finalTransforms[boneIndex] = m_GlobalInverseTransforms[m_currAnim] * globalTransform * m_boneTransforms[boneIndex];

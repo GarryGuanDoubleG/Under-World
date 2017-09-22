@@ -205,7 +205,7 @@ void VecUtils::normalize(Vec3 &v)
 {
 	const float len2 = VecUtils::dot(v, v);
 
-	if (fabs(len2) < 1e-12) {
+	if(fabs(len2) < 1e-12) {
 		v.clear();
 	}
 	else {
@@ -257,7 +257,7 @@ void Givens::rot12_post(Mat3 &m, const float c, const float s)
 static void calcSymmetricGivensCoefficients(const float a_pp,
 	const float a_pq, const float a_qq, float &c, float &s)
 {
-	if (a_pq == 0) {
+	if(a_pq == 0) {
 		c = 1;
 		s = 0;
 		return;
@@ -302,7 +302,7 @@ void Schur2::rot12(SMat3 &m, float &c, float &s)
 
 static void rotate01(SMat3 &vtav, Mat3 &v)
 {
-	if (vtav.m01 == 0) {
+	if(vtav.m01 == 0) {
 		return;
 	}
 
@@ -314,7 +314,7 @@ static void rotate01(SMat3 &vtav, Mat3 &v)
 
 static void rotate02(SMat3 &vtav, Mat3 &v)
 {
-	if (vtav.m02 == 0) {
+	if(vtav.m02 == 0) {
 		return;
 	}
 
@@ -326,7 +326,7 @@ static void rotate02(SMat3 &vtav, Mat3 &v)
 
 static void rotate12(SMat3 &vtav, Mat3 &v)
 {
-	if (vtav.m12 == 0) {
+	if(vtav.m12 == 0) {
 		return;
 	}
 

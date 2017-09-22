@@ -608,7 +608,7 @@ static SIMDi SIMDi_NUM(vectorSize);
 
 void FUNC(InitSIMDValues)()
 {
-	if (VAR(SIMD_Values_Set))
+	if(VAR(SIMD_Values_Set))
 		return;
 
 	uSIMDf incF;
@@ -1038,7 +1038,7 @@ int SIMD_LEVEL_CLASS::AlignedSize(int size)
 {
 #ifdef FN_ALIGNED_SETS
 	// size must be a multiple of VECTOR_SIZE (8)
-	if ((size & (VECTOR_SIZE - 1)) != 0)
+	if((size & (VECTOR_SIZE - 1)) != 0)
 	{
 		size &= ~(VECTOR_SIZE - 1);
 		size += VECTOR_SIZE;
@@ -1160,7 +1160,7 @@ case GradientFractal_Normalise:\
 }
 
 #define SET_BUILDER(f)\
-if ((zSize & (VECTOR_SIZE - 1)) == 0)\
+if((zSize & (VECTOR_SIZE - 1)) == 0)\
 {\
 	SIMDi yBase = SIMDi_SET(yStart);\
 	SIMDi zBase = SIMDi_ADD(SIMDi_NUM(incremental), SIMDi_SET(zStart));\
@@ -1384,7 +1384,7 @@ FILL_FRACTAL_SET(Cubic)
 #else
 #define SIZE_MASK & ~(VECTOR_SIZE - 1)
 #define SAFE_LAST(f)\
-if (loopMax != vectorSet->size)\
+if(loopMax != vectorSet->size)\
 {\
 	std::size_t remaining = (vectorSet->size - loopMax) * 4;\
 	\
@@ -1499,7 +1499,7 @@ void SIMD_LEVEL_CLASS::Fill##func##FractalSet(float* noiseSet, FastNoiseVectorSe
 	SIMD_ZERO_ALL();
 	SIMDi seedV = SIMDi_SET(m_seed);
 
-	if ((zSize & (VECTOR_SIZE - 1)) == 0)
+	if((zSize & (VECTOR_SIZE - 1)) == 0)
 	{
 		SIMDi x = SIMDi_MUL(SIMDi_SET(xStart), SIMDi_NUM(xPrime));
 		SIMDi yBase = SIMDi_MUL(SIMDi_SET(yStart), SIMDi_NUM(yPrime));
@@ -2135,7 +2135,7 @@ void SIMD_LEVEL_CLASS::FillSampledNoiseSet(float* noiseSet, int xStart, int ySta
 	assert(noiseSet);
 	SIMD_ZERO_ALL();
 
-	if (sampleScale <= 0)
+	if(sampleScale <= 0)
 	{
 		FillNoiseSet(noiseSet, xStart, yStart, zStart, xSize, ySize, zSize);
 		return;
@@ -2153,13 +2153,13 @@ void SIMD_LEVEL_CLASS::FillSampledNoiseSet(float* noiseSet, int xStart, int ySta
 	int ySizeSample = ySize + yOffset;
 	int zSizeSample = zSize + zOffset;
 
-	if (xSizeSample & sampleMask)
+	if(xSizeSample & sampleMask)
 		xSizeSample = (xSizeSample & ~sampleMask) + sampleSize;
 
-	if (ySizeSample & sampleMask)
+	if(ySizeSample & sampleMask)
 		ySizeSample = (ySizeSample & ~sampleMask) + sampleSize;
 
-	if (zSizeSample & sampleMask)
+	if(zSizeSample & sampleMask)
 		zSizeSample = (zSizeSample & ~sampleMask) + sampleSize;
 
 	xSizeSample = (xSizeSample >> sampleScale) + 1;
@@ -2247,7 +2247,7 @@ void SIMD_LEVEL_CLASS::FillSampledNoiseSet(float* noiseSet, int xStart, int ySta
 
 					for (int i = 0; i < vMax; i++)
 					{
-						if (xi.a[i] >= 0 && xi.a[i] < xSize &&
+						if(xi.a[i] >= 0 && xi.a[i] < xSize &&
 							yi.a[i] >= 0 && yi.a[i] < ySize &&
 							zi.a[i] >= 0 && zi.a[i] < zSize)
 						{
@@ -2279,7 +2279,7 @@ void SIMD_LEVEL_CLASS::FillSampledNoiseSet(float* noiseSet, FastNoiseVectorSet* 
 
 	int sampleScale = vectorSet->sampleScale;
 
-	if (sampleScale <= 0)
+	if(sampleScale <= 0)
 	{
 		FillNoiseSet(noiseSet, vectorSet, xOffset, yOffset, zOffset);
 		return;
@@ -2297,13 +2297,13 @@ void SIMD_LEVEL_CLASS::FillSampledNoiseSet(float* noiseSet, FastNoiseVectorSet* 
 	int ySizeSample = ySize;
 	int zSizeSample = zSize;
 
-	if (xSizeSample & sampleMask)
+	if(xSizeSample & sampleMask)
 		xSizeSample = (xSizeSample & ~sampleMask) + sampleSize;
 
-	if (ySizeSample & sampleMask)
+	if(ySizeSample & sampleMask)
 		ySizeSample = (ySizeSample & ~sampleMask) + sampleSize;
 
-	if (zSizeSample & sampleMask)
+	if(zSizeSample & sampleMask)
 		zSizeSample = (zSizeSample & ~sampleMask) + sampleSize;
 
 	xSizeSample = (xSizeSample >> sampleScale) + 1;
@@ -2389,7 +2389,7 @@ void SIMD_LEVEL_CLASS::FillSampledNoiseSet(float* noiseSet, FastNoiseVectorSet* 
 
 					for (int i = 0; i < vMax; i++)
 					{
-						if (xi.a[i] < xSize &&
+						if(xi.a[i] < xSize &&
 							yi.a[i] < ySize &&
 							zi.a[i] < zSize)
 						{

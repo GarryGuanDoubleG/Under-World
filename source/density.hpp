@@ -21,6 +21,10 @@ public:
 public:
 	static void SetVoxelSize(const float & voxelSize);
 
+	static void SetMaxVoxelHeight(const float & height);
+
+	static void Initialize();
+
 	static glm::vec3 FindIntersection(Density::DensityType type, const glm::vec3 &p0, const glm::vec3 &p1);
 	static glm::vec3 CalculateNormals(Density::DensityType type, const glm::vec3 &pos);
 

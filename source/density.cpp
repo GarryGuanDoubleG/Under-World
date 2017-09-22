@@ -13,9 +13,19 @@ omp_lock_t g_thread_lock;
 
 void Density::SetVoxelSize(const float & voxelSize)
 {
+	//size in world space
 	Density::voxelSize = voxelSize;
 	Density::invVoxelSize = 1.0f / voxelSize;
+}
 
+void Density::SetMaxVoxelHeight(const float & height)
+{
+	//height is in voxel space
+	Density::maxHeight = height;
+}
+
+void Density::Initialize()
+{
 	omp_init_lock(&g_thread_lock);
 
 	terrainFN.SetFractalOctaves(8);
@@ -64,7 +74,7 @@ glm::vec3 Density::FindIntersection(Density::DensityType type, const glm::vec3 &
 	for (int i = 0; i <= steps; i++)
 	{
 		float density = glm::abs(noiseSet[i]);
-		if (density < minValue)
+		if(density < minValue)
 		{
 			minValue = density;
 			t = increment * i;
@@ -110,11 +120,11 @@ float Density::GetTerrainDensity(const glm::vec3& worldPosition, float noise3D, 
 {
 	float terrain = 0.0f;
 	
-	if (worldPosition.y <= 1)
+	if(worldPosition.y <= 1)
 		terrain = worldPosition.y - 1.f;
-	else if (worldPosition.y > (noise2D + noise3D) * voxelSize * maxHeight)
+	else if(worldPosition.y > (noise2D + noise3D) * voxelSize * maxHeight)
 		terrain = worldPosition.y - noise2D * voxelSize * maxHeight;
-	else if (worldPosition.y > 1.0f)
+	else if(worldPosition.y > 1.0f)
 		terrain = worldPosition.y - (noise2D + noise3D) * maxHeight * voxelSize;
 
 	return terrain;
