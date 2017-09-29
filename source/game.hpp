@@ -19,7 +19,6 @@ using namespace std;
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm\gtx\euler_angles.hpp>
-#include <glm/gtc/noise.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -49,6 +48,7 @@ using namespace std;
 #include "chunk.hpp"
 #include "voxelManager.hpp"
 #include "graphics.hpp"
+#include "atmosphere.hpp"
 
 #define SCREEN_WIDTH 1680.0f
 #define SCREEN_HEIGHT 1080.0f
@@ -59,7 +59,7 @@ using namespace std;
 #define VOXEL_MODE 8
 #define MODEL_MODE 16
 #define SHADOW_MODE 32
-
+#define DEFERRED_MODE 64
 class Game;
 extern Game *g_game;
 
@@ -75,6 +75,7 @@ private:
 	ResManager *m_resManager;
 	Entity *m_entitiesList;
 
+	Atmosphere *m_atmosphere;
 public:
 	VoxelManager *m_voxelManager;
 
@@ -87,13 +88,19 @@ public:
 
 	Game();
 	~Game();
-
+	//loop
 	void Draw();
 	void Update();
 	void Close();
 	void Input();
 
 	glm::vec3 GetPlayerPosition();
+
+	Shader * GetShader(const char * name);
+
+	Texture * GetTexture(const char * name);
+
+	Camera * GetCamera();
 
 	bool IsRunning();
 };

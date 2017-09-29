@@ -1,4 +1,5 @@
 #include "game.hpp"
+#include <array>
 
 Game * g_game;
 static float g_prevTime;
@@ -25,6 +26,10 @@ Game::Game() : m_running(true)
 	m_graphics->SetTextures(m_resManager->LoadTextures());
 	m_graphics->SetModel(m_resManager->LoadModels());
 	m_graphics->SetCamera(m_camera);
+	m_graphics->InitSkybox();
+
+	m_atmosphere = new Atmosphere(m_graphics->GetVAO("quad"));
+	m_atmosphere->Precompute();
 
 	m_entitiesList = new Entity[MAX_ENTITIES];
 	for (int i = 0; i < MAX_ENTITIES - 1; i++)
@@ -33,8 +38,11 @@ Game::Game() : m_running(true)
 	m_voxelManager = new VoxelManager();
 	m_voxelManager->Init();
 
-	m_graphics->SetFlag(FP_MODE | SKYBOX_MODE | VOXEL_MODE | MODEL_MODE | SHADOW_MODE);
+	SlogCheckGLError();
+	m_graphics->SetFlag(FP_MODE /*| SKYBOX_MODE*/ | VOXEL_MODE | MODEL_MODE | SHADOW_MODE);
 	g_prevTime = 0;
+
+	SlogCheckGLError();
 }
 
 Game::~Game()
@@ -54,10 +62,18 @@ void Game::Draw()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	else
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	m_graphics->RenderScene();
+	GBuffer gBuffer;
+	if(m_flag & DEFERRED_MODE)
+		m_graphics->RenderScene();
+	else
+	{
+		gBuffer = m_graphics->DeferredRenderScene();
+		m_atmosphere->Render(gBuffer, GetTexture("scene"));
+	}
 	m_graphics->Display();
+
 }
 
 void Game::Update()
@@ -69,6 +85,7 @@ void Game::Update()
 	if(m_flag & FP_MODE) {
 		SDL_WarpMouseInWindow(m_graphics->GetWindow(), SCREEN_WIDTH * .5f, SCREEN_HEIGHT * .5f);
 	}
+
 }
 
 void Game::Close()
@@ -107,6 +124,9 @@ void Game::Input()
 			case SDLK_3:
 				m_graphics->m_flag ^=VOXEL_MODE;
 				break;
+			case SDLK_4:
+				m_flag ^= DEFERRED_MODE;
+				break;
 			default:
 				break;
 			}
@@ -117,6 +137,19 @@ void Game::Input()
 glm::vec3 Game::GetPlayerPosition()
 {
 	return m_camera->GetPosition();
+}
+
+Shader * Game::GetShader(const char * name)
+{
+	return m_graphics->GetShader(name);
+}
+Texture * Game::GetTexture(const char *name)
+{
+	return m_graphics->GetTexture(name);
+}
+Camera * Game::GetCamera()
+{
+	return m_camera;
 }
 
 bool Game::IsRunning()

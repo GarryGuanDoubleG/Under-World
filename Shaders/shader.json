@@ -1,5 +1,5 @@
 {
-  "depthMap" :{
+  "depthMap": {
     "fs": "Shaders/depthShader_fs.glsl",
     "vs": "Shaders/depthShader_vs.glsl"
   },
@@ -35,21 +35,30 @@
     "vs": "Shaders/voxelTex_vs.glsl",
     "fs": "Shaders/voxelTex_fs.glsl"
   },
+  "voxel_deferred": {
+    "vs": "Shaders/voxel_deferred_vs.glsl",
+    "fs": "Shaders/voxel_deferred_fs.glsl"
+  },
   "lighting": {
     "vs": "Shaders/lighting_vs.glsl",
     "fs": "Shaders/lighting_fs.glsl"
   },
-
+  "deferred": {
+    "vs": "Shaders/deferred_vs.glsl",
+    "fs": "Shaders/deferred_fs.glsl"
+  },
+  "deferredLighting": {
+    "vs": "Shaders/deferredLighting_vs.glsl",
+    "fs": "Shaders/deferredLighting_fs.glsl"
+  },
   "minimap": {
     "vs": "Shaders/minimap_vs.glsl",
     "fs": "Shaders/minimap_fs.glsl"
   },
-
   "hud": {
     "vs": "Shaders/ui.vert",
     "fs": "Shaders/ui.frag"
   },
-
   "ray": {
     "vs": "Shaders/ray.vert",
     "fs": "Shaders/ray.frag"
@@ -75,8 +84,40 @@
   "health": {
     "vs": "Shaders/health_vs.glsl",
     "fs": "Shaders/health_fs.glsl"
+  },
+  "atmosphere": {
+    "vs": "Shaders/Scattering/atmosphere_vs.glsl",
+    "fs": "Shaders/Scattering/atmosphere_fs.glsl"
+  },
+  "transmittance": {
+    "compute": "Shaders/Scattering/transmittance.glsl"
+  },
+  "delta_e": {
+    "compute": "Shaders/Scattering/delta_e.compute.glsl"
+  },
+  "delta_sm_sr": {
+    "compute": "Shaders/Scattering/delta_sm_sr.compute.glsl"
+  },
+  "copy_irradiance": {
+    "compute": "Shaders/Scattering/copy_irradiance.compute.glsl"
+  },
+  "copy_inscatter": {
+    "compute": "Shaders/Scattering/copy_inscatter.compute.glsl"
+  },
+  "delta_j": {
+    "compute": "Shaders/Scattering/delta_j.compute.glsl"
+  },
+  "irradiance_n": {
+    "compute": "Shaders/Scattering/irradiance_n.compute.glsl"
+  },
+  "delta_sr": {
+    "compute": "Shaders/Scattering/delta_sr.compute.glsl"
+  },
+  "add_delta_e": {
+    "compute": "Shaders/Scattering/add_delta_e.compute.glsl"
+  },
+  "add_delta_sr": {
+    "compute": "Shaders/Scattering/add_delta_sr.compute.glsl"
   }
-
-
 }
 

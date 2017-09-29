@@ -45,6 +45,36 @@ bool read_file(char *name, string &out)
 	while (getline(in, input))
 	{
 		out.append(input + "\n");
+
+		string word = "";
+		istringstream iss(input);
+
+		iss >> word;
+
+		if (word == "#pragma")
+		{
+			string command;
+			iss >> command;
+
+			if (command == "include")
+			{
+				string currentPath(name);
+				currentPath.erase(currentPath.rfind('/') + 1);
+
+				string file;
+				iss >> file;
+
+				if (file.front() == '"' && file.back() == '"')
+				{
+					file.erase(0, 1);
+					file.erase(file.size() - 1);
+				}
+
+				string filesource = "";
+				read_file((char*)(currentPath + file).c_str(), filesource);
+				out.append(filesource + "\n");
+			}
+		}
 	}
 
 	return true;
@@ -107,9 +137,32 @@ GLuint compile_shaders(string &vs_shader, string &fs_shader)
 	return program;
 }
 
-Shader::Shader( string &vs_shader, string fs_shader)
+Shader::Shader( string &vs_shader, string &fs_shader)
 {
 	m_shaderID = compile_shaders(vs_shader, fs_shader);	
+}
+
+Shader::Shader(string & compute)
+{
+	GLchar infoLog[512];
+	GLint result = GL_FALSE;
+	GLint InfoLogLength;
+
+	//Create program, attach shaders to it, and link it
+	m_shaderID = glCreateProgram();
+
+	compile_attach_shader(compute, GL_COMPUTE_SHADER, m_shaderID);
+
+	glLinkProgram(m_shaderID);
+	glGetProgramiv(m_shaderID, GL_LINK_STATUS, &result);
+
+	if (!result)
+	{
+		glGetProgramiv(m_shaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
+		glGetProgramInfoLog(m_shaderID, InfoLogLength, &InfoLogLength, infoLog);
+
+		printf("Program Log: %s\n", infoLog);
+	}
 }
 
 Shader::~Shader()
@@ -140,9 +193,14 @@ void Shader::SetUniform1i(string uniform, GLint value)
 	glUniform1i(Uniform(uniform), value);
 }
 
-void Shader::SetUniform2fv(string uniform, glm::vec2 value)
+void Shader::SetUniform2fv(const string &uniform, const glm::vec2 &value)
 {
 	glUniform2fv(Uniform(uniform), 1, &value[0]);
+}
+
+void Shader::SetUniform3fv(const string & uniform, const glm::vec3 & value)
+{
+	glUniform3fv(Uniform(uniform), 1, &value[0]);
 }
 
 GLuint Shader::Uniform(string uniformName)

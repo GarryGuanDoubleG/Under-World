@@ -3,11 +3,12 @@
 enum TextureType
 {
 	Tex2D = 0,
-	Skybox = 1,
-	Ambient = 2,
-	Diffuse = 3,
-	Specular = 4,
-	DepthMap = 5
+	Tex3D = 1,
+	Skybox = 2,
+	Ambient = 3,
+	Diffuse = 4,
+	Specular = 5,
+	DepthMap = 6
 };
 
 class Texture
@@ -33,8 +34,16 @@ public:
 
 	void SetTexType(TextureType type);
 	void SetTexType(aiTextureType type);
+	void SetTexID(GLuint id);
 
 	void SetDepthMap(GLuint width, GLuint height);
+
+	void CreateTexture2D(int w, int h, GLuint internalFormat, GLuint format, GLuint type = GL_FLOAT);
+
+	void CreateImage2D(int w, int h, bool float32);
+	void CreateImage3D(int w, int h, int d, bool float32);
+
+	void BindImage2D();
 
 	GLuint GetTexID();
 	TextureType GetTexType();

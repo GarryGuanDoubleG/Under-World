@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -156,6 +156,10 @@
     <None Include="Resources\sound.json" />
     <None Include="Resources\structures.json" />
     <None Include="Resources\textures\texture.json" />
+    <None Include="Shaders\deferredLighting_fs.glsl" />
+    <None Include="Shaders\deferredLighting_vs.glsl" />
+    <None Include="Shaders\deferred_fs.glsl" />
+    <None Include="Shaders\deferred_vs.glsl" />
     <None Include="Shaders\depthShader_vs.glsl" />
     <None Include="Shaders\depthShader_fs.glsl" />
     <None Include="Shaders\model_fs.glsl" />
@@ -164,15 +168,34 @@
     <None Include="Shaders\object_vs.glsl" />
     <None Include="Shaders\quad_fs.glsl" />
     <None Include="Shaders\quad_vs.glsl" />
+    <None Include="Shaders\Scattering\add_delta_e.compute.glsl" />
+    <None Include="Shaders\Scattering\add_delta_sr.compute.glsl" />
+    <None Include="Shaders\Scattering\atmosphere_fs.glsl" />
+    <None Include="Shaders\Scattering\atmosphere_vs.glsl" />
+    <None Include="Shaders\Scattering\compute_scattering.inc.glsl" />
+    <None Include="Shaders\Scattering\copy_inscatter.compute.glsl" />
+    <None Include="Shaders\Scattering\copy_irradiance.compute.glsl" />
+    <None Include="Shaders\Scattering\delta_e.compute.glsl" />
+    <None Include="Shaders\Scattering\delta_j.compute.glsl" />
+    <None Include="Shaders\Scattering\delta_sm_sr.compute.glsl" />
+    <None Include="Shaders\Scattering\delta_sr.compute.glsl" />
+    <None Include="Shaders\Scattering\irradiance_n.compute.glsl" />
+    <None Include="Shaders\Scattering\scatterFunctions.inc.glsl" />
+    <None Include="Shaders\Scattering\transmittance.glsl" />
     <None Include="Shaders\shader.json" />
     <None Include="Shaders\skybox_fs.glsl" />
     <None Include="Shaders\skybox_vs.glsl" />
+    <None Include="Shaders\sun_vs.glsl" />
+    <None Include="Shaders\voxelCommon.inc.glsl" />
     <None Include="Shaders\voxelTex_fs.glsl" />
     <None Include="Shaders\voxelTex_vs.glsl" />
+    <None Include="Shaders\voxel_deferred_fs.glsl" />
+    <None Include="Shaders\voxel_deferred_vs.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Allocator.hpp" />
     <ClInclude Include="source\animController.hpp" />
+    <ClInclude Include="source\atmosphere.hpp" />
     <ClInclude Include="source\camera.hpp" />
     <ClInclude Include="source\chunk.hpp" />
     <ClInclude Include="source\density.hpp" />
@@ -205,6 +228,7 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="source\atmosphere.cpp" />
     <ClCompile Include="source\camera.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotSet</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotSet</EnableEnhancedInstructionSet>

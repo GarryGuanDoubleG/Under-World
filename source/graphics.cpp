@@ -14,13 +14,25 @@ Graphics::Graphics(int winWidth, int winHeight)
 {
 	if(!InitGraphics(winWidth, winHeight))
 	{
+		slog("Graphics Failed to initialize");
 		Cleanup();
 		exit(1);
 	}
 
 	InitShapes();
-	InitSkybox();
 	InitDepthMap();
+	InitFBOS();
+	//RealInitFBO();
+
+	for (unsigned int i = 0; i < 32; i++)
+	{
+		float xPos = ((rand() % 1000) / 10.0) * 6.0 - 3.0;
+		float yPos = ((rand() % 1000) / 10.0) * 6.0 - 4.0;
+		float zPos = ((rand() % 1000) / 10.0) * 6.0 - 3.0;
+
+		lightPositions[i] = glm::vec3(xPos, yPos, zPos);
+	}
+	glEnable(GL_DEPTH_TEST);
 }
 
 Graphics::~Graphics()
@@ -74,9 +86,9 @@ bool Graphics::InitGraphics(int winWidth, int winHeight)
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
 	// Accept fragment if it closer to the camera than the former one
-	glDepthFunc(GL_LESS);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDepthFunc(GL_LEQUAL);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	
 
@@ -144,15 +156,12 @@ void Graphics::InitShapes()
 	m_vboMap.insert(pair<string, GLuint>("cube", cube_vbo));
 
 	//quad
-	GLfloat quadVertices[] = {   // Vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-								 // Positions   // TexCoords
-		-1.0f,  1.0f,  0.0f, 1.0f,
-		-1.0f, -1.0f,  0.0f, 0.0f,
-		1.0f, -1.0f,  1.0f, 0.0f,
-
-		-1.0f,  1.0f,  0.0f, 1.0f,
-		1.0f, -1.0f,  1.0f, 0.0f,
-		1.0f,  1.0f,  1.0f, 1.0f
+	float quadVertices[] = {
+		// positions        // texture Coords
+		-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
 	};
 
 	GLuint quad_vao;
@@ -165,11 +174,10 @@ void Graphics::InitShapes()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices[0], GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
-
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
 	//uv
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -180,68 +188,7 @@ void Graphics::InitShapes()
 
 void Graphics::InitSkybox()
 {
-	GLfloat skyboxVertices[] = {
-		// Positions          
-		-1.0f,  1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f,  1.0f, -1.0f,
-		-1.0f,  1.0f, -1.0f,
-
-		-1.0f, -1.0f,  1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f,  1.0f, -1.0f,
-		-1.0f,  1.0f, -1.0f,
-		-1.0f,  1.0f,  1.0f,
-		-1.0f, -1.0f,  1.0f,
-
-		1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-
-		-1.0f, -1.0f,  1.0f,
-		-1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f, -1.0f,  1.0f,
-		-1.0f, -1.0f,  1.0f,
-
-		-1.0f,  1.0f, -1.0f,
-		1.0f,  1.0f, -1.0f,
-		1.0f,  1.0f,  1.0f,
-		1.0f,  1.0f,  1.0f,
-		-1.0f,  1.0f,  1.0f,
-		-1.0f,  1.0f, -1.0f,
-
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f,  1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f,  1.0f,
-		1.0f, -1.0f,  1.0f
-	};
-
-	GLuint skyboxVAO, skyboxVBO;
-
-	glGenVertexArrays(1, &skyboxVAO);
-	glBindVertexArray(skyboxVAO);
-
-	glGenBuffers(1, &skyboxVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices[0], GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-
-	m_vaoMap["skybox"] = skyboxVAO;
-	m_vboMap["skybox"] = skyboxVBO;
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	m_skydome = new Skydome(m_modelMap["skydome"], 10, 10);
 }
 
 void Graphics::InitDepthMap()
@@ -260,6 +207,108 @@ void Graphics::InitDepthMap()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Graphics::InitFBOS()
+{
+	//deferred rendering FBOs
+	glGenFramebuffers(1, &m_deferredFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFBO);
+
+	m_GBuffer.gPosition.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB16F, GL_RGB);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_GBuffer.gPosition.GetTexID(), 0);
+
+	m_GBuffer.gNormal.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB16F, GL_RGB);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_GBuffer.gNormal.GetTexID(), 0);
+
+	m_GBuffer.gAlbedoSpec.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_GBuffer.gAlbedoSpec.GetTexID(), 0);
+
+	unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	glDrawBuffers(3, attachments);
+
+	//depth map
+	glGenRenderbuffers(1, &m_depthRBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, m_depthRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCREEN_WIDTH, SCREEN_HEIGHT);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthRBO);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		cout << "Frame buffer not complete " << endl;
+	}
+
+	//post processing FBO
+	glGenFramebuffers(1, &m_sceneFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
+	Texture *shadedScene = new Texture();
+	shadedScene->CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, shadedScene->GetTexID(), 0);
+
+	m_textureMap["scene"] = shadedScene;
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		cout << "Frame buffer not complete " << endl;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Graphics::RealInitFBO()
+{
+
+	glGenFramebuffers(1, &gBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+
+	// position color buffer
+	glGenTextures(1, &gPosition);
+	glBindTexture(GL_TEXTURE_2D, gPosition);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+	// normal color buffer
+	glGenTextures(1, &gNormal);
+	glBindTexture(GL_TEXTURE_2D, gNormal);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+	// color + specular color buffer
+	glGenTextures(1, &gAlbedoSpec);
+	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
+
+	//m_GBuffer.gPosition.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB16F, GL_RGB);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_GBuffer.gPosition.GetTexID(), 0);
+
+	//m_GBuffer.gNormal.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB16F, GL_RGB);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_GBuffer.gNormal.GetTexID(), 0);
+
+	//m_GBuffer.gAlbedoSpec.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_GBuffer.gAlbedoSpec.GetTexID(), 0);
+
+	m_GBuffer.gPosition.SetTexID(gPosition);
+	//m_GBuffer.gNormal.SetTexID(gNormal);
+	//m_GBuffer.gAlbedoSpec.SetTexID(gAlbedoSpec);
+	//
+	// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+	unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	glDrawBuffers(3, attachments);
+	// create and attach depth buffer (renderbuffer)
+
+	glGenRenderbuffers(1, &rboDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCREEN_WIDTH, SCREEN_HEIGHT);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+	// finally check if framebuffer is complete
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "Framebuffer not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Graphics::SetCamera(Camera * camera)
@@ -292,6 +341,21 @@ void Graphics::XORSetFlag(GLuint flag)
 	m_flag ^= flag;
 }
 
+Shader * Graphics::GetShader(const char * key)
+{
+	return m_shaderMap[key];
+}
+
+GLuint Graphics::GetVAO(const char * name)
+{
+	return m_vaoMap[name];
+}
+
+Texture * Graphics::GetTexture(const char * name)
+{
+	return m_textureMap[name];
+}
+
 void Graphics::RenderBackground(GLfloat bg_color[4])
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -302,72 +366,107 @@ void Graphics::RenderSkybox()
 {
 	if(~m_flag & SKYBOX_MODE) return;
 
-	float time = g_game->GetElapsedTime();
-	float rotate_speed = glm::radians(0.001f);
-	float rotation = rotate_speed * g_game->GetElapsedTime();
-	float timeCycle = glm::mod(time, 16000.f);
-	float blend = 0.f;
+	glDepthFunc(GL_LEQUAL);
+	m_skydome->draw(m_camera, m_shaderMap["skybox"]);
+}
 
-	if (timeCycle < 4000)
-	{
-		blend = 0;
-	}
-	else if (timeCycle < 8000)
-	{
-		blend = (timeCycle - 4000) / 4000;
-	}
-	else if( timeCycle < 12000)
-	{
-		blend = 1.0f;
-	}
-	else
-	{
-		blend = 1.0f - ((timeCycle - 12000) / 4000.0f);
-	}
+GBuffer Graphics::DeferredRenderScene()
+{
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	Shader *shader = m_shaderMap["skybox"];
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFBO);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+	//render skydome
+	Shader *objectShader = m_shaderMap["deferred"];
+	objectShader->Use();
+	//objectShader->SetMat4("model", glm::translate(glm::mat4(), m_camera->GetPosition()));
+	glm::mat4 model(1.0f);
+	model = glm::translate(model, m_camera->GetPosition());
+	model = glm::scale(model, glm::vec3(10));
+	objectShader->SetMat4("model", model);
+	objectShader->SetMat4("view", m_camera->GetViewMat());
+	objectShader->SetMat4("projection", m_camera->GetProj());
+
+
+	m_skydome->draw(m_camera, objectShader);
+	DeferredRenderVoxels(m_shaderMap["voxel_deferred"]);
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+	DeferredRenderLighting(m_shaderMap["deferredLighting"]);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	Shader *quad = m_shaderMap["quad"];
+	quad->Use();
+	m_textureMap["scene"]->Bind(0);
+	RenderToQuad();
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_deferredFBO);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+											   // blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
+											   // the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the 		
+											   // depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
+	glBlitFramebuffer(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+	return m_GBuffer;
+}
+
+void Graphics::DeferredRenderLighting(Shader *shader)
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shader->Use();
 
-	slog("blend: %5f \n", blend);
+	m_GBuffer.Bind(0);
+	shader->SetUniform1i("gPosition", 0);
+	shader->SetUniform1i("gNormal", 1);
+	shader->SetUniform1i("gAlbedoSpec", 2);
 
-	glm::mat4 view = glm::mat4(glm::mat3(m_camera->GetViewMat()));
-	view = glm::rotate(view, rotation, glm::vec3(0, 1.0f, 0));
+	//shader->SetUniform1i("lightCount", 0);
+	shader->SetUniform3fv("viewPos", m_camera->GetPosition());
 
-	GLint depthMode;
-	glGetIntegerv(GL_DEPTH_FUNC, &depthMode);
-	glDepthFunc(GL_LEQUAL);
-
-	glBindVertexArray(m_vaoMap["skybox"]);
-	glUniformMatrix4fv(shader->Uniform("view"), 1, GL_FALSE, &view[0][0]);
-	glUniformMatrix4fv(shader->Uniform("projection"), 1, GL_FALSE, &m_camera->GetProj()[0][0]);
-
-	Texture  *daySkybox = m_textureMap["daySkybox"];
-	daySkybox->Bind(0);
-
-	Texture  *nightSkybox = m_textureMap["nightSkybox"];
-	nightSkybox->Bind(1);
-
-	glUniform1i(shader->Uniform("daySkybox"), 0);
-	glUniform1i(shader->Uniform("nightSkybox"), 1);
-	glUniform1f(shader->Uniform("blendFactor"), blend);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-
-	daySkybox->Unbind();
-	nightSkybox->Unbind();
-
-	glBindVertexArray(0);
-
-	glDepthFunc(depthMode);
+	RenderToQuad();
+	m_GBuffer.Unbind();
 }
 
 void Graphics::RenderScene()
 {
 	if(m_flag & SKYBOX_MODE) RenderSkybox();
+
+	Shader *objectShader = m_shaderMap["object"];
+	objectShader->Use();
+	//objectShader->SetMat4("model", glm::translate(glm::mat4(), m_camera->GetPosition()));
+	objectShader->SetMat4("model", glm::translate(glm::mat4(), glm::vec3(0.0f)));
+	objectShader->SetMat4("view", m_camera->GetViewMat());
+	objectShader->SetMat4("projection", m_camera->GetProj());
+
+	m_textureMap["grass"]->Bind(0);
+	m_skydome->draw(m_camera, objectShader);
+	m_textureMap["grass"]->Unbind();
+
 	if(m_flag & SHADOW_MODE) RenderShadowMap();
 	if(m_flag & VOXEL_MODE) RenderVoxels();
 
-	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(400.f, 150, 400.0f));
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(400.f, 150, 4000.0f));
 	model = glm::scale(model, glm::vec3(1.5f));
+
+	for (unsigned int i = 0; i < 32; i++)
+	{
+		glm::mat4 model = glm::mat4();
+		model = glm::translate(model, lightPositions[i]);
+		model = glm::scale(model, glm::vec3(30.125f));
+		RenderCube(model);
+	}
+
 
 	if(m_flag & MODEL_MODE) RenderModel("arissa", model);
 }
@@ -406,23 +505,15 @@ void Graphics::RenderShadowMap()
 
 void Graphics::RenderToQuad()
 {
-	Shader *shader = m_shaderMap["quad"];
-	shader->Use();
-
-	float near_plane = 1.0f,
-		far_plane = 1000.f;
-	shader->SetUniform1i("depthMap", 0);
-
 	glBindVertexArray(m_vaoMap["quad"]);
-	m_textureMap["brickNormal"]->Bind(0);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	m_textureMap["brickNormal"]->Unbind();
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
+
 }
 
 void Graphics::RenderCube(glm::mat4 model)
 {
-	Shader *shader = m_shaderMap["object"];
+	Shader *shader = m_shaderMap["deferred"];
 	shader->Use();
 
 	Texture *tex = m_textureMap["grass"];
@@ -437,14 +528,26 @@ void Graphics::RenderCube(glm::mat4 model)
 	glm::vec3 light_pos(10.f,10.f, 10.f);
 	glm::vec3 light_color(1.0f, 1.0f, 1.0f);
 
-	glUniform3fv(shader->Uniform("viewPos"), 1, &m_camera->GetPosition()[0]);
-	glUniform3fv(shader->Uniform("lightPos"), 1, &light_pos[0]);
-	glUniform3fv(shader->Uniform("lightColor"), 1, &light_color[0]);
+	//glUniform3fv(shader->Uniform("viewPos"), 1, &m_camera->GetPosition()[0]);
+	//glUniform3fv(shader->Uniform("lightPos"), 1, &light_pos[0]);
+	//glUniform3fv(shader->Uniform("lightColor"), 1, &light_color[0]);
 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	tex->Unbind();
 	glBindVertexArray(0);
+}
+
+void Graphics::DeferredRenderModel(Shader *shader, const string &name, const glm::mat4 &modelMat)
+{
+	Model * model = m_modelMap["arissa"];
+	shader->Use();
+
+	shader->SetMat4("model", modelMat);
+	shader->SetMat4("projection", m_camera->GetProj());
+	shader->SetMat4("view", m_camera->GetViewMat());
+
+	model->Draw(shader);
 }
 
 void Graphics::RenderModel(const string &name, const glm::mat4 &modelMat)
@@ -467,6 +570,34 @@ void Graphics::RenderModel(const string &name, const glm::mat4 &modelMat)
 	glUniform3fv(shader->Uniform("lightColor"), 1, &light_color[0]);
 
 	model->Draw(shader);
+}
+
+void Graphics::DeferredRenderVoxels(Shader *shader)
+{
+	shader = m_shaderMap["voxel_deferred"];
+	shader->Use();
+	shader->SetMat4("projection", m_camera->GetProj());
+	shader->SetMat4("model", glm::mat4(1.0f));
+	shader->SetMat4("view", m_camera->GetViewMat());
+
+	m_textureMap["grass"]->Bind(3);
+	m_textureMap["brick"]->Bind(4);
+
+	m_textureMap["grassNormal"]->Bind(15);
+	m_textureMap["brickNormal"]->Bind(16);
+
+	GLint samplers[] = { 3, 4 };
+	GLint samplersNormalMap[] = { 15,16 };
+	glUniform1iv(shader->Uniform("voxelTexture"), 2, &samplers[0]);
+	glUniform1iv(shader->Uniform("normalMap"), 2, &samplersNormalMap[0]);
+
+	g_game->m_voxelManager->Render();
+
+	m_textureMap["brick"]->Unbind();
+	m_textureMap["brickNormal"]->Unbind();
+
+	m_textureMap["grass"]->Unbind();
+	m_textureMap["grassNormal"]->Unbind();
 }
 
 void Graphics::RenderVoxels()
@@ -550,6 +681,7 @@ void Graphics::Cleanup()
 {
 	for (auto &kv : m_vaoMap) glDeleteVertexArrays(1, &kv.second);
 	for (auto &kv : m_vboMap) glDeleteBuffers(1, &kv.second);
+	for (auto &tex : m_textureMap) tex.second->Destroy();
 
 	m_shaderMap.clear();
 	m_textureMap.clear();

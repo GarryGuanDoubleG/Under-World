@@ -111,7 +111,14 @@ map<string, Shader *> ResManager::LoadShaders()
 		Json obj = it.value();
 		string key = it.key();
 
-		shader_map.insert(pair<string, Shader*>(key, new Shader(obj["vs"].get<string>(), obj["fs"].get<string>())));
+		if (obj.find("compute") != obj.end())
+		{
+			shader_map.insert(pair<string, Shader*>(key, new Shader (obj["compute"].get<string>())));
+		}
+		else
+		{
+			shader_map.insert(pair<string, Shader*>(key, new Shader(obj["vs"].get<string>(), obj["fs"].get<string>())));
+		}
 	}
 
 	in.close();

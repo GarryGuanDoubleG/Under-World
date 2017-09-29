@@ -53,5 +53,8 @@
   "sphere": {
     "path": "Resources\\models\\sphere.obj",
     "scale": [ 1.0, 1.0, 1.0 ]
+  },
+  "skydome": {
+    "path":  "Resources\\models\\skydome.obj"
   }
 }

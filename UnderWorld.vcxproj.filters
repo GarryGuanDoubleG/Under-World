@@ -34,21 +34,18 @@
     <Filter Include="Header Files\Utility\FastNoise">
       <UniqueIdentifier>{3976a62c-d512-48dc-8719-1bd1e7ae6012}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Scattering">
+      <UniqueIdentifier>{f5b135e5-5c1f-4363-9c2f-9711c870fee2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Voxel">
+      <UniqueIdentifier>{39fe005c-65e6-4319-8ffc-f23ea9076b88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Model">
+      <UniqueIdentifier>{0120fcfc-d642-4f45-9c4a-1be1cfa0239a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Shaders\model_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\model_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\object_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\object_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\skybox_fs.glsl">
       <Filter>Shaders</Filter>
     </None>
@@ -76,12 +73,6 @@
     <None Include="Resources\models\models.json">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Shaders\voxelTex_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\voxelTex_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\depthShader_vs.glsl">
       <Filter>Shaders</Filter>
     </None>
@@ -95,6 +86,88 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\quad_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\sun_vs.glsl" />
+    <None Include="Shaders\Scattering\add_delta_e.compute.glsl">
+      <Filter>Shaders\Scattering</Filter>
+    </None>
+    <None Include="Shaders\Scattering\add_delta_sr.compute.glsl">
+      <Filter>Shaders\Scattering</Filter>
+    </None>
+    <None Include="Shaders\Scattering\atmosphere_fs.glsl">
+      <Filter>Shaders\Scattering</Filter>
+    </None>
+    <None Include="Shaders\Scattering\atmosphere_vs.glsl">
+      <Filter>Shaders\Scattering</Filter>
+    </None>
+    <None Include="Shaders\Scattering\compute_scattering.inc.glsl">
+      <Filter>Shaders\Scattering</Filter>
+    </None>
+    <None Include="Shaders\Scattering\copy_inscatter.compute.glsl">
+      <Filter>Shaders\Scattering</Filter>
+    </None>
+    <None Include="Shaders\Scattering\copy_irradiance.compute.glsl">
+      <Filter>Shaders\Scattering</Filter>
+    </None>
+    <None Include="Shaders\Scattering\delta_e.compute.glsl">
+      <Filter>Shaders\Scattering</Filter>
+    </None>
+    <None Include="Shaders\Scattering\delta_j.compute.glsl">
+      <Filter>Shaders\Scattering</Filter>
+    </None>
+    <None Include="Shaders\Scattering\delta_sm_sr.compute.glsl">
+      <Filter>Shaders\Scattering</Filter>
+    </None>
+    <None Include="Shaders\Scattering\delta_sr.compute.glsl">
+      <Filter>Shaders\Scattering</Filter>
+    </None>
+    <None Include="Shaders\Scattering\irradiance_n.compute.glsl">
+      <Filter>Shaders\Scattering</Filter>
+    </None>
+    <None Include="Shaders\Scattering\scatterFunctions.inc.glsl">
+      <Filter>Shaders\Scattering</Filter>
+    </None>
+    <None Include="Shaders\Scattering\transmittance.glsl">
+      <Filter>Shaders\Scattering</Filter>
+    </None>
+    <None Include="Shaders\voxelTex_vs.glsl">
+      <Filter>Shaders\Voxel</Filter>
+    </None>
+    <None Include="Shaders\voxelTex_fs.glsl">
+      <Filter>Shaders\Voxel</Filter>
+    </None>
+    <None Include="Shaders\deferred_vs.glsl">
+      <Filter>Shaders\Model</Filter>
+    </None>
+    <None Include="Shaders\deferred_fs.glsl">
+      <Filter>Shaders\Model</Filter>
+    </None>
+    <None Include="Shaders\object_vs.glsl">
+      <Filter>Shaders\Model</Filter>
+    </None>
+    <None Include="Shaders\model_fs.glsl">
+      <Filter>Shaders\Model</Filter>
+    </None>
+    <None Include="Shaders\model_vs.glsl">
+      <Filter>Shaders\Model</Filter>
+    </None>
+    <None Include="Shaders\object_fs.glsl">
+      <Filter>Shaders\Model</Filter>
+    </None>
+    <None Include="Shaders\voxel_deferred_vs.glsl">
+      <Filter>Shaders\Voxel</Filter>
+    </None>
+    <None Include="Shaders\voxel_deferred_fs.glsl">
+      <Filter>Shaders\Voxel</Filter>
+    </None>
+    <None Include="Shaders\voxelCommon.inc.glsl">
+      <Filter>Shaders\Voxel</Filter>
+    </None>
+    <None Include="Shaders\deferredLighting_fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\deferredLighting_vs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
@@ -175,6 +248,9 @@
       <Filter>Header Files\Voxels</Filter>
     </ClInclude>
     <ClInclude Include="source\skydome.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\atmosphere.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -270,6 +346,9 @@
       <Filter>Source Files\Voxels</Filter>
     </ClCompile>
     <ClCompile Include="source\skydome.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\atmosphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
