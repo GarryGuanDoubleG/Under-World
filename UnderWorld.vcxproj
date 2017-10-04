@@ -156,6 +156,17 @@
     <None Include="Resources\sound.json" />
     <None Include="Resources\structures.json" />
     <None Include="Resources\textures\texture.json" />
+    <None Include="Shaders\Clouds\applyCloud_fs.glsl" />
+    <None Include="Shaders\Clouds\cloudCurlNoise.glsl" />
+    <None Include="Shaders\Clouds\cloud_common.inc.glsl" />
+    <None Include="Shaders\Clouds\cloud_vs.glsl" />
+    <None Include="Shaders\Clouds\cloudHighFreqNoise.glsl" />
+    <None Include="Shaders\Clouds\cloudLowFreqNoise.glsl" />
+    <None Include="Shaders\Clouds\generateWeatherData.glsl" />
+    <None Include="Shaders\Clouds\noise.inc.glsl" />
+    <None Include="Shaders\Clouds\raymarch_clouds_fs.glsl" />
+    <None Include="Shaders\Clouds\raymarch_clouds_vs.glsl" />
+    <None Include="Shaders\common.inc.glsl" />
     <None Include="Shaders\deferredLighting_fs.glsl" />
     <None Include="Shaders\deferredLighting_vs.glsl" />
     <None Include="Shaders\deferred_fs.glsl" />
@@ -185,7 +196,6 @@
     <None Include="Shaders\shader.json" />
     <None Include="Shaders\skybox_fs.glsl" />
     <None Include="Shaders\skybox_vs.glsl" />
-    <None Include="Shaders\sun_vs.glsl" />
     <None Include="Shaders\voxelCommon.inc.glsl" />
     <None Include="Shaders\voxelTex_fs.glsl" />
     <None Include="Shaders\voxelTex_vs.glsl" />
@@ -198,6 +208,7 @@
     <ClInclude Include="source\atmosphere.hpp" />
     <ClInclude Include="source\camera.hpp" />
     <ClInclude Include="source\chunk.hpp" />
+    <ClInclude Include="source\weather.hpp" />
     <ClInclude Include="source\density.hpp" />
     <ClInclude Include="source\entity.hpp" />
     <ClInclude Include="source\game.hpp" />
@@ -241,6 +252,7 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="source\weather.cpp" />
     <ClCompile Include="source\density.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotSet</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotSet</EnableEnhancedInstructionSet>

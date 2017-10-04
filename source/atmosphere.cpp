@@ -8,16 +8,27 @@ Atmosphere::Atmosphere() : m_skyW(256), m_skyH(64), m_transW(1024), m_transH(256
 Atmosphere::Atmosphere(GLuint quadVao) : m_skyW(256), m_skyH(64), m_transW(1024), m_transH(256), m_inscatterW(256), m_inscatterH(128), m_inscatterD(32)
 {
 	this->quadVao = quadVao;
+
+	glGenFramebuffers(1, &m_FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
+
+	//bind texture
+	m_outputTex.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGBA16F, GL_RGBA);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_outputTex.GetTexID(), 0);
+
+	//unbind framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Atmosphere::Precompute()
 {
+	//better to load textures & shaders locally and delete them after precomputation
+
 	//2D
 	Texture deltaE;
 	transmittance = new Texture();
 	irradiance = new Texture();
 	
-
 	transmittance->CreateImage2D(m_transW, m_transH, false);
 	irradiance->CreateImage2D(m_skyW, m_skyH, false);
 	deltaE.CreateImage2D(m_skyW, m_skyH, false);
@@ -246,13 +257,19 @@ void Atmosphere::RenderToQuad()
 	glBindVertexArray(0);
 }
 
-void Atmosphere::Render(GBuffer &gbuffer, Texture *scene)
+Texture Atmosphere::Render(GBuffer &gbuffer, Texture *scene)
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
+
 	Shader *shader = g_game->GetShader("atmosphere");
 	Camera *camera = g_game->GetCamera();
 
 	shader->Use();
 	shader->SetUniform3fv("cameraPos", camera->GetPosition());
+	//shader->SetUniform1f("sun_azimuth", g_game->m_skydome->m_azimuth);
+	//shader->SetUniform1f("sun_altitude", g_game->m_skydome->m_altitude);
+	shader->SetUniform3fv("sunDir", g_game->m_skydome->m_sunDirection);
+	shader->SetUniform1f("sunIntensity", g_game->m_skydome->m_sunIntensity);
 
 	irradiance->Bind(0);
 	transmittance->Bind(1);
@@ -268,11 +285,6 @@ void Atmosphere::Render(GBuffer &gbuffer, Texture *scene)
 	inscatter->Unbind();
 	scene->Unbind();
 
-	//Shader *quad = g_game->GetShader("quad");
-	//quad->Use();
-	//quad->SetUniform1i("tex3D", 0);
-	//quad->SetUniform1i("tex", 0);
-	//inscatter->Bind(0);
-	//RenderToQuad();
-
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	return m_outputTex;
 }

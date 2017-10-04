@@ -1,24 +1,46 @@
 #include "game.hpp"
 
 
-Skydome::Skydome(Model * model, float outerRadius, float innerRadius)
+const glm::vec3 Skydome::sun_dawn = { .8f, .3f, 0.2f };
+const glm::vec3 Skydome::sun_noon = { .5f, .9f, 0.2f };
+const glm::vec3 Skydome::sun_dusk = { 0.9f, 0.3f, 0.1f };
+const glm::vec3 Skydome::sun_midnight = { 0.f, 0.f, 0.f };
+
+const glm::vec3 Skydome::zenith_dawn = { 0.1f, 0.1f, 0.65f };
+const glm::vec3 Skydome::horizon_dawn = { 0.5f, 0.15f, 0.4f };
+
+const glm::vec3 Skydome::zenith_noon = { 0.1f, 1.0f, .4f };
+const glm::vec3 Skydome::horizon_noon = { 0.34f, 0.88f, 0.54f };
+
+const glm::vec3 Skydome::zenith_dusk = { 0.5f, 0.4f, 0.3f };
+const glm::vec3 Skydome::horizon_dusk = { 0.9f, 0.4f, 0.1f };
+
+const glm::vec3 Skydome::zenith_midnight = { 0.f, 0.0f, 0.01f };
+const glm::vec3 Skydome::horizon_midnight = { 0.f, 0.01f, 0.05f };
+
+const float Skydome::altitude_margin = -0.12f;
+
+Skydome::Skydome(Model * model)
 {
 	m_sphere = model;
-	this->outerRadius = outerRadius;
-	this->innerRadius = innerRadius;
+
+
+	m_timeScale= .003f;
+	m_timeOfDay = 12.f;
 }
 
 Skydome::~Skydome()
 {
 }
 
-void Skydome::draw(Camera * camera, Shader * shader)
+void Skydome::Update()
+{
+	propagate_time(g_game->GetDeltaTime());
+	CalculateSun();
+}
+
+void Skydome::Draw(Shader *shader)
 {	
-	//shader->SetMat4("projection", camera->GetProj());
-	//shader->SetMat4("view", camera->GetViewMat());
-
-	glm::vec3 light_dir(-.2f, -1.f, -0.3f);
-
 	m_sphere->Draw(shader);
 }
 
@@ -26,8 +48,13 @@ void Skydome::upload_sun(const GLuint shader, const Camera & camera)
 {
 }
 
-void Skydome::propagate_time(const float elapsed_time)
+void Skydome::propagate_time(const float delta_time)
 {
+	m_timeOfDay += delta_time * m_timeScale;
+	if (m_timeOfDay >= 24.f)
+		m_timeOfDay -= 24.f;
+	else if (m_timeOfDay < 0.f)
+		m_timeOfDay += 24.f;
 }
 
 void Skydome::update_light_space(const Camera & camera)
@@ -50,4 +77,54 @@ void Skydome::update_sun_frustum(const glm::vec3 sun_pos, const glm::vec3 sun_fr
 bool Skydome::sphere_in_sun_frustum(glm::vec3 center, float radius)
 {
 	return false;
+}
+// Converts a normalized spherical coordinate (r = 1) to cartesian coordinates
+glm::vec3 spherical_to_vector(float theta, float phi) {
+	float sin_theta = sin(theta);
+	return glm::normalize(glm::vec3(
+		sin(phi) * cos(theta),
+		cos(phi),
+		sin_theta * sin(phi)
+	));
+}
+
+void Skydome::CalculateSun()
+{
+	//// Assuming declination = 0
+	float latitude = 45 * M_PI / 180.f; // lat 40 deg in rad
+	float solar_hour_angle = (m_timeOfDay - 12.f) * 15 * M_PI / 180.f;
+	//int sha_sign = (solar_hour_angle > 0) - (solar_hour_angle < 0);
+	this->m_altitude = asin(cos(latitude) * cos(solar_hour_angle));
+
+	if (solar_hour_angle > 0)
+		this->m_azimuth = acos(sin(m_altitude) * sin(latitude) / (cos(m_altitude) * cos(latitude)));
+	else
+		m_azimuth = 2 * M_PI - acos(sin(m_altitude) * sin(latitude) / (cos(m_altitude) * cos(latitude)));
+
+	//m_sunDirection = glm::normalize(glm::vec3(sin(m_azimuth), sin(m_altitude), -cos(m_azimuth)));
+	m_sunDirection = glm::vec3(0, 1.0, 0);
+	//m_sunDirection = spherical_to_vector(m_altitude, m_azimuth);
+	m_sunIntensity = 10.0f;
+
+
+}
+
+float Skydome::GetAzimuth()
+{
+	return m_azimuth;
+}
+
+float Skydome::GetAltitude()
+{
+	return m_altitude;
+}
+
+glm::vec3 Skydome::GetSunColor()
+{
+	return m_sunColor;
+}
+
+glm::vec3 Skydome::GetSunDirection()
+{
+	return m_sunDirection;
 }

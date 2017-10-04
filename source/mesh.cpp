@@ -46,7 +46,7 @@ void Mesh::Draw(Shader *shader)
 		tex.Unbind();
 }
 
-void Mesh::DrawVertices(Shader *shader)
+void Mesh::DrawVertices()
 {
 	//bind textures
 	glBindVertexArray(this->m_vao);

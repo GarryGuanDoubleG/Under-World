@@ -186,9 +186,10 @@ void Graphics::InitShapes()
 	m_vboMap.insert(pair<string, GLuint>("quad", quad_vbo));
 }
 
-void Graphics::InitSkybox()
+Skydome * Graphics::InitSkybox()
 {
-	m_skydome = new Skydome(m_modelMap["skydome"], 10, 10);
+	m_skydome = new Skydome(m_modelMap["skydome"]);
+	return m_skydome;
 }
 
 void Graphics::InitDepthMap()
@@ -255,62 +256,6 @@ void Graphics::InitFBOS()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Graphics::RealInitFBO()
-{
-
-	glGenFramebuffers(1, &gBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-
-	// position color buffer
-	glGenTextures(1, &gPosition);
-	glBindTexture(GL_TEXTURE_2D, gPosition);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
-	// normal color buffer
-	glGenTextures(1, &gNormal);
-	glBindTexture(GL_TEXTURE_2D, gNormal);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
-	// color + specular color buffer
-	glGenTextures(1, &gAlbedoSpec);
-	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
-
-	//m_GBuffer.gPosition.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB16F, GL_RGB);
-	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_GBuffer.gPosition.GetTexID(), 0);
-
-	//m_GBuffer.gNormal.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB16F, GL_RGB);
-	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_GBuffer.gNormal.GetTexID(), 0);
-
-	//m_GBuffer.gAlbedoSpec.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
-	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_GBuffer.gAlbedoSpec.GetTexID(), 0);
-
-	m_GBuffer.gPosition.SetTexID(gPosition);
-	//m_GBuffer.gNormal.SetTexID(gNormal);
-	//m_GBuffer.gAlbedoSpec.SetTexID(gAlbedoSpec);
-	//
-	// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
-	unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-	glDrawBuffers(3, attachments);
-	// create and attach depth buffer (renderbuffer)
-
-	glGenRenderbuffers(1, &rboDepth);
-	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCREEN_WIDTH, SCREEN_HEIGHT);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
-	// finally check if framebuffer is complete
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "Framebuffer not complete!" << std::endl;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
 void Graphics::SetCamera(Camera * camera)
 {
 	m_camera = camera;
@@ -362,12 +307,22 @@ void Graphics::RenderBackground(GLfloat bg_color[4])
 	glClearBufferfv(GL_COLOR, 0, bg_color);
 }
 
-void Graphics::RenderSkybox()
+void Graphics::RenderSkybox(Shader *shader)
 {
 	if(~m_flag & SKYBOX_MODE) return;
 
+	shader->Use();
+
 	glDepthFunc(GL_LEQUAL);
-	m_skydome->draw(m_camera, m_shaderMap["skybox"]);
+
+	glm::mat4 model(1.0f);
+	model = glm::translate(model, m_camera->GetPosition());
+	model = glm::scale(model, glm::vec3(1.f));
+	shader->SetMat4("model", model);
+	shader->SetMat4("view", m_camera->GetViewMat());
+	shader->SetMat4("projection", m_camera->GetProj());
+
+	m_skydome->Draw(shader);
 }
 
 GBuffer Graphics::DeferredRenderScene()
@@ -379,25 +334,16 @@ GBuffer Graphics::DeferredRenderScene()
 	glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFBO);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
 	//render skydome
-	Shader *objectShader = m_shaderMap["deferred"];
-	objectShader->Use();
-	//objectShader->SetMat4("model", glm::translate(glm::mat4(), m_camera->GetPosition()));
-	glm::mat4 model(1.0f);
-	model = glm::translate(model, m_camera->GetPosition());
-	model = glm::scale(model, glm::vec3(10));
-	objectShader->SetMat4("model", model);
-	objectShader->SetMat4("view", m_camera->GetViewMat());
-	objectShader->SetMat4("projection", m_camera->GetProj());
+	RenderSkybox(m_shaderMap["deferred"]);
 
-
-	m_skydome->draw(m_camera, objectShader);
+	//render voxels
 	DeferredRenderVoxels(m_shaderMap["voxel_deferred"]);
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+
+	//render lighitng
 	DeferredRenderLighting(m_shaderMap["deferredLighting"]);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -433,6 +379,7 @@ void Graphics::DeferredRenderLighting(Shader *shader)
 
 	//shader->SetUniform1i("lightCount", 0);
 	shader->SetUniform3fv("viewPos", m_camera->GetPosition());
+	shader->SetUniform3fv("sunDir", m_skydome->m_sunDirection);
 
 	RenderToQuad();
 	m_GBuffer.Unbind();
@@ -440,18 +387,13 @@ void Graphics::DeferredRenderLighting(Shader *shader)
 
 void Graphics::RenderScene()
 {
-	if(m_flag & SKYBOX_MODE) RenderSkybox();
+	if (m_flag & SKYBOX_MODE)
+	{
+		m_textureMap["grass"]->Bind(0);
+		RenderSkybox(m_shaderMap["object"]);
+		m_textureMap["grass"]->Unbind();
 
-	Shader *objectShader = m_shaderMap["object"];
-	objectShader->Use();
-	//objectShader->SetMat4("model", glm::translate(glm::mat4(), m_camera->GetPosition()));
-	objectShader->SetMat4("model", glm::translate(glm::mat4(), glm::vec3(0.0f)));
-	objectShader->SetMat4("view", m_camera->GetViewMat());
-	objectShader->SetMat4("projection", m_camera->GetProj());
-
-	m_textureMap["grass"]->Bind(0);
-	m_skydome->draw(m_camera, objectShader);
-	m_textureMap["grass"]->Unbind();
+	}
 
 	if(m_flag & SHADOW_MODE) RenderShadowMap();
 	if(m_flag & VOXEL_MODE) RenderVoxels();
@@ -496,7 +438,7 @@ void Graphics::RenderShadowMap()
 	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(400.f, 150, 400.0f));
 	model = glm::scale(model, glm::vec3(1.5f));
 	shader->SetMat4("model", model);
-	m_modelMap["arissa"]->DrawVertices(shader);
+	m_modelMap["arissa"]->DrawVertices();
 
 	glCullFace(GL_BACK);
 
@@ -550,28 +492,6 @@ void Graphics::DeferredRenderModel(Shader *shader, const string &name, const glm
 	model->Draw(shader);
 }
 
-void Graphics::RenderModel(const string &name, const glm::mat4 &modelMat)
-{
-	if(~m_flag & MODEL_MODE) return;
-
-	Model * model = m_modelMap["arissa"];
-	Shader *shader = m_shaderMap["object"];
-	shader->Use();
-
-	shader->SetMat4("model", modelMat);
-	shader->SetMat4("projection", m_camera->GetProj());
-	shader->SetMat4("view", m_camera->GetViewMat());
-
-	glm::vec3 light_pos(50.f, 200.f, 50.f);
-	glm::vec3 light_color(1.0f, 1.0f, 1.0f);
-
-	glUniform3fv(shader->Uniform("viewPos"), 1, &m_camera->GetPosition()[0]);
-	glUniform3fv(shader->Uniform("lightPos"), 1, &light_pos[0]);
-	glUniform3fv(shader->Uniform("lightColor"), 1, &light_color[0]);
-
-	model->Draw(shader);
-}
-
 void Graphics::DeferredRenderVoxels(Shader *shader)
 {
 	shader = m_shaderMap["voxel_deferred"];
@@ -600,6 +520,29 @@ void Graphics::DeferredRenderVoxels(Shader *shader)
 	m_textureMap["grassNormal"]->Unbind();
 }
 
+void Graphics::RenderModel(const string &name, const glm::mat4 &modelMat)
+{
+	if (~m_flag & MODEL_MODE) return;
+
+	Model * model = m_modelMap["arissa"];
+	Shader *shader = m_shaderMap["object"];
+	shader->Use();
+
+	shader->SetMat4("model", modelMat);
+	shader->SetMat4("projection", m_camera->GetProj());
+	shader->SetMat4("view", m_camera->GetViewMat());
+
+	glm::vec3 light_pos(50.f, 200.f, 50.f);
+	glm::vec3 light_color(1.0f, 1.0f, 1.0f);
+
+	glUniform3fv(shader->Uniform("viewPos"), 1, &m_camera->GetPosition()[0]);
+	glUniform3fv(shader->Uniform("lightPos"), 1, &light_pos[0]);
+	glUniform3fv(shader->Uniform("lightColor"), 1, &light_color[0]);
+
+	model->Draw(shader);
+}
+
+
 void Graphics::RenderVoxels()
 {
 	if(~m_flag & VOXEL_MODE) return;
@@ -627,7 +570,7 @@ void Graphics::RenderVoxels()
 	shader->SetMat4("view", m_camera->GetViewMat());
 
 	glm::vec3 light_color(1.0f, 1.0f, 1.0f);
-	glm::vec3 light_dir(-.2f, -1.f, -0.3f);
+	glm::vec3 light_dir = g_game->m_skydome->m_sunDirection;
 
 
 	glUniform3fv(shader->Uniform("viewPos"), 1, &m_camera->GetPosition()[0]);

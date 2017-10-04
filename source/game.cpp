@@ -26,10 +26,13 @@ Game::Game() : m_running(true)
 	m_graphics->SetTextures(m_resManager->LoadTextures());
 	m_graphics->SetModel(m_resManager->LoadModels());
 	m_graphics->SetCamera(m_camera);
-	m_graphics->InitSkybox();
+	m_skydome = m_graphics->InitSkybox();
 
 	m_atmosphere = new Atmosphere(m_graphics->GetVAO("quad"));
 	m_atmosphere->Precompute();
+
+	m_weather = new Weather(m_graphics->GetVAO("quad"));
+	m_weather->PrecomputeNoise();
 
 	m_entitiesList = new Entity[MAX_ENTITIES];
 	for (int i = 0; i < MAX_ENTITIES - 1; i++)
@@ -39,7 +42,7 @@ Game::Game() : m_running(true)
 	m_voxelManager->Init();
 
 	SlogCheckGLError();
-	m_graphics->SetFlag(FP_MODE /*| SKYBOX_MODE*/ | VOXEL_MODE | MODEL_MODE | SHADOW_MODE);
+	m_graphics->SetFlag(FP_MODE | SKYBOX_MODE | VOXEL_MODE | MODEL_MODE | SHADOW_MODE);
 	g_prevTime = 0;
 
 	SlogCheckGLError();
@@ -70,7 +73,8 @@ void Game::Draw()
 	else
 	{
 		gBuffer = m_graphics->DeferredRenderScene();
-		m_atmosphere->Render(gBuffer, GetTexture("scene"));
+		Texture postProcessing = m_atmosphere->Render(gBuffer, GetTexture("scene"));
+		m_weather->Render(gBuffer, &postProcessing);
 	}
 	m_graphics->Display();
 
@@ -78,14 +82,14 @@ void Game::Draw()
 
 void Game::Update()
 {
-	g_prevTime = SDL_GetTicks();
-
 	m_voxelManager->Update();
+	m_skydome->Update();
 
 	if(m_flag & FP_MODE) {
 		SDL_WarpMouseInWindow(m_graphics->GetWindow(), SCREEN_WIDTH * .5f, SCREEN_HEIGHT * .5f);
 	}
 
+	g_prevTime = SDL_GetTicks();
 }
 
 void Game::Close()
@@ -143,10 +147,12 @@ Shader * Game::GetShader(const char * name)
 {
 	return m_graphics->GetShader(name);
 }
+
 Texture * Game::GetTexture(const char *name)
 {
 	return m_graphics->GetTexture(name);
 }
+
 Camera * Game::GetCamera()
 {
 	return m_camera;

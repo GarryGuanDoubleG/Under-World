@@ -43,6 +43,12 @@
     <Filter Include="Shaders\Model">
       <UniqueIdentifier>{0120fcfc-d642-4f45-9c4a-1be1cfa0239a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Clouds">
+      <UniqueIdentifier>{22597dac-1a6c-432f-a7c5-f37f6e01edf5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Clouds\noise">
+      <UniqueIdentifier>{c135922d-9f2c-4d1a-b525-e4880fae3a82}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -88,7 +94,6 @@
     <None Include="Shaders\quad_fs.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="Shaders\sun_vs.glsl" />
     <None Include="Shaders\Scattering\add_delta_e.compute.glsl">
       <Filter>Shaders\Scattering</Filter>
     </None>
@@ -169,6 +174,39 @@
     </None>
     <None Include="Shaders\deferredLighting_vs.glsl">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Clouds\cloud_vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Clouds\noise.inc.glsl">
+      <Filter>Shaders\Clouds\noise</Filter>
+    </None>
+    <None Include="Shaders\common.inc.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Clouds\cloudHighFreqNoise.glsl">
+      <Filter>Shaders\Clouds\noise</Filter>
+    </None>
+    <None Include="Shaders\Clouds\cloudLowFreqNoise.glsl">
+      <Filter>Shaders\Clouds\noise</Filter>
+    </None>
+    <None Include="Shaders\Clouds\cloud_common.inc.glsl">
+      <Filter>Shaders\Clouds</Filter>
+    </None>
+    <None Include="Shaders\Clouds\generateWeatherData.glsl">
+      <Filter>Shaders\Clouds</Filter>
+    </None>
+    <None Include="Shaders\Clouds\cloudCurlNoise.glsl">
+      <Filter>Shaders\Clouds\noise</Filter>
+    </None>
+    <None Include="Shaders\Clouds\raymarch_clouds_vs.glsl">
+      <Filter>Shaders\Clouds</Filter>
+    </None>
+    <None Include="Shaders\Clouds\raymarch_clouds_fs.glsl">
+      <Filter>Shaders\Clouds</Filter>
+    </None>
+    <None Include="Shaders\Clouds\applyCloud_fs.glsl">
+      <Filter>Shaders\Clouds</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -251,6 +289,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\atmosphere.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\weather.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -349,6 +390,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\atmosphere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\weather.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

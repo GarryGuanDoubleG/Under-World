@@ -85,6 +85,26 @@
     "vs": "Shaders/health_vs.glsl",
     "fs": "Shaders/health_fs.glsl"
   },
+  "GenerateWeatherData": {
+    "compute": "Shaders/Clouds/generateWeatherData.glsl"
+  },
+  "cloudHighFreqNoise": {
+    "compute": "Shaders/Clouds/cloudHighFreqNoise.glsl"
+  },
+  "cloudLowFreqNoise": {
+    "compute": "Shaders/Clouds/cloudLowFreqNoise.glsl"
+  },
+  "cloudCurlNoise": {
+    "compute": "Shaders/Clouds/cloudCurlNoise.glsl"
+  },
+  "applyCloud": {
+    "vs": "Shaders/quad_vs.glsl",
+    "fs": "Shaders/Clouds/applyCloud_fs.glsl"
+  },
+  "raymarchClouds": {
+    "vs": "Shaders/Clouds/raymarch_clouds_vs.glsl",
+    "fs": "Shaders/Clouds/raymarch_clouds_fs.glsl"
+  },
   "atmosphere": {
     "vs": "Shaders/Scattering/atmosphere_vs.glsl",
     "fs": "Shaders/Scattering/atmosphere_fs.glsl"

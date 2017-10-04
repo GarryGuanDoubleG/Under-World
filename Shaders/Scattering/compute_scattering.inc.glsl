@@ -28,41 +28,6 @@
 
 // Include local scattering code
 #define NO_COMPUTE_SHADER 1
-#pragma include "scatterFunctions.inc.glsl"
-
-const float sun_azimuth = 0;
-const float sun_altitude = 90;
-
-bool is_skybox(vec3 pos, vec3 cameraPos)
-{
-	return distance(pos, cameraPos) > 20000.0;
-}
-
-bool is_skybox(vec3 pos)
-{
-	return distance(pos, viewPos) > 20000.0;
-}
-
-
-// Converts a normalized spherical coordinate (r = 1) to cartesian coordinates
-vec3 spherical_to_vector(float theta, float phi) {
-    float sin_theta = sin(theta);
-    return normalize(vec3(
-        sin(phi) * cos(theta),
-		cos(phi),
-        sin_theta * sin(phi)
-    ));
-}
-
-// Converts a given sun azimuth and altitude to a direction vector
-vec3 sun_azimuth_to_angle(float azimuth, float altitude) {
-    float phi = (90 - altitude) / 180.0 * M_PI;
-    float theta = azimuth / 180.0 * M_PI;
-    return spherical_to_vector(theta, phi);
-}
-
-vec3 sun_vector = sun_azimuth_to_angle(sun_azimuth, sun_altitude);
-
 /*
 Some parts of this code are taken from the master thesis of Stefan Sperlhofer,
 which unfortunately does not seem to be online anymore, so I can't link to it.
@@ -70,6 +35,16 @@ which unfortunately does not seem to be online anymore, so I can't link to it.
 
 const float EPSILON_ATMOSPHERE = 0.002f;
 const float EPSILON_INSCATTER = 0.01f;
+
+bool is_skybox(vec3 pos, vec3 cameraPos)
+{
+	return distance(pos, cameraPos) > 40000.0;
+}
+
+bool is_skybox(vec3 pos)
+{
+	return distance(pos, viewPos) > 40000.0;
+}
 
 
 // input - d: view ray in world space

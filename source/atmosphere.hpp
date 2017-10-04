@@ -11,6 +11,8 @@ class Atmosphere
 	Texture *transmittance;
 
 	GLuint quadVao;
+	GLuint m_FBO;
+	Texture m_outputTex;
 public:
 	Atmosphere();
 	Atmosphere(GLuint quadVao);
@@ -27,7 +29,7 @@ public:
 	void AddDeltas(Texture & deltaE, Texture & deltaSR);
 
 	void RenderToQuad();
-	void Render(GBuffer & gbuffer, Texture *scene);
+	Texture Render(GBuffer & gbuffer, Texture *scene);
 private:
 
 };

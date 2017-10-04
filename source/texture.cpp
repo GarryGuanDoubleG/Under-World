@@ -281,18 +281,48 @@ void Texture::CreateImage2D(int w, int h, bool float32)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void Texture::CreateImage2D(int w, int h, GLuint texRepeat, GLuint internalFormat, GLuint format, GLuint type)
+{
+	m_type = Tex2D;
+
+	glGenTextures(1, &m_texID);
+	glBindTexture(GL_TEXTURE_2D, m_texID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texRepeat);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texRepeat);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, w, h, 0, format, type, NULL);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
 void Texture::CreateImage3D(int w, int h, int d, bool float32)
 {
 	m_type = Tex3D;
 
 	glGenTextures(1, &m_texID);
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_3D, m_texID);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA16F, w, h, d, 0, GL_RGBA, GL_FLOAT, NULL);
+
+	glBindTexture(GL_TEXTURE_3D, 0);
+}
+
+void Texture::CreateImage3D(int w, int h, int d, GLuint internalFormat, GLuint format, GLuint type)
+{
+	m_type = Tex3D;
+
+	glGenTextures(1, &m_texID);
+	glBindTexture(GL_TEXTURE_3D, m_texID);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage3D(GL_TEXTURE_3D, 0, internalFormat, w, h, d, 0, format, type, NULL);
 
 	glBindTexture(GL_TEXTURE_3D, 0);
 }

@@ -15,8 +15,11 @@ layout (binding = 4) uniform sampler2D gNormal;
 layout (binding = 5) uniform sampler2D gAlbedoSpec;
 
 layout (binding = 6) uniform sampler2D ShadedScene;
-const float sunIntensity = 10.0f;
+//const float sunIntensity = 30.0f;
+uniform float sunIntensity;
 
+#pragma include "common.inc.glsl"
+#pragma include "scatterFunctions.inc.glsl"
 #pragma include "compute_scattering.inc.glsl"
 
 const float EXPOSURE = 1.f;
@@ -42,6 +45,7 @@ void main()
 
 	vec3 inscatterLight = DoScattering(surfacePos, viewDir, sky_clip) * sunIntensity;
 
+
 	if(is_skybox(surfacePos))
 	{
 		inscatterLight *= M_PI;
@@ -49,10 +53,9 @@ void main()
         inscatterLight * sky_clip;
 
         silhouette_col *= 2.0;
-        float disk_factor = pow(clamp(dot(viewDir, sun_vector) + 0.000069, 0, 1), 23.0 * 1e5);
+        float disk_factor = pow(clamp(dot(viewDir, sunDir) + 0.000069, 0, 1), 23.0 * 1e5);		
         float upper_disk_factor = smoothstep(0, 1, (viewDir.y + 0.045) * 1.0);
-        inscatterLight += vec3(1, 0.3, 0.1) * disk_factor * upper_disk_factor *
-            silhouette_col * 3.0 * 1e3;
+        inscatterLight += vec3(1, 0.1, 0.3) * disk_factor * upper_disk_factor * silhouette_col * 3.0 * 1e3;
 	}
 	else
 	{
@@ -66,20 +69,8 @@ void main()
 	result.xyz = textureLod(ShadedScene, UV, 0).xyz;
 	result.w = 1.0f;
 
-	
-	vec3 cam_pos = viewPos;
-	cam_pos = worldspace_to_atmosphere(cam_pos);
-	float offset;
-	float max_path_length;
-
-	
 	vec3 tone_map = result.xyz + inscatterLight;
-	
 	tone_map = HDR(tone_map);
-	//tone_map = (tone_map) / (tone_map + vec3(1.0f));
-	//tone_map = pow(tone_map, vec3(1.0 / 2.2));
 
 	result.xyz = tone_map;
-	//result.xyz += inscatterLight;
-	//result.xyz = HDR(result.xyz);
 }

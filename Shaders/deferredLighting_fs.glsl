@@ -17,8 +17,10 @@ struct Light {
 
 const int NR_LIGHTS = 32;
 uniform Light lights[NR_LIGHTS];
+
 uniform int lightCount;
 uniform vec3 viewPos;
+uniform vec3 sunDir;
 
 void main()
 {             
@@ -31,8 +33,9 @@ void main()
     // then calculate lighting as usual
     vec3 lighting  = Diffuse * 0.3; // hard-coded ambient component
     vec3 viewDir  = normalize(viewPos - FragPos);
-	vec3 lightDir = vec3(-.2f, -1.f, -0.3f);
-	lightDir *= -1;
+	vec3 lightDir = sunDir * -1;
+	//vec3 lightDir = vec3(-.2f, -1.f, -0.3f);
+	//lightDir *= -1;
     //for(int i = 0; i < lightCount; ++i)
     //{
     //    // diffuse

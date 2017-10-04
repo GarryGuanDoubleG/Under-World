@@ -3,32 +3,53 @@
 class Skydome
 {
 	Model *m_sphere;
-	glm::vec3 m_sunLightDir;
-	glm::vec3 m_waveLength;
+	// Constant color values:
+	static const glm::vec3 sun_dawn;
+	static const glm::vec3 sun_noon;
+	static const glm::vec3 sun_dusk;
+	static const glm::vec3 sun_midnight;
 
-	float outerRadius;
-	float outerRadiusSQ;
-	float innerRadius;
-	float innerRadiusSQ;
+	static const glm::vec3 zenith_dawn;
+	static const glm::vec3 horizon_dawn;
 
-	float fKrESun;
-	float fKmESun;
-	float fKr4Pi;
-	float fKm4Pi;
-	float fScale;
-	float fScaleDepth;
-	float fScaleOverScaleDepth;
+	static const glm::vec3 zenith_noon;
+	static const glm::vec3 horizon_noon;
+
+	static const glm::vec3 zenith_dusk;
+	static const glm::vec3 horizon_dusk;
+
+	static const glm::vec3 zenith_midnight;
+	static const glm::vec3 horizon_midnight;
+
+	static const float altitude_margin;
+
 public:
-	Skydome(Model *model, float outerRadius = 100, float innerRadius = 100);
-	~Skydome();
-	float time_of_day, time_scale;
+	float m_timeOfDay, m_timeScale;
+	float m_altitude, m_azimuth, m_interp, m_interp_night;
+	float m_sunIntensity;
 
-	void draw(Camera *camera, Shader * shader);
+	glm::vec3 m_sunDirection;
+	glm::vec3 m_sunColor;
+
+public:
+	Skydome(Model *model);
+	~Skydome();
+
+	void Update();
+	void Draw(Shader * shader);
 	void upload_sun(const GLuint shader, const Camera &camera);
-	void propagate_time(const float elapsed_time);
 	void update_light_space(const Camera &camera);
 	void reset_time();
 	glm::mat4 get_light_space_matrix();
 	void update_sun_frustum(const glm::vec3 sun_pos, const glm::vec3 sun_front, const glm::vec3 sun_right);
 	bool sphere_in_sun_frustum(glm::vec3 center, float radius);
+
+	//update per frame
+
+	void CalculateSun();
+	float GetAzimuth();
+	float GetAltitude();
+	glm::vec3 GetSunColor();
+	glm::vec3 GetSunDirection();
+	void propagate_time(const float elapsed_time);
 };

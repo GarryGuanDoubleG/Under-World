@@ -58,19 +58,18 @@ public:
 	~Graphics();
 	bool InitGraphics(int winWidth, int winHeight);
 	void InitShapes();
-	void InitSkybox();
+	Skydome* InitSkybox();
 
 	void InitDepthMap();
 
 	void InitFBOS();
-
-	void RealInitFBO();
 
 	void SetCamera(Camera *camera);
 	void SetShaders(map<string, Shader*> &shaders);
 	void SetTextures(map<string, Texture*> &textures);
 	void SetModel(map<string, Model*>& models);
 	void SetFlag(GLuint flag);
+
 	void XORSetFlag(GLuint flag);
 
 	Shader * GetShader(const char *key);
@@ -81,7 +80,7 @@ public:
 
 	void Display();
 	void RenderBackground(GLfloat bg_color[4]);
-	void RenderSkybox();
+	void RenderSkybox(Shader * shader);
 	GBuffer DeferredRenderScene();
 	void DeferredRenderLighting(Shader *shader);
 	void RenderScene();

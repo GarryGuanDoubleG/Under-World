@@ -49,6 +49,7 @@ using namespace std;
 #include "voxelManager.hpp"
 #include "graphics.hpp"
 #include "atmosphere.hpp"
+#include "weather.hpp"
 
 #define SCREEN_WIDTH 1680.0f
 #define SCREEN_HEIGHT 1080.0f
@@ -76,7 +77,9 @@ private:
 	Entity *m_entitiesList;
 
 	Atmosphere *m_atmosphere;
+	Weather *m_weather;
 public:
+	Skydome *m_skydome;
 	VoxelManager *m_voxelManager;
 
 public:

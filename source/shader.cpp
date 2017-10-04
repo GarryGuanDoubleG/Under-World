@@ -1,5 +1,7 @@
 #include "game.hpp"
 
+#define SHADER_PATH "Shaders/" //default shader path
+
 /**
 *@brief prints out any errors with compiling a particular shader
 *@param name the name of the shader
@@ -71,8 +73,10 @@ bool read_file(char *name, string &out)
 				}
 
 				string filesource = "";
-				read_file((char*)(currentPath + file).c_str(), filesource);
-				out.append(filesource + "\n");
+				if(read_file((char*)(currentPath + file).c_str(), filesource))
+					out.append(filesource + "\n");
+				else if(read_file((char*)(SHADER_PATH + file).c_str(), filesource))
+					out.append(filesource + "\n");
 			}
 		}
 	}

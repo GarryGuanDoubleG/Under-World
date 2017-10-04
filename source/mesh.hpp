@@ -63,7 +63,7 @@ public:
 	*/
 	void Draw(Shader *shader);
 
-	void DrawVertices(Shader * shader);
+	void DrawVertices();
 
 	/**
 	* @brief additional buffer for instance rendering

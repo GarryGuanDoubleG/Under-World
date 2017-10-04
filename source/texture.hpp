@@ -41,8 +41,9 @@ public:
 	void CreateTexture2D(int w, int h, GLuint internalFormat, GLuint format, GLuint type = GL_FLOAT);
 
 	void CreateImage2D(int w, int h, bool float32);
+	void CreateImage2D(int w, int h, GLuint texRepeat, GLuint internalFormat, GLuint format, GLuint type);
 	void CreateImage3D(int w, int h, int d, bool float32);
-
+	void CreateImage3D(int w, int h, int d, GLuint internalFormat, GLuint format, GLuint type);
 	void BindImage2D();
 
 	GLuint GetTexID();

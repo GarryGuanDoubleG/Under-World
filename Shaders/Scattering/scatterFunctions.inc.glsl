@@ -88,7 +88,7 @@ const float AVERAGE_GROUND_REFLECTANCE = 0.1f;
 
 // Rayleigh
 //const float HR = GET_SETTING(scattering, rayleigh_height_scale);
-const float HR = 12.0;
+const float HR = 8.0;
 const vec3 betaR = vec3(5.8e-3, 1.35e-2, 3.31e-2);
 
 // Mie
@@ -106,9 +106,9 @@ const vec3 betaR = vec3(5.8e-3, 1.35e-2, 3.31e-2);
  //const vec3 betaMSca = vec3(20e-3);
  //const float mieG = 0.76;
 // PARTLY CLOUDY
-const float HM = 3.0;
-const vec3 betaMSca = vec3(3e-3);
-const float mieG = 0.65;
+const float HM = 1.2;
+const vec3 betaMSca = vec3(20e-3);
+const float mieG = 0.8;
 
 // Beta Mie Extinction
 const vec3 betaMEx = betaMSca / 0.9;
