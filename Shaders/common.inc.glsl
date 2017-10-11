@@ -42,8 +42,50 @@ vec3 sun_azimuth_to_angle(float azimuth, float altitude) {
     float theta = azimuth / 180.0 * M_PI;
     return spherical_to_vector(theta, phi);
 	//return spherical_to_vector(azimuth, altitude);
-	//return sunDir;
+	//return su
+	//nDir;
 }
+
+float random(vec3 scale, float seed) {
+	/* use the fragment position for a different seed per-pixel */
+	return fract(sin(dot(scale + seed, scale)) * 43758.5453 + seed);
+}
+
+vec3 InternalRaySphereIntersect( float sphereRadius, vec3 origin, vec3 direction)
+{	
+	float a0 = sphereRadius * sphereRadius - dot( origin, origin);
+	float a1 = dot( origin, direction);
+	float result = sqrt(a1 * a1 + a0) - a1;
+	
+	return origin + direction * result;
+}
+
+float CalculatePlanetRadius( float atmosphereHeight, float horizonDistance)
+{
+	float atmosphereRadius = atmosphereHeight * atmosphereHeight + horizonDistance * horizonDistance;
+	atmosphereRadius /= 2.0f * atmosphereHeight;
+
+	return atmosphereRadius - atmosphereHeight;
+}
+
+float CalculateHorizonDistance( float innerRadius, float outerRadius)
+{
+	return sqrt( (outerRadius * outerRadius) - (innerRadius * innerRadius));
+}
+
+float CalculateMaxDistance(float earthRadius, float atmosphereEndHeight)
+{
+	return CalculateHorizonDistance( earthRadius, earthRadius + atmosphereEndHeight);
+}
+
+float CalculateMaxRayDistance(float earthRadius, float atmosphereStartHeight, float atmosphereEndHeight)
+{
+	float cloudInnerDistance = CalculateHorizonDistance( earthRadius, earthRadius + atmosphereStartHeight);
+	float cloudOuterDistance = CalculateHorizonDistance( earthRadius, earthRadius + atmosphereEndHeight);
+	return cloudOuterDistance - cloudInnerDistance;
+}
+
+#define clip(x) if(x < 0) discard;
 
 //#define get_sun_vector() sun_azimuth_to_angle(sun_azimuth, sun_altitude);
 #define get_sun_vector() sunDir

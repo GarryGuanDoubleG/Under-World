@@ -85,6 +85,7 @@
     "vs": "Shaders/health_vs.glsl",
     "fs": "Shaders/health_fs.glsl"
   },
+
   "GenerateWeatherData": {
     "compute": "Shaders/Clouds/generateWeatherData.glsl"
   },

@@ -22,5 +22,7 @@ void main() {
 	curlValues = set_ranges_signed(curlValues, curl_low, curl_high);
 
 	imageStore(DestTex, coord, vec4(encode_curl(curlValues), 0));
+
+	//imageStore(DestTex, coord, vec4(0));
 	//imageStore(DestTex, coord, vec4(1.0f, 0,0,1));
 }

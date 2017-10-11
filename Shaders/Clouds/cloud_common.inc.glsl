@@ -32,8 +32,11 @@
 
 #define SUN_DISTANCE 10000000.0
 
+#define CLOUD_WIND_SPEED 1.0
+#define CLOUD_GLOBAL_DENSITY 0.2
 
-uniform float time;
+const float time = 1.0;
+const float frame_number = 1.0;
 
 ivec2 reprojection_offsets[16] = {
 	ivec2(2,1), ivec2(1,2), ivec2(2,0), ivec2(0,1),
@@ -58,7 +61,23 @@ vec3 decode_curl(vec3 c) {
 	return (c - 0.5) * 2.0;
 }
 
-//vec3 get_raymarch_direction(vec3 sun_dir){
-//	float direction = get_night_time(sun_dir, 3.0, -0.3) > 0.0 ? -1.0 : 1.0;
-//	return sun_dir * direction;
+//void calculate_per_frame_random_data(out vec3 per_frame_random_data, float cloud_time, float cloud_wind_speed, float cloud_global_density, vec2 uv = vec2(0,0)) 
+//{
+// 	vec2 xy_offset = get_time(cloud_time, cloud_wind_speed * WEATHER_TIME_SCALAR) * cloud_wind_speed + cloud_time;
+ 				
+// 	vec3 sampling_pos1 = vec3(uv + xy_offset,   0.0) * 2.0;
+// 	vec3 sampling_pos2 = vec3(uv + xy_offset, 100.0) * 2.0;
+// 	vec3 sampling_pos3 = vec3(uv + xy_offset, 200.0) * 1.0;
+
+// 	float perlin1 = perlin(sampling_pos1);
+// 	float perlin2 = perlin(sampling_pos2);
+// 	float perlin3 = perlin(sampling_pos3);
+ 				
+// 	perlin1 = set_range(perlin1, 0.0, 1.0);
+// 	perlin2 = set_range(perlin2, 0.0, 1.0);
+// 	perlin3 = set_range(perlin3, 0.0, 1.0);
+
+//	per_frame_random_data.x = pow(perlin1, 2.0) * 3.0;
+//	per_frame_random_data.y = 0.0;//cloud_global_density;
+//	per_frame_random_data.z = perlin3 * UP_DOWN_DRAFT_RANGE;
 //}

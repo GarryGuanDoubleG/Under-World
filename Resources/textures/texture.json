@@ -12,7 +12,9 @@
     "path": "Resources\\textures\\brickWall.jpg",
     "normal": "Resources\\textures\\brickwall_normal.jpg"
   },
-
+  "weather": {
+    "path": "Resources\\textures\\weather.png"
+  },
   "grass1": {
     "path": "billboard_grass.png"
   },

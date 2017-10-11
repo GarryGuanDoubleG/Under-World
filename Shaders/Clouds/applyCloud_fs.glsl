@@ -11,8 +11,10 @@ void main() {
     vec4 scene_color = textureLod(ShadedScene, UV, 0);
     vec4 cloud_color = textureLod(CloudsTex, UV, 0);
 
-    //result = scene_color * (1 - cloud_color.w) + cloud_color;
-	result.rgb = mix(scene_color, cloud_color, 0.5f).rgb;
-    result.w = scene_color.w;
+    result = scene_color * (1 - cloud_color.w) + cloud_color;
+	//result.rgb = mix(scene_color, cloud_color, cloud_color.a).rgb;
+    //result.w = scene_color.w;
+	result.w = 1.0f;
 	//result = scene_color;
+	//result = cloud_color;
 }

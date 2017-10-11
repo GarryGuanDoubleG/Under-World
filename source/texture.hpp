@@ -25,6 +25,7 @@ public:
 	~Texture();
 
 	void LoadTexture(string filepath);
+	void LoadTexture3D(string filepath, int w, int h, int d, GLuint internalFormat, GLuint format, GLuint wrapmode);
 	void LoadSkybox(string filepath);
 	void Destroy();
 	void TriFiltering();
@@ -43,7 +44,7 @@ public:
 	void CreateImage2D(int w, int h, bool float32);
 	void CreateImage2D(int w, int h, GLuint texRepeat, GLuint internalFormat, GLuint format, GLuint type);
 	void CreateImage3D(int w, int h, int d, bool float32);
-	void CreateImage3D(int w, int h, int d, GLuint internalFormat, GLuint format, GLuint type);
+	void CreateImage3D(int w, int h, int d, GLuint internalFormat, GLuint format, GLuint type, GLuint WrapMode = GL_CLAMP_TO_EDGE, GLuint Filter = GL_LINEAR);
 	void BindImage2D();
 
 	GLuint GetTexID();

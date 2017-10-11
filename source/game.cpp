@@ -89,6 +89,7 @@ void Game::Update()
 		SDL_WarpMouseInWindow(m_graphics->GetWindow(), SCREEN_WIDTH * .5f, SCREEN_HEIGHT * .5f);
 	}
 
+	slog("FPS %5f", 1000.0f / GetDeltaTime());
 	g_prevTime = SDL_GetTicks();
 }
 

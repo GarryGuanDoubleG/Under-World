@@ -68,4 +68,5 @@ void main()
 	perlin3 += perlin4;
 
 	imageStore(DestTex, coord, vec4(perlin1, perlin2, perlin3, perlin4));
+	//imageStore(DestTex, coord, vec4(0));
 }

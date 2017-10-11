@@ -84,6 +84,41 @@ void Texture::LoadTexture(string filepath)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void Texture::LoadTexture3D(string filepath, int w, int h, int d, GLuint internalFormat, GLuint format, GLuint wrapmode)
+{
+	ifstream infile;
+
+	infile.open(filepath, ios::in | ios::binary | ios::ate);
+
+	if (!infile.is_open())
+	{
+		slog("Could not open file %s", filepath);
+		return;
+	}
+
+	int fileSize = infile.tellg();
+	infile.seekg(0, ios::beg);
+
+	char *data = new char[fileSize];
+	infile.read(data, fileSize);
+
+	infile.close();
+
+	//load data into a 3D texture
+	glGenTextures(1, &m_texID);
+	glBindTexture(GL_TEXTURE_3D, m_texID);
+
+	// set the texture parameters
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, wrapmode);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, wrapmode);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, wrapmode);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	glTexImage3D(GL_TEXTURE_3D, 0, internalFormat, w, h, d, 0, format, GL_UNSIGNED_BYTE, data);
+	delete[] data;
+}
+
 void Texture::LoadSkybox(string filepath)
 {
 	const std::string faces[6] =
@@ -312,16 +347,16 @@ void Texture::CreateImage3D(int w, int h, int d, bool float32)
 	glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-void Texture::CreateImage3D(int w, int h, int d, GLuint internalFormat, GLuint format, GLuint type)
+void Texture::CreateImage3D(int w, int h, int d, GLuint internalFormat, GLuint format, GLuint type, GLuint WrapMode, GLuint Filter)
 {
 	m_type = Tex3D;
 
 	glGenTextures(1, &m_texID);
 	glBindTexture(GL_TEXTURE_3D, m_texID);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, WrapMode);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, WrapMode);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, Filter);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, Filter);
 	glTexImage3D(GL_TEXTURE_3D, 0, internalFormat, w, h, d, 0, format, type, NULL);
 
 	glBindTexture(GL_TEXTURE_3D, 0);
