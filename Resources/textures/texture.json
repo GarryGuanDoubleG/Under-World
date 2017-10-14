@@ -15,6 +15,9 @@
   "weather": {
     "path": "Resources\\textures\\weather.png"
   },
+  "CurlNoise": {
+    "path": "Resources\\textures\\CurlNoise.png"
+  },
   "grass1": {
     "path": "billboard_grass.png"
   },

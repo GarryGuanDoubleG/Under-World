@@ -11,6 +11,7 @@
 #define WINDOW_HEIGHT 1080
 
 #define SCREEN_SIZE vec2(WINDOW_WIDTH, WINDOW_HEIGHT)
+#define ASPECT_RATIO WINDOW_WIDTH / WINDOW_HEIGHT
 
 #define get_half_texcoord() vec2((ivec2(gl_FragCoord.xy) * 2 + 0.5) / SCREEN_SIZE)
 
@@ -51,7 +52,7 @@ float random(vec3 scale, float seed) {
 	return fract(sin(dot(scale + seed, scale)) * 43758.5453 + seed);
 }
 
-vec3 InternalRaySphereIntersect( float sphereRadius, vec3 origin, vec3 direction)
+vec3 InternalRaySphereIntersect(float sphereRadius, vec3 origin, vec3 direction)
 {	
 	float a0 = sphereRadius * sphereRadius - dot( origin, origin);
 	float a1 = dot( origin, direction);

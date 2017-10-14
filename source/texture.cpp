@@ -86,6 +86,8 @@ void Texture::LoadTexture(string filepath)
 
 void Texture::LoadTexture3D(string filepath, int w, int h, int d, GLuint internalFormat, GLuint format, GLuint wrapmode)
 {
+	m_type = Tex3D;
+
 	ifstream infile;
 
 	infile.open(filepath, ios::in | ios::binary | ios::ate);
@@ -134,7 +136,6 @@ void Texture::LoadSkybox(string filepath)
 
 	//now generate texture with data
 	glGenTextures(1, &m_texID);
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_texID);
 	//use GL_BGR because thats how bmp files store color
 	//give image to opengl
@@ -305,7 +306,6 @@ void Texture::CreateImage2D(int w, int h, bool float32)
 	m_type = Tex2D;
 
 	glGenTextures(1, &m_texID);
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_texID);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

@@ -1,6 +1,6 @@
 #pragma once
 
-#extension GL_ARB_shading_language_420pack : enable
+//#extension GL_ARB_shading_language_420pack : enable
 
 // This file includes defines and functions used for the scattering
 

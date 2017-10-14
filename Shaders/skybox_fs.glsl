@@ -1,4 +1,4 @@
-#version 400 core
+#version 450 core
 varying vec3 color;
 varying vec3 secondaryColor;
 

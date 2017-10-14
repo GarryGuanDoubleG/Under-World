@@ -1,4 +1,4 @@
- #version 400 core
+ #version 450 core
 
  #pragma include "voxelCommon.inc.glsl"
 out vec4 color;

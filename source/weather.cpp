@@ -31,43 +31,46 @@ void Weather::PrecomputeNoise()
 
 	const glm::ivec3 workGroupSize(8, 8, 4);
 
-	//noise textures
-	m_cloudNoiseTexHigh.CreateImage3D(detailNoise, detailNoise, detailNoise, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, GL_REPEAT);
-	m_cloudNoiseTexLow.CreateImage3D(baseNoise, baseNoise, baseNoise, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, GL_REPEAT);
-	m_cloudNoiseCurl.CreateImage2D(curlRes, curlRes, GL_MIRRORED_REPEAT, GL_RGBA, GL_RGBA, GL_FLOAT);
-	//weather data
-	m_weatherDataTex.CreateImage2D(weatherDataRes, weatherDataRes, GL_MIRRORED_REPEAT, GL_RGBA, GL_RGBA, GL_FLOAT);
+	////noise textures
+	//m_cloudNoiseTexHigh.CreateImage3D(detailNoise, detailNoise, detailNoise, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, GL_REPEAT);
+	//m_cloudNoiseTexLow.CreateImage3D(baseNoise, baseNoise, baseNoise, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, GL_REPEAT);
+	//m_cloudNoiseCurl.CreateImage2D(curlRes, curlRes, GL_MIRRORED_REPEAT, GL_RGBA, GL_RGBA, GL_FLOAT);
+	////weather data
+	//m_weatherDataTex.CreateImage2D(weatherDataRes, weatherDataRes, GL_MIRRORED_REPEAT, GL_RGBA, GL_RGBA, GL_FLOAT);
 
 
-	//high res cloud noise
-	Shader * shader = g_game->GetShader("cloudHighFreqNoise");
-	shader->Use();
-	glBindImageTexture(0, m_cloudNoiseTexHigh.GetTexID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
-	glDispatchCompute(detailNoise / workGroupSize.x, detailNoise / workGroupSize.y, detailNoise / workGroupSize.z);
+	////high res cloud noise
+	//Shader * shader = g_game->GetShader("cloudHighFreqNoise");
+	//shader->Use();
+	//glBindImageTexture(0, m_cloudNoiseTexHigh.GetTexID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
+	//glDispatchCompute(detailNoise / workGroupSize.x, detailNoise / workGroupSize.y, detailNoise / workGroupSize.z);
 
-	//low res
-	shader = g_game->GetShader("cloudLowFreqNoise");
-	shader->Use();
-	glBindImageTexture(0, m_cloudNoiseTexLow.GetTexID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
-	glDispatchCompute(baseNoise / workGroupSize.x, baseNoise / workGroupSize.y, baseNoise / workGroupSize.z);
+	////low res
+	//shader = g_game->GetShader("cloudLowFreqNoise");
+	//shader->Use();
+	//glBindImageTexture(0, m_cloudNoiseTexLow.GetTexID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
+	//glDispatchCompute(baseNoise / workGroupSize.x, baseNoise / workGroupSize.y, baseNoise / workGroupSize.z);
 
 	//curl noise
-	shader = g_game->GetShader("cloudCurlNoise");
+	Shader *shader = g_game->GetShader("cloudCurlNoise");
 	shader->Use();
 	glBindImageTexture(0, m_cloudNoiseCurl.GetTexID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
 	glDispatchCompute(curlRes / workGroupSize.x, curlRes / workGroupSize.y, 1);
 
-	//Weather data
-	shader = g_game->GetShader("GenerateWeatherData");
-	shader->Use();
-	shader->SetUniform1f("time", 1.0f);
+	////Weather data
+	//shader = g_game->GetShader("GenerateWeatherData");
+	//shader->Use();
+	//shader->SetUniform1f("time", 1.0f);
 
-	glBindImageTexture(0, m_weatherDataTex.GetTexID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
-	glDispatchCompute(weatherDataRes / workGroupSize.x, weatherDataRes / workGroupSize.y, 1);
-	SlogCheckGLError();
+	//glBindImageTexture(0, m_weatherDataTex.GetTexID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
+	//glDispatchCompute(weatherDataRes / workGroupSize.x, weatherDataRes / workGroupSize.y, 1);
+	//SlogCheckGLError();
 
-	//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	////glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+	m_cloudNoiseTexLow.LoadTexture3D("Resources\\textures\\noise.bytes", 128, 128, 128, GL_RGBA, GL_RGBA, GL_REPEAT);
+	m_cloudNoiseTexHigh.LoadTexture3D("Resources\\textures\\noise_detail.bytes", 32, 32, 32, GL_RGB, GL_RGB, GL_REPEAT);
 }
 
 void Weather::RenderToQuad()
@@ -90,9 +93,10 @@ void Weather::Render(GBuffer gBuffer, Texture *shadedScene)
 
 	m_cloudNoiseTexHigh.Bind(1);
 	m_cloudNoiseTexLow.Bind(2);
-	m_cloudNoiseCurl.Bind(3);
-	m_weatherDataTex.Bind(4);
-	//g_game->GetTexture("weather")->Bind(4);
+	g_game->GetTexture("CurlNoise")->Bind(3);
+	//m_cloudNoiseCurl.Bind(3);
+	//m_weatherDataTex.Bind(4);
+	g_game->GetTexture("weather")->Bind(4);
 
 	shader->SetUniform3fv("sunDir", g_game->m_skydome->GetSunDirection());
 	shader->SetUniform3fv("cameraPos", camera->GetPosition());
@@ -101,8 +105,10 @@ void Weather::Render(GBuffer gBuffer, Texture *shadedScene)
 	RenderToQuad();
 
 	m_cloudNoiseTexHigh.Unbind();
-	m_weatherDataTex.Unbind();
-	//g_game->GetTexture("weather")->Unbind();	m_cloudNoiseCurl.Unbind();
+	//m_weatherDataTex.Unbind();
+	g_game->GetTexture("weather")->Unbind();
+	//m_cloudNoiseCurl.Unbind();
+	g_game->GetTexture("CurlNoise")->Unbind();
 	m_cloudNoiseTexLow.Unbind();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
