@@ -17,82 +17,80 @@ layout (binding = 3) uniform sampler2D _CurlNoise;
 
 layout(binding = 4) uniform sampler2D _WeatherTexture;
 
-const float atmosphereEndHeight = 28000;
-const float atmosphereStartHeight = 20000;
+const float atmosphereEndHeight = 7500;
+const float atmosphereStartHeight = 4500;
 const float atmosphereThickness = atmosphereEndHeight - atmosphereStartHeight;
-const float horizonDistance = 100000;
-const float _EarthRadius = CalculatePlanetRadius(atmosphereStartHeight, horizonDistance);//407583.3
+const float horizonDistance = 35000;
+//const float _EarthRadius = CalculatePlanetRadius(atmosphereStartHeight, horizonDistance);//407583.3
+const float _EarthRadius = 6371000.0f;
 
-const float maxDistance = CalculateMaxDistance(_EarthRadius, atmosphereEndHeight);//57242
-const float maxRayDistance = CalculateMaxRayDistance(_EarthRadius, atmosphereStartHeight, atmosphereEndHeight);
-const float coverateOffsetX = .1f;
-const float coverateOffsetY = .1f;
-
+//const float maxDistance = CalculateMaxDistance(_EarthRadius, atmosphereEndHeight);//57242
+const float maxDistance = 70242.f;
+//const float maxRayDistance = CalculateMaxRayDistance(_EarthRadius, atmosphereStartHeight, atmosphereEndHeight);
+const float maxRayDistance = 22242.0f;
 const float _StartHeight = atmosphereStartHeight;
 const float _EndHeight = atmosphereEndHeight;
-const float _BaseFBMScale = 1;
+const float _BaseFBMScale = 2;
 const float _DetailScale = 4;
-const float _DetailFBMScale = .30f;
+const float _DetailFBMScale = .22f;
 const float _AtmosphereThickness = atmosphereThickness;
-//const vec3 viewPos = viewPos;
+
 const float _MaxDistance = maxDistance;
 
 const float _FieldOfView = 60.0f;
-const float _AspectRatio = 16.0f / 10.0f;
+const float _AspectRatio = ASPECT_RATIO;
 
 
-const float sunScalar = 1.0f;
-const float ambientScalar = 1.0f;
 const float sunRayLength = 0.08f * atmosphereThickness;
 const float coneRadius = 0.08f * atmosphereThickness;
-//const float density = 1.0f;
-const float forwardScatteringG = 0.8f;
-const float backwardScatteringG = -0.5f;
-const float darkOutlineScalar = 1.0f;
 
-float _CloudBottomFade = .4f;
+float _CloudBottomFade = 0.33f;
 			
-vec3 _CameraPosition = vec3(0, _EarthRadius, 0) + viewPos;
+//vec3 _CameraPosition = vec3(0, _EarthRadius, 0) + viewPos.rgb;
+vec3 _CameraPosition = vec3(viewPos.x, _EarthRadius, viewPos.z);
+//vec3 _CameraPosition = viewPos;
 
-vec3 _BaseOffset = vec3(0, 0.001f, 0);
-vec3 _DetailOffset = vec3(0, 0.001f, 0);
-vec2 _CoverageOffset = vec2(coverateOffsetX, coverateOffsetY);
-float _BaseScale = 1.0f / atmosphereEndHeight;
-float _CoverageScale = 1.0f / maxDistance;
-float _HorizonFadeStartAlpha = .9f;
+//animations
+uniform vec3 _BaseOffset ;
+uniform vec3 _DetailOffset ;
+uniform vec2 _CoverageOffset;
+
+
+float _BaseScale = 1.f / (atmosphereEndHeight);
+float _CoverageScale = 1.0f / (maxDistance * 10);
+float _HorizonFadeStartAlpha = .5f;
 float _OneMinusHorizonFadeStartAlpha = 1.0f - _HorizonFadeStartAlpha;
-float _HorizonFadeScalar = .2f;					// Fades clouds on horizon, 1.0 -> 10.0 (1.0 = smooth fade, 10 = no fade)
-vec3 _LightDirection = sunDir;
+float _HorizonFadeScalar = .1f;					// Fades clouds on horizon, 1.0 -> 10.0 (1.0 = smooth fade, 10 = no fade)
+vec3 _LightDirection = -sunDir;
 vec3 _LightColor = vec3(1.0f);
-float _LightScalar = .8f;
-float _AmbientScalar = 2.0f;
+float _LightScalar = 1.f;
+float _AmbientScalar = 1.0f;
 //181 157 10
-vec3 _CloudTopColor = vec3(.8f);
-//vec3 _CloudBaseColor = vec3(200.f / 255.f , 190.f / 255.f, 215.f / 255.f);
-vec3 _CloudBaseColor = vec3(1.0f);
-vec4 _Gradient1 = vec4(0.2f);		// x,y,z,w = 4 positions of a black,white,white,black gradient
-vec4 _Gradient2 = vec4(0.5f);				// x,y,z,w = 4 positions of a black,white,white,black gradient
-vec4 _Gradient3 = vec4(0.7f);// x,y,z,w = 4 positions of a black,white,white,black gradient
+vec3 _CloudTopColor = vec3(1.0f);
+//vec3 _CloudBaseColor = vec3(83.f / 255.f , 96.f / 255.f, 105.f / 255.f);
+vec3 _CloudBaseColor = vec3(169, 198, 255)/255.0f;
+//vec3 _CloudBaseColor = vec3(94, 140, 186)/255.0f;
+//vec3 _CloudBaseColor = vec3(1.0f);
 float _SunRayLength = sunRayLength;
 float _ConeRadius = coneRadius;
 float _MaxIterations = 128;
 float _MaxRayDistance = maxRayDistance;
 float _RayStepLength = (atmosphereThickness / (_MaxIterations * .5f));
 float _SampleScalar = 1.f;
-float _SampleThreshold = .05f;
-float _ErosionEdgeSize = .2f;
-float _CloudDistortion = .353f;
-float _CloudDistortionScale = .5f;
-float _Density = 2.0f;
-float _ForwardScatteringG = .8f;
-float _BackwardScatteringG = -.5f;
-float _DarkOutlineScalar = 1.0f;
 
-float _HorizonCoverageStart = .3f;
-float _HorizonCoverageEnd = 0.4f;
+float _ErosionEdgeSize = .5f;
+float _CloudDistortion = .45f;
+float _CloudDistortionScale = .5f;
+float _Density = 1.0f;
+float _ForwardScatteringG = 0.79f;
+float _BackwardScatteringG = -0.39f;
+float _DarkOutlineScalar = 1.f;
+
+float _HorizonCoverageStart = .4f;
+float _HorizonCoverageEnd = .7f;
 			
 float _LODDistance = .313;
-float _RayMinimumY = 0;
+float _RayMinimumY = .10;
 
 //vec3 _Random0 = normalize(vec3(random(vec3(1.0f), 1.0f)));
 //vec3 _Random1 = normalize(vec3(random(vec3(1.0f), 1.3213330f)));;
@@ -207,6 +205,7 @@ vec4 SampleWeatherTexture(vec3 ray)
 	//coverageB.b = saturate( smoothstep( _HorizonCoverageEnd, _HorizonCoverageStart, depth) * 2.0);
 	float alpha = smoothstep( _HorizonCoverageStart, _HorizonCoverageEnd, depth);
 	vec4 coverage = textureLod( _WeatherTexture, uv, 0.0f);
+
 	//return coverage;
 
 	coverageB = vec4( smoothstep( _HorizonCoverageStart, _HorizonCoverageEnd, depth),
@@ -316,18 +315,6 @@ float HenyeyGreensteinPhase(float cosAngle, float g)
 	return (1.0 - g2) / pow(1.0 + g2 - 2.0 * g * cosAngle, 1.5);
 }
 
-vec3 FilmicTonemap(vec3 x)
-{
-	const float A = 0.15;
-	const float B = 0.50;
-	const float C = 0.10;
-	const float D = 0.20;
-	const float E = 0.02;
-	const float F = 0.30;
-
-	return ((x*(A*x + C*B) + D*E) / (x*(A*x + B) + D*F)) - E / F;
-}
-
 //In-Scattering Probability Function (Powdered Sugar Effect)
 float PowderTerm(float densityAtSample, float cosTheta)
 {
@@ -393,7 +380,7 @@ vec3 SampleLight(vec3 origin, float originDensity, float pixelAlpha, vec3 cosAng
 
 	float forwardP = HenyeyGreensteinPhase(cosAngle.r, _ForwardScatteringG);
 	float backwardsP = HenyeyGreensteinPhase(cosAngle.r, _BackwardScatteringG);
-	float P = (forwardP + backwardsP) / 2.0;
+	float P = (forwardP + backwardsP) * .5f;
 
 	return _LightColor * BeerTerm(thickness) * PowderTerm(originDensity, cosAngle.r) * P;
 }
@@ -402,6 +389,18 @@ vec3 SampleLight(vec3 origin, float originDensity, float pixelAlpha, vec3 cosAng
 vec3 SampleAmbientLight(float atmosphereY, float depth)
 {
 	return mix(_CloudBaseColor, _CloudTopColor, atmosphereY);
+}
+
+vec3 FilmicTonemap(vec3 x)
+{
+	const float A = 0.15;
+	const float B = 0.50;
+	const float C = 0.10;
+	const float D = 0.20;
+	const float E = 0.02;
+	const float F = 0.30;
+
+	return ((x*(vec3(A)*x + vec3(C*B)) + vec3(D*E)) / (x*(vec3(A)*x + vec3(B)) + vec3(D*F))) - vec3(E / F);
 }
 
 //Fragment shader
@@ -490,15 +489,8 @@ void main()
 				sunLight *= _LightScalar;
 				ambientLight *= _AmbientScalar;
 					
+				particle.a = 1.0 - T; //* transmittance;
 				particle.rgb = vec3(sunLight + ambientLight);
-				particle.a = 1.0 - T * transmittance;
-
-		
-				//float ambientLight =  mix(_CloudBaseColor, _CloudTopColor, atmosphereY);
-					
-				float bottomShade = atmosphereY;
-				float topShade = saturate(particle.y) ;
-					
 				particle.rgb*= particle.a;
 					
 
@@ -521,11 +513,18 @@ void main()
 		color *= _HorizonFadeStartAlpha + fade * _OneMinusHorizonFadeStartAlpha;
 	}
 	// If you reach this point, allelujah!
+
+	const float Exposure = 1.5f;
 	const float ExposureBias = 2.0;
-	const vec3 W = vec3(11.2);
+
+	const vec3 W = vec3(3.9);
+	color.rgb *= Exposure;
 	vec3 curr = FilmicTonemap(ExposureBias * color.rgb);
 	vec3 whiteScale = vec3(1.0f) / FilmicTonemap(W);
 
 	result.rgb = curr * whiteScale;
 	result.a = color.a;
+	//result = vec4(1.0f, 0,0,1);
+
+	//result = color;
 }

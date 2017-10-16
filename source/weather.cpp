@@ -11,11 +11,22 @@ Weather::Weather(GLuint quadVao)
 	glBindFramebuffer(GL_FRAMEBUFFER, m_cloudFBO);
 
 	//bind texture
-	m_cloudTex.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGBA16F, GL_RGBA);
+	m_cloudTex.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGBA32F, GL_RGBA);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_cloudTex.GetTexID(), 0);
 
 	//unbind framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	m_animationScale = 0.1f;
+	m_timeScale = .002f;
+	m_coverageOffsetPerFrame = glm::vec2(.01f, .01f);
+	//m_coverageOffsetPerFrame = glm::vec2(0);
+	m_cloudDetailOffsetPerFrame = glm::vec3(.1f, .1f, 0);
+	m_cloudBaseOffsetPerFrame = glm::vec3(.01, -.01f, 0.0f);
+
+	m_coverageOffset = glm::vec2(0.0f);
+	m_cloudDetailOffset = glm::vec3(0.0f);
+	m_cloudBaseOffset = glm::vec3(0.0f);
 }
 
 Weather::~Weather()
@@ -73,6 +84,13 @@ void Weather::PrecomputeNoise()
 	m_cloudNoiseTexHigh.LoadTexture3D("Resources\\textures\\noise_detail.bytes", 32, 32, 32, GL_RGB, GL_RGB, GL_REPEAT);
 }
 
+void Weather::Update()
+{
+	m_coverageOffset += m_animationScale * m_coverageOffsetPerFrame * g_game->GetDeltaTime() * m_timeScale;
+	m_cloudBaseOffset += m_animationScale * m_cloudBaseOffsetPerFrame * g_game->GetDeltaTime() * m_timeScale;
+	m_cloudDetailOffset += m_animationScale * m_cloudDetailOffsetPerFrame * g_game->GetDeltaTime() * m_timeScale;
+}
+
 void Weather::RenderToQuad()
 {
 	glBindVertexArray(quadVAO);
@@ -94,23 +112,21 @@ void Weather::Render(GBuffer gBuffer, Texture *shadedScene)
 	m_cloudNoiseTexHigh.Bind(1);
 	m_cloudNoiseTexLow.Bind(2);
 	g_game->GetTexture("CurlNoise")->Bind(3);
-	//m_cloudNoiseCurl.Bind(3);
-	//m_weatherDataTex.Bind(4);
 	g_game->GetTexture("weather")->Bind(4);
 
 	shader->SetUniform3fv("sunDir", g_game->m_skydome->GetSunDirection());
 	shader->SetUniform3fv("cameraPos", camera->GetPosition());
-	shader->SetUniform1f("frame_time", 1.0f);
-
+	shader->SetUniform3fv("_BaseOffset", m_cloudBaseOffset);
+	shader->SetUniform3fv("_DetailOffset", m_cloudDetailOffset);
+	shader->SetUniform2fv("_CoverageOffset", m_coverageOffset);
 	RenderToQuad();
 
 	m_cloudNoiseTexHigh.Unbind();
-	//m_weatherDataTex.Unbind();
 	g_game->GetTexture("weather")->Unbind();
-	//m_cloudNoiseCurl.Unbind();
 	g_game->GetTexture("CurlNoise")->Unbind();
 	m_cloudNoiseTexLow.Unbind();
 
+	//render to final scene
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	shader = g_game->GetShader("applyCloud");

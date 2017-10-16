@@ -68,15 +68,21 @@ void Game::Draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	GBuffer gBuffer;
-	if(m_flag & DEFERRED_MODE)
+	if (m_flag & DEFERRED_MODE)
+	{
 		m_graphics->RenderScene();
+		m_graphics->Display();
+	}
 	else
 	{
 		gBuffer = m_graphics->DeferredRenderScene();
 		Texture postProcessing = m_atmosphere->Render(gBuffer, GetTexture("scene"));
+		double time = GetElapsedTime();
 		m_weather->Render(gBuffer, &postProcessing);
+		m_graphics->Display();
+		time = GetElapsedTime() - time;
+		slog("Time to render clouds: %10f", time);
 	}
-	m_graphics->Display();
 
 }
 
@@ -84,15 +90,16 @@ void Game::Update()
 {
 	m_voxelManager->Update();
 	m_skydome->Update();
+	m_weather->Update();
 
 	if(m_flag & FP_MODE) {
 		SDL_WarpMouseInWindow(m_graphics->GetWindow(), SCREEN_WIDTH * .5f, SCREEN_HEIGHT * .5f);
 	}
 
-	slog("FPS %5f", 1000.0f / GetDeltaTime());
+	//slog("FPS %5f", 1000.0f / GetDeltaTime());
 	g_prevTime = SDL_GetTicks();
 }
-
+ 
 void Game::Close()
 {
 	m_voxelManager->Close();

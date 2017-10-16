@@ -216,7 +216,7 @@ void Graphics::InitFBOS()
 	glGenFramebuffers(1, &m_deferredFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFBO);
 
-	m_GBuffer.gPosition.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB16F, GL_RGB);
+	m_GBuffer.gPosition.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB32F, GL_RGB);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_GBuffer.gPosition.GetTexID(), 0);
 
 	m_GBuffer.gNormal.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB16F, GL_RGB);
@@ -313,7 +313,8 @@ void Graphics::RenderSkybox(Shader *shader)
 
 	shader->Use();
 
-	glDepthFunc(GL_LEQUAL);
+	glDisable(GL_DEPTH_TEST);
+	//glDepthFunc(GL_LEQUAL);
 
 	glm::mat4 model(1.0f);
 	model = glm::translate(model, m_camera->GetPosition());
@@ -323,6 +324,7 @@ void Graphics::RenderSkybox(Shader *shader)
 	shader->SetMat4("projection", m_camera->GetProj());
 
 	m_skydome->Draw(shader);
+	glEnable(GL_DEPTH_TEST);
 }
 
 GBuffer Graphics::DeferredRenderScene()

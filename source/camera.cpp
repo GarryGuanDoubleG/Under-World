@@ -13,13 +13,13 @@ Camera::Camera(glm::vec3 position, glm::vec3 target)
 	m_view_mat = glm::lookAt(m_pos, m_pos + m_forward, m_up);
 
 	//set up perspective mat4
-	m_perspect_proj = glm::perspective(45.0f, SCREEN_WIDTH / SCREEN_HEIGHT, 1.f, 100000.0f);
+	m_perspect_proj = glm::perspective(45.0f, SCREEN_WIDTH / SCREEN_HEIGHT, 1.f, 1000000.0f);
 
 	m_yaw = 0.0f;
 	m_pitch = 0.0f;
 	m_roll = 0.0f;
 
-	m_speed = 120.0f;
+	m_speed = 30.0f;
 }
 
 Camera::~Camera()
@@ -51,8 +51,7 @@ glm::vec3 Camera::GetRotation()
 
 void Camera::HandleInput(SDL_Event event)
 {
-	float time = Game::GetDeltaTime();
-	GLfloat cam_speed = m_speed;
+	GLfloat cam_speed = m_speed * g_game->GetDeltaTime();
 
 	if(event.type == SDL_KEYDOWN)
 	{
@@ -79,6 +78,7 @@ void Camera::HandleInput(SDL_Event event)
 		default:
 			break;
 		}
+		slog("Position %5f, %5f, %5f", m_pos.x, m_pos.y, m_pos.z);
 	}
 	else if(event.type == SDL_MOUSEMOTION)
 	{
