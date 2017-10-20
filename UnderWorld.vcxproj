@@ -231,6 +231,13 @@
     <ClInclude Include="source\VoxelVertex.hpp" />
     <ClInclude Include="utility\FastNoise.h" />
     <ClInclude Include="utility\FastNoiseSIMD.h" />
+    <ClInclude Include="utility\ImGui\imconfig.h" />
+    <ClInclude Include="utility\ImGui\imgui.h" />
+    <ClInclude Include="utility\ImGui\imgui_impl_sdl_gl3.h" />
+    <ClInclude Include="utility\ImGui\imgui_internal.h" />
+    <ClInclude Include="utility\ImGui\stb_rect_pack.h" />
+    <ClInclude Include="utility\ImGui\stb_textedit.h" />
+    <ClInclude Include="utility\ImGui\stb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\animController.cpp">
@@ -369,6 +376,10 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="utility\ImGui\imgui.cpp" />
+    <ClCompile Include="utility\ImGui\imgui_demo.cpp" />
+    <ClCompile Include="utility\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="utility\ImGui\imgui_impl_sdl_gl3.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

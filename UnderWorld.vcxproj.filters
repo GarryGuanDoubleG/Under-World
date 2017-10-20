@@ -49,6 +49,12 @@
     <Filter Include="Shaders\Clouds\noise">
       <UniqueIdentifier>{c135922d-9f2c-4d1a-b525-e4880fae3a82}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Utility\ImGUI">
+      <UniqueIdentifier>{c198f875-b65d-41c1-a054-dfc3a573554f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utility\ImGUI">
+      <UniqueIdentifier>{0f035ecf-6b5c-463a-8bae-81509f0d34a9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -294,6 +300,27 @@
     <ClInclude Include="source\weather.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="utility\ImGui\imgui_impl_sdl_gl3.h">
+      <Filter>Header Files\Utility\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\ImGui\imgui_internal.h">
+      <Filter>Header Files\Utility\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\ImGui\stb_rect_pack.h">
+      <Filter>Header Files\Utility\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\ImGui\stb_textedit.h">
+      <Filter>Header Files\Utility\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\ImGui\stb_truetype.h">
+      <Filter>Header Files\Utility\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\ImGui\imconfig.h">
+      <Filter>Header Files\Utility\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\ImGui\imgui.h">
+      <Filter>Header Files\Utility\ImGUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\graphics.cpp">
@@ -394,6 +421,18 @@
     </ClCompile>
     <ClCompile Include="source\weather.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utility\ImGui\imgui.cpp">
+      <Filter>Source Files\Utility\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="utility\ImGui\imgui_demo.cpp">
+      <Filter>Source Files\Utility\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="utility\ImGui\imgui_draw.cpp">
+      <Filter>Source Files\Utility\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="utility\ImGui\imgui_impl_sdl_gl3.cpp">
+      <Filter>Source Files\Utility\ImGUI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -28,6 +28,9 @@ Game::Game() : m_running(true)
 	m_graphics->SetCamera(m_camera);
 	m_skydome = m_graphics->InitSkybox();
 
+	ImGui_ImplSdlGL3_Init(m_graphics->GetWindow());
+	ImGui_ImplSdlGL3_NewFrame(m_graphics->GetWindow());
+
 	m_atmosphere = new Atmosphere(m_graphics->GetVAO("quad"));
 	m_atmosphere->Precompute();
 
@@ -78,11 +81,27 @@ void Game::Draw()
 		Texture postProcessing = m_atmosphere->Render(gBuffer, GetTexture("scene"));
 		m_weather->Render(gBuffer, &postProcessing);
 	}
+	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	bool show_test_window = true;
+	bool show_another_window = false;
+	{
+		static float f = 0.0f;
+		ImGui::Text("Hello, world!");
+		ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+		ImGui::ColorEdit3("clear color", (float*)&clear_color);
+		if (ImGui::Button("Test Window")) show_test_window ^= 1;
+		if (ImGui::Button("Another Window")) show_another_window ^= 1;
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	}
+
+	ImGui::Render();
 	m_graphics->Display();
 }
 
 void Game::Update()
 {
+	ImGui_ImplSdlGL3_NewFrame(m_graphics->GetWindow());
+
 	m_voxelManager->Update();
 	m_skydome->Update();
 	m_weather->Update();
@@ -97,6 +116,7 @@ void Game::Update()
  
 void Game::Close()
 {
+	ImGui_ImplSdlGL3_Shutdown();
 	m_voxelManager->Close();
 	m_graphics->Cleanup();
 }
@@ -108,7 +128,7 @@ void Game::Input()
 	while (SDL_PollEvent(&event))
 	{
 		m_camera->HandleInput(event);
-
+		ImGui_ImplSdlGL3_ProcessEvent(&event);
 		if(event.type == SDL_QUIT)
 			m_running = false;
 

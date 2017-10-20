@@ -24,6 +24,9 @@ using namespace std;
 #include <assimp/postprocess.h>
 #include <omp.h>
 
+#include <ImGui\imgui.h>
+#include <ImGui\imgui_impl_sdl_gl3.h>
+
 #include <FastNoiseSIMD.h>
 #include <FastNoise.h>
 #include "simple_logger.h"
