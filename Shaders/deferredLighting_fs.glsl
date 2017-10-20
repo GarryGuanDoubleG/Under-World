@@ -26,7 +26,11 @@ void main()
 {             
     // retrieve data from gbuffer
     vec3 FragPos = texture(gPosition, UV).rgb;
-
+	if(distance(FragPos, viewPos) > 40000)
+	{
+		FragColor = vec4(0,0,0,1.0f);
+		return;
+	}
     vec3 Normal = texture(gNormal, UV).rgb;
     vec3 Diffuse = texture(gAlbedoSpec, UV).rgb;
     float Specular = texture(gAlbedoSpec, UV).a;

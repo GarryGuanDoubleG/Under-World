@@ -318,7 +318,7 @@ void Graphics::RenderSkybox(Shader *shader)
 
 	glm::mat4 model(1.0f);
 	model = glm::translate(model, m_camera->GetPosition());
-	model = glm::scale(model, glm::vec3(1.f));
+	model = glm::scale(model, glm::vec3(10.f));
 	shader->SetMat4("model", model);
 	shader->SetMat4("view", m_camera->GetViewMat());
 	shader->SetMat4("projection", m_camera->GetProj());

@@ -71,19 +71,14 @@ void Game::Draw()
 	if (m_flag & DEFERRED_MODE)
 	{
 		m_graphics->RenderScene();
-		m_graphics->Display();
 	}
 	else
 	{
 		gBuffer = m_graphics->DeferredRenderScene();
 		Texture postProcessing = m_atmosphere->Render(gBuffer, GetTexture("scene"));
-		double time = GetElapsedTime();
 		m_weather->Render(gBuffer, &postProcessing);
-		m_graphics->Display();
-		time = GetElapsedTime() - time;
-		slog("Time to render clouds: %10f", time);
 	}
-
+	m_graphics->Display();
 }
 
 void Game::Update()
