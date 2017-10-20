@@ -69,7 +69,6 @@ extern Game *g_game;
 
 class Game
 {
-
 private:
 	bool m_running;
 	int m_flag;
@@ -109,4 +108,7 @@ public:
 	Camera * GetCamera();
 
 	bool IsRunning();
+	bool IsFPMode();//true if in first person mode, false if mouse is free moving
+private:
+	void RenderImGUI();
 };

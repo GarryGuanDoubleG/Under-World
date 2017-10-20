@@ -78,9 +78,8 @@ void Camera::HandleInput(SDL_Event event)
 		default:
 			break;
 		}
-		slog("Position %5f, %5f, %5f", m_pos.x, m_pos.y, m_pos.z);
 	}
-	else if(event.type == SDL_MOUSEMOTION)
+	else if(event.type == SDL_MOUSEMOTION && g_game->IsFPMode())
 	{
 		GLfloat sensitivity = 0.05f; // mouse sensitivity
 

@@ -35,7 +35,7 @@ Game::Game() : m_running(true)
 	m_atmosphere->Precompute();
 
 	m_weather = new Weather(m_graphics->GetVAO("quad"));
-	m_weather->PrecomputeNoise();
+	m_weather->LoadCloudData();
 
 	m_entitiesList = new Entity[MAX_ENTITIES];
 	for (int i = 0; i < MAX_ENTITIES - 1; i++)
@@ -81,22 +81,30 @@ void Game::Draw()
 		Texture postProcessing = m_atmosphere->Render(gBuffer, GetTexture("scene"));
 		m_weather->Render(gBuffer, &postProcessing);
 	}
+	
+	RenderImGUI();
+	m_graphics->Display();
+}
+
+void Game::RenderImGUI()
+{
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	bool show_test_window = true;
 	bool show_another_window = false;
+	//default debug imgui window
 	{
-		static float f = 0.0f;
 		ImGui::Text("Hello, world!");
-		ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-		ImGui::ColorEdit3("clear color", (float*)&clear_color);
-		if (ImGui::Button("Test Window")) show_test_window ^= 1;
-		if (ImGui::Button("Another Window")) show_another_window ^= 1;
+		if (ImGui::Button("Cloud Params")) m_weather->m_showCloudParams ^= 1;
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::Text("Position %5f, %5f, %5f", m_camera->GetPosition().x, m_camera->GetPosition().y, m_camera->GetPosition().z);
 	}
 
+	m_weather->RenderImGui();
+
 	ImGui::Render();
-	m_graphics->Display();
 }
+
+
 
 void Game::Update()
 {
@@ -106,7 +114,8 @@ void Game::Update()
 	m_skydome->Update();
 	m_weather->Update();
 
-	if(m_flag & FP_MODE) {
+	if(m_flag & FP_MODE) 
+	{
 		SDL_WarpMouseInWindow(m_graphics->GetWindow(), SCREEN_WIDTH * .5f, SCREEN_HEIGHT * .5f);
 	}
 
@@ -186,3 +195,7 @@ bool Game::IsRunning()
 	return m_running;
 }
 
+bool Game::IsFPMode()
+{
+	return m_flag & FP_MODE;
+}

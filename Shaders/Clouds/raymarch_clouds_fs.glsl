@@ -17,80 +17,61 @@ layout (binding = 3) uniform sampler2D _CurlNoise;
 
 layout(binding = 4) uniform sampler2D _WeatherTexture;
 
-const float atmosphereEndHeight = 7500;
-const float atmosphereStartHeight = 4500;
-const float atmosphereThickness = atmosphereEndHeight - atmosphereStartHeight;
-const float horizonDistance = 35000;
-//const float _EarthRadius = CalculatePlanetRadius(atmosphereStartHeight, horizonDistance);//407583.3
-const float _EarthRadius = 6371000.0f;
+//uniform float PLANET_RADIUS = CalculatePlanetRadius(atmosphereStartHeight, horizonDistance);//407583.3
 
-//const float maxDistance = CalculateMaxDistance(_EarthRadius, atmosphereEndHeight);//57242
-const float maxDistance = 70242.f;
-//const float maxRayDistance = CalculateMaxRayDistance(_EarthRadius, atmosphereStartHeight, atmosphereEndHeight);
-const float maxRayDistance = 22242.0f;
-const float _StartHeight = atmosphereStartHeight;
-const float _EndHeight = atmosphereEndHeight;
-const float _BaseFBMScale = 2;
-const float _DetailScale = 4;
-const float _DetailFBMScale = .22f;
-const float _AtmosphereThickness = atmosphereThickness;
+//uniform float maxDistance = CalculateMaxDistance(PLANET_RADIUS, atmosphereEndHeight);//57242
+//uniform float maxRayDistance = CalculateMaxRayDistance(PLANET_RADIUS, atmosphereStartHeight, atmosphereEndHeight);
+uniform float _StartHeight;
+uniform float _BaseFBMScale;
+uniform float _DetailScale;
+uniform float _DetailFBMScale;
+uniform float _AtmosphereThickness;
 
-const float _MaxDistance = maxDistance;
+uniform float _MaxDistance;
 
-const float _FieldOfView = 60.0f;
-const float _AspectRatio = ASPECT_RATIO;
-
-
-const float sunRayLength = 0.08f * atmosphereThickness;
-const float coneRadius = 0.08f * atmosphereThickness;
-
-float _CloudBottomFade = 0.33f;
+uniform float _CloudBottomFade;
 			
-//vec3 _CameraPosition = vec3(0, _EarthRadius, 0) + viewPos.rgb;
-vec3 _CameraPosition = vec3(viewPos.x, _EarthRadius, viewPos.z);
+//vec3 _CameraPosition = vec3(0, PLANET_RADIUS, 0) + viewPos.rgb;
+vec3 _CameraPosition = vec3(viewPos.x, PLANET_RADIUS + viewPos.y, viewPos.z);
 //vec3 _CameraPosition = viewPos;
 
 //animations
-uniform vec3 _BaseOffset ;
-uniform vec3 _DetailOffset ;
+uniform vec3 _BaseOffset;
+uniform vec3 _DetailOffset;
 uniform vec2 _CoverageOffset;
 
+uniform float _BaseScale;
+uniform float _CoverageScale;
+uniform float _HorizonFadeStartAlpha;
+uniform float _OneMinusHorizonFadeStartAlpha;
+uniform float _HorizonFadeScalar;					// Fades clouds on horizon, 1.0 -> 10.0 (1.0 = smooth fade, 10 = no fade)
 
-float _BaseScale = 1.f / (atmosphereEndHeight);
-float _CoverageScale = 1.0f / (maxDistance * 10);
-float _HorizonFadeStartAlpha = .5f;
-float _OneMinusHorizonFadeStartAlpha = 1.0f - _HorizonFadeStartAlpha;
-float _HorizonFadeScalar = .1f;					// Fades clouds on horizon, 1.0 -> 10.0 (1.0 = smooth fade, 10 = no fade)
-vec3 _LightDirection = -sunDir;
-vec3 _LightColor = vec3(1.0f);
-float _LightScalar = 1.f;
-float _AmbientScalar = 1.0f;
+uniform vec3 _LightColor;
+uniform float _LightScalar;
+uniform float _AmbientScalar;
 //181 157 10
-vec3 _CloudTopColor = vec3(1.0f);
-//vec3 _CloudBaseColor = vec3(83.f / 255.f , 96.f / 255.f, 105.f / 255.f);
-vec3 _CloudBaseColor = vec3(169, 198, 255)/255.0f;
-//vec3 _CloudBaseColor = vec3(94, 140, 186)/255.0f;
-//vec3 _CloudBaseColor = vec3(1.0f);
-float _SunRayLength = sunRayLength;
-float _ConeRadius = coneRadius;
-float _MaxIterations = 128;
-float _MaxRayDistance = maxRayDistance;
-float _RayStepLength = (atmosphereThickness / (_MaxIterations * .5f));
-float _SampleScalar = 1.f;
+uniform vec3 _CloudTopColor;
+//uniform vec3 _CloudBaseColor = uniform vec3(83.f / 255.f , 96.f / 255.f, 105.f / 255.f);
+uniform vec3 _CloudBaseColor;
+//uniform vec3 _CloudBaseColor = uniform vec3(94, 140, 186)/255.0f;
+//uniform vec3 _CloudBaseColor = uniform vec3(1.0f);
+uniform float _SunRayLength;
+uniform float _ConeRadius;
+uniform float _MaxIterations;
+uniform float _MaxRayDistance;
+uniform float _RayStepLength;
+uniform float _SampleScalar;
 
-float _ErosionEdgeSize = .5f;
-float _CloudDistortion = .45f;
-float _CloudDistortionScale = .5f;
-float _Density = 1.0f;
-float _ForwardScatteringG = 0.79f;
-float _BackwardScatteringG = -0.39f;
-float _DarkOutlineScalar = 1.f;
 
-float _HorizonCoverageStart = .4f;
-float _HorizonCoverageEnd = .7f;
+uniform float _Density;
+uniform float _ForwardScatteringG;
+uniform float _BackwardScatteringG;
+uniform float _DarkOutlineScalar;
+
+uniform float _HorizonCoverageStart;
+uniform float _HorizonCoverageEnd;
 			
-float _LODDistance = .313;
-float _RayMinimumY = .10;
+uniform float _RayMinimumY;
 
 //vec3 _Random0 = normalize(vec3(random(vec3(1.0f), 1.0f)));
 //vec3 _Random1 = normalize(vec3(random(vec3(1.0f), 1.3213330f)));;
@@ -140,7 +121,7 @@ float mix3(float v0, float v1, float v2, float a)
 
 float NormalizedAtmosphereY(vec3 ray)
 {
-	float y = length(ray) - _EarthRadius - _StartHeight;
+	float y = length(ray) - PLANET_RADIUS - _StartHeight;
 	return y / _AtmosphereThickness;
 }
 
@@ -235,7 +216,7 @@ float SampleCloudDensity(vec3 ray, vec4 weather_data, float csRayHeight)
 	//We have to multiply by base scale as the texture we are looking into is huge simply using the ray coordinates as a lookup
 	//Will result in sampling the same area of all pixels, ergo we end up with one giant cloud in the sky
 	vec4 samplingPos = vec4(ray  * _BaseScale + _BaseOffset, 0);
-	vec2 inCloudMinMax = vec2(_StartHeight, _EndHeight);
+
 	vec4 low_frequency_noises = textureLod(_PerlinWorleyNoise, samplingPos.rgb, 0).rgba;
 
 	//Here we make an FBM out of the 3 worley noises found in the GBA channels of the low_frequency_noises.
@@ -291,7 +272,7 @@ float SampleCloudDensity(vec3 ray, vec4 weather_data, float csRayHeight)
 	float high_freq_noise_modifier = lerp(vec4(high_freq_FBM), vec4(1.0 - high_freq_FBM), saturate(csRayHeight * 10));
 
 	//Here we remap our cloud with the high_freq_noise_modifier
-	float final_cloud = Remap(base_cloud_with_coverage, high_freq_noise_modifier*_DetailFBMScale, 1.0 , 0.0 , 1.0) ;
+	float final_cloud = Remap(base_cloud_with_coverage, high_freq_noise_modifier*_DetailFBMScale, 1.0 , 0.0 , 1.0);
 	//result.rgb = vec3(final_cloud);
 	//return the final cloud!
 
@@ -335,7 +316,7 @@ vec3 SampleLight(vec3 origin, float originDensity, float pixelAlpha, vec3 cosAng
 {
 	const float iterations = 5.0;
 
-	vec3 rayStep = -_LightDirection * (_SunRayLength / iterations);
+	vec3 rayStep = -sunDir * (_SunRayLength / iterations);
 	vec3 ray = origin + rayStep;
 
 	float atmosphereY = 0.0;
@@ -414,8 +395,7 @@ void main()
 
 	vec3 rayDirection = normalize( fragPos - viewPos);
 
-	vec2 uv = (UV - 0.5) * _FieldOfView;
-	uv.x *= _AspectRatio;
+	vec2 uv = vec2(0.0f);
 
 	if( rayDirection.y > _RayMinimumY)
 	{
@@ -428,13 +408,13 @@ void main()
 		//result.a = 1.0f;
 		//result.r = 1.0f;
 
-		vec3 ray = InternalRaySphereIntersect(_EarthRadius + _StartHeight, _CameraPosition, rayDirection);
+		vec3 ray = InternalRaySphereIntersect(PLANET_RADIUS + _StartHeight, _CameraPosition, rayDirection);
 		vec3 rayStep = rayDirection * _RayStepLength;
 
 		float atmosphereY = 0.0;
 		float rayStepScalar = 1.0;
 
-		float cosAngle = dot(rayDirection, -_LightDirection);
+		float cosAngle = dot(rayDirection, -sunDir);
 
 		float zeroThreshold = 4.0;
 		float zeroAccumulator = 0.0;

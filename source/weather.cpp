@@ -1,12 +1,30 @@
 #include "game.hpp"
 
-Weather::Weather()
+
+float CalculateHorizonDistance(float innerRadius, float outerRadius)
 {
+	return sqrt((outerRadius * outerRadius) - (innerRadius * innerRadius));
+}
+
+float CalculateMaxDistance(float earthRadius, float atmosphereEndHeight)
+{
+	return CalculateHorizonDistance(earthRadius, earthRadius + atmosphereEndHeight);
+}
+
+float CalculateMaxRayDistance(float earthRadius, float atmosphereStartHeight, float atmosphereEndHeight)
+{
+	float cloudInnerDistance = CalculateHorizonDistance(earthRadius, earthRadius + atmosphereStartHeight);
+	float cloudOuterDistance = CalculateHorizonDistance(earthRadius, earthRadius + atmosphereEndHeight);
+	return cloudOuterDistance - cloudInnerDistance;
+}
+
+Weather::Weather() : m_showCloudParams(false)
+{
+
 }
 Weather::Weather(GLuint quadVao)
 {
 	this->quadVAO = quadVao;
-
 	glGenFramebuffers(1, &m_cloudFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_cloudFBO);
 
@@ -17,78 +35,33 @@ Weather::Weather(GLuint quadVao)
 	//unbind framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	m_animationScale = 0.1f;
-	m_timeScale = .002f;
-	m_coverageOffsetPerFrame = glm::vec2(.01f, .01f);
-	//m_coverageOffsetPerFrame = glm::vec2(0);
-	m_cloudDetailOffsetPerFrame = glm::vec3(.1f, .1f, 0);
-	m_cloudBaseOffsetPerFrame = glm::vec3(.01, -.01f, 0.0f);
-
-	m_coverageOffset = glm::vec2(0.0f);
-	m_cloudDetailOffset = glm::vec3(0.0f);
-	m_cloudBaseOffset = glm::vec3(0.0f);
+	m_showCloudParams = false;
 }
 
 Weather::~Weather()
 {
 }
 
-void Weather::PrecomputeNoise()
+void Weather::LoadCloudData()
 {
-	const int weatherDataRes = 256;
-	const int detailNoise = 32;
-	const int baseNoise = 128;
-	const int curlRes = 128;
+	Texture *baseNoise3D = new Texture();
+	Texture *detailNoise3D = new Texture();
 
-	const glm::ivec3 workGroupSize(8, 8, 4);
-
-	////noise textures
-	//m_cloudNoiseTexHigh.CreateImage3D(detailNoise, detailNoise, detailNoise, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, GL_REPEAT);
-	//m_cloudNoiseTexLow.CreateImage3D(baseNoise, baseNoise, baseNoise, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, GL_REPEAT);
-	//m_cloudNoiseCurl.CreateImage2D(curlRes, curlRes, GL_MIRRORED_REPEAT, GL_RGBA, GL_RGBA, GL_FLOAT);
-	////weather data
-	//m_weatherDataTex.CreateImage2D(weatherDataRes, weatherDataRes, GL_MIRRORED_REPEAT, GL_RGBA, GL_RGBA, GL_FLOAT);
+	baseNoise3D->LoadTexture3D("Resources\\textures\\noise.bytes", 128, 128, 128, GL_RGBA, GL_RGBA, GL_REPEAT);
+	detailNoise3D->LoadTexture3D("Resources\\textures\\noise_detail.bytes", 32, 32, 32, GL_RGB, GL_RGB, GL_REPEAT);
 
 
-	////high res cloud noise
-	//Shader * shader = g_game->GetShader("cloudHighFreqNoise");
-	//shader->Use();
-	//glBindImageTexture(0, m_cloudNoiseTexHigh.GetTexID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
-	//glDispatchCompute(detailNoise / workGroupSize.x, detailNoise / workGroupSize.y, detailNoise / workGroupSize.z);
-
-	////low res
-	//shader = g_game->GetShader("cloudLowFreqNoise");
-	//shader->Use();
-	//glBindImageTexture(0, m_cloudNoiseTexLow.GetTexID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
-	//glDispatchCompute(baseNoise / workGroupSize.x, baseNoise / workGroupSize.y, baseNoise / workGroupSize.z);
-
-	//curl noise
-	Shader *shader = g_game->GetShader("cloudCurlNoise");
-	shader->Use();
-	glBindImageTexture(0, m_cloudNoiseCurl.GetTexID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
-	glDispatchCompute(curlRes / workGroupSize.x, curlRes / workGroupSize.y, 1);
-
-	////Weather data
-	//shader = g_game->GetShader("GenerateWeatherData");
-	//shader->Use();
-	//shader->SetUniform1f("time", 1.0f);
-
-	//glBindImageTexture(0, m_weatherDataTex.GetTexID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
-	//glDispatchCompute(weatherDataRes / workGroupSize.x, weatherDataRes / workGroupSize.y, 1);
-	//SlogCheckGLError();
-
-	////glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
-
-	m_cloudNoiseTexLow.LoadTexture3D("Resources\\textures\\noise.bytes", 128, 128, 128, GL_RGBA, GL_RGBA, GL_REPEAT);
-	m_cloudNoiseTexHigh.LoadTexture3D("Resources\\textures\\noise_detail.bytes", 32, 32, 32, GL_RGB, GL_RGB, GL_REPEAT);
+	m_cloudParams.weatherTex = g_game->GetTexture("weather");
+	m_cloudParams.curlNoise = g_game->GetTexture("CurlNoise");
+	m_cloudParams.baseNoise3D = baseNoise3D;
+	m_cloudParams.detailNoise3D = detailNoise3D;
 }
 
 void Weather::Update()
 {
-	m_coverageOffset += m_animationScale * m_coverageOffsetPerFrame * g_game->GetDeltaTime() * m_timeScale;
-	m_cloudBaseOffset += m_animationScale * m_cloudBaseOffsetPerFrame * g_game->GetDeltaTime() * m_timeScale;
-	m_cloudDetailOffset += m_animationScale * m_cloudDetailOffsetPerFrame * g_game->GetDeltaTime() * m_timeScale;
+	m_cloudParams.CoverageOffset += m_cloudParams.animationScale * m_cloudParams.coverageOffsetPerFrame * g_game->GetDeltaTime() * m_cloudParams.timeScale;
+	m_cloudParams.BaseOffset += m_cloudParams.animationScale * m_cloudParams.cloudBaseOffsetPerFrame * g_game->GetDeltaTime() * m_cloudParams.timeScale;
+	m_cloudParams.DetailOffset += m_cloudParams.animationScale * m_cloudParams.cloudDetailOffsetPerFrame * g_game->GetDeltaTime() * m_cloudParams.timeScale;
 }
 
 void Weather::RenderToQuad()
@@ -98,33 +71,24 @@ void Weather::RenderToQuad()
 	glBindVertexArray(0);	
 }
 
+
+
 void Weather::Render(GBuffer gBuffer, Texture *shadedScene)
 {
-	//bind frmaebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, m_cloudFBO);
 
 	Camera *camera = g_game->GetCamera();
 	Shader *shader = g_game->GetShader("raymarchClouds");
 	shader->Use();
+	//render clouds
 
 	gBuffer.gPosition.Bind(0);
-
-	m_cloudNoiseTexHigh.Bind(1);
-	m_cloudNoiseTexLow.Bind(2);
-	g_game->GetTexture("CurlNoise")->Bind(3);
-	g_game->GetTexture("weather")->Bind(4);
-
 	shader->SetUniform3fv("sunDir", g_game->m_skydome->GetSunDirection());
 	shader->SetUniform3fv("cameraPos", camera->GetPosition());
-	shader->SetUniform3fv("_BaseOffset", m_cloudBaseOffset);
-	shader->SetUniform3fv("_DetailOffset", m_cloudDetailOffset);
-	shader->SetUniform2fv("_CoverageOffset", m_coverageOffset);
-	RenderToQuad();
 
-	m_cloudNoiseTexHigh.Unbind();
-	g_game->GetTexture("weather")->Unbind();
-	g_game->GetTexture("CurlNoise")->Unbind();
-	m_cloudNoiseTexLow.Unbind();
+	m_cloudParams.LoadParams(shader);
+	RenderToQuad();
+	m_cloudParams.UnbindTextures();
 
 	//render to final scene
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -136,16 +100,59 @@ void Weather::Render(GBuffer gBuffer, Texture *shadedScene)
 	RenderToQuad();
 	m_cloudTex.Unbind();
 	shadedScene->Unbind();
+}
 
-//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//	Shader * shader = g_game->GetShader("quad");
-//	shader->Use();
-//	m_cloudNoiseTexLow.Bind(0);
-//	//g_game->GetTexture("weather")->Bind(0);
-//	//m_cloudNoiseTexHigh.Bind(0);
-//	//m_cloudNoiseCurl.Bind(0);
-//	RenderToQuad();
-//	//m_cloudNoiseTexLow.Unbind();
-////	m_cloudNoiseTexHigh.Unbind();
+
+void Weather::RenderImGui()
+{
+	if (!m_showCloudParams) return;
+	ImGui::Begin("Another Window", &m_showCloudParams);
+	ImGui::Text("Cloud Params!");
+
+	ImGui::SliderFloat("Start Height", &m_cloudParams.atmosphereStartHeight, 0.0f, 100000.0f);
+	ImGui::SliderFloat("End Height", &m_cloudParams.atmosphereEndHeight, 0.0f, 100000.0f);
+	ImGui::SliderFloat("Max Distance", &m_cloudParams.maxDistance, 0.0f, 300000.0f);
+
+	//update dependant values
+	m_cloudParams.atmosphereThickness = m_cloudParams.atmosphereEndHeight - m_cloudParams.atmosphereStartHeight;
+	m_cloudParams.BaseScale = 1.0f / m_cloudParams.atmosphereEndHeight;
+	m_cloudParams.CoverageScale = 1.0f / (m_cloudParams.maxDistance * 10.0f);
+
+	ImGui::SliderFloat("Horizon Fade Scalar", &m_cloudParams.HorizonFadeScalar, 0, 1.0f);
+	ImGui::SliderFloat("Horizon Fade Start Alpha", &m_cloudParams.HorizonFadeStartAlpha, 0, 1.0f);
+
+	m_cloudParams.OneMinusHorizonFadeStartAlpha = 1.0f - m_cloudParams.HorizonFadeStartAlpha;
+	
+	ImGui::SliderFloat("LightScalar", &m_cloudParams.LightScalar, 0.0f, 1.0f);
+	ImGui::SliderFloat("AmbientScalar", &m_cloudParams.AmbientScalar, 0.0f, 1.0f);
+	ImGui::SliderFloat("SunRayLength", &m_cloudParams.SunRayLength, 0.0f, 1.0f);
+	ImGui::SliderFloat("Cone Radius", &m_cloudParams.ConeRadius, 0.0f, 1.0f);
+	ImGui::SliderFloat("Cloud Bottom Fade", &m_cloudParams.CloudBottomFade, 0.0f, 1.0f);
+
+	ImGui::SliderFloat3("Cloud Top Color", &m_cloudParams.CloudTopColor[0], 0.0f, 1.0f);
+	ImGui::SliderFloat3("Cloud Bottom COlor", &m_cloudParams.CloudBaseColor[0], 0.0f, 1.0f);
+
+	ImGui::InputFloat("Max Iterations", &m_cloudParams.MaxIterations, 8, 64.0f, 1);
+	m_cloudParams.RayStepLength = m_cloudParams.atmosphereThickness / (m_cloudParams.MaxIterations * .5f);
+
+	//animations
+	ImGui::SliderFloat("Animation Scale", &m_cloudParams.animationScale, 0.0f, 1.0f);
+	ImGui::SliderFloat2("CoverageOffset Per Frame", &m_cloudParams.coverageOffsetPerFrame[0], 0.0f, 1.0f);
+	ImGui::SliderFloat3("BaseOffset Per Frame", &m_cloudParams.BaseOffset[0], 0, 1);
+	ImGui::SliderFloat3("DetailOffset Per Frame", &m_cloudParams.DetailOffset[0], 0, 1);
+
+	ImGui::SliderFloat("Base FBM Scale", &m_cloudParams.BaseFBMScale, 0.0f, 20.0f);
+	ImGui::SliderFloat("Detail Scale", &m_cloudParams.DetailScale, 0.0f, 20.0f);
+	ImGui::SliderFloat("Detail FBM SCALE", &m_cloudParams.DetailFBMScale, 0.0f, 1.0f);
+
+	ImGui::SliderFloat("Density", &m_cloudParams.LightScalar, 0.0f, 8.0f);
+	ImGui::SliderFloat("Forward Scattering", &m_cloudParams.ForwardScatteringG, 0.0f, 1.0f);
+	ImGui::SliderFloat("Backward Scattering", &m_cloudParams.BackwardScatteringG, 0.0f, -1.0f);
+	ImGui::SliderFloat("Dark Outline Scalar", &m_cloudParams.DarkOutlineScalar, 0.0f, 1.0f);
+	ImGui::SliderFloat("Horizon Coverage Start", &m_cloudParams.HorizonCoverageStart, 0.0f, 1.0f);
+	ImGui::SliderFloat("Horizon Coverage End", &m_cloudParams.HorizonCoverageEnd, 0.0f, 1.0f);
+
+	ImGui::SliderFloat("Ray Minimum Y", &m_cloudParams.RayMinimumY, 0, 1.0f);
+
+	ImGui::End();
 }
