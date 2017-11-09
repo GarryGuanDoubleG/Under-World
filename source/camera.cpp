@@ -43,6 +43,11 @@ glm::vec3 Camera::GetPosition()
 	return m_pos;
 }
 
+glm::vec3 Camera::GetForward()
+{
+	return m_forward;
+}
+
 glm::vec3 Camera::GetRotation()
 {
 	return glm::vec3(glm::radians(m_pitch), glm::radians(m_yaw), glm::radians(m_roll));

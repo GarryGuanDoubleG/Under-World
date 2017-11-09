@@ -27,6 +27,7 @@ Skydome::Skydome(Model * model)
 
 	m_timeScale= .003f;
 	m_timeOfDay = 12.f;
+	m_sunDirection = glm::vec3(0, 1, 0);
 }
 
 Skydome::~Skydome()
@@ -102,7 +103,8 @@ void Skydome::CalculateSun()
 		m_azimuth = 2 * M_PI - acos(sin(m_altitude) * sin(latitude) / (cos(m_altitude) * cos(latitude)));
 
 	//m_sunDirection = glm::normalize(glm::vec3(sin(m_azimuth), sin(m_altitude), -cos(m_azimuth)));
-	m_sunDirection = glm::vec3(0, 1.0, 0);
+	//m_sunDirection = glm::vec3(.95, .05, 0);
+	//m_sunDirection = glm::vec3(0, 1.0, 0);
 	//m_sunDirection = spherical_to_vector(m_altitude, m_azimuth);
 	m_sunIntensity = 10.0f;
 

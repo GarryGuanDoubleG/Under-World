@@ -177,6 +177,8 @@
     <None Include="Shaders\model_vs.glsl" />
     <None Include="Shaders\object_fs.glsl" />
     <None Include="Shaders\object_vs.glsl" />
+    <None Include="Shaders\Ocean\oceanFFT_vs.glsl" />
+    <None Include="Shaders\Ocean\oceanFFT_fs.glsl" />
     <None Include="Shaders\quad_fs.glsl" />
     <None Include="Shaders\quad_vs.glsl" />
     <None Include="Shaders\Scattering\add_delta_e.compute.glsl" />
@@ -229,6 +231,7 @@
     <ClInclude Include="source\texture.hpp" />
     <ClInclude Include="source\voxelManager.hpp" />
     <ClInclude Include="source\VoxelVertex.hpp" />
+    <ClInclude Include="source\worldTree.h" />
     <ClInclude Include="utility\FastNoise.h" />
     <ClInclude Include="utility\FastNoiseSIMD.h" />
     <ClInclude Include="utility\ImGui\imconfig.h" />
@@ -350,6 +353,7 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="source\VoxelVertex.cpp" />
+    <ClCompile Include="source\worldTree.cpp" />
     <ClCompile Include="utility\FastNoise.cpp">
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>

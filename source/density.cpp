@@ -1,7 +1,7 @@
 #include "game.hpp"
 float Density::voxelSize = 32.0f;
 float Density::invVoxelSize = 1.0f;
-float Density::maxHeight = 32.0f;
+float Density::maxHeight = 32.0f; //max number of voxels high
 float Density::densityGenTime;
 
 FastNoise Density::terrainFN;
@@ -28,8 +28,8 @@ void Density::Initialize()
 {
 	omp_init_lock(&g_thread_lock);
 
-	terrainFN.SetFractalOctaves(8);
-	terrainFN.SetFrequency(0.02f);
+	terrainFN.SetFractalOctaves(4);
+	terrainFN.SetFrequency(0.01f);
 	terrainFN.SetFractalLacunarity(2.0f);
 	terrainFN.SetFractalType(terrainFN.FBM);
 	terrainFN.SetFractalGain(0.5);
@@ -53,7 +53,6 @@ void Density::Initialize()
 	caveFNSIMD->SetPerturbAmp(caveFNSIMD->GradientFractal);
 	caveFNSIMD->SetPerturbFrequency(0.6f);
 }
-
 
 glm::vec3 Density::FindIntersection(Density::DensityType type, const glm::vec3 &p0, const glm::vec3 &p1)
 {
@@ -86,6 +85,33 @@ glm::vec3 Density::FindIntersection(Density::DensityType type, const glm::vec3 &
 	return p0 + ((p1 - p0) * t);
 }
 
+glm::vec3 Density::FindIntersection2D(Density::DensityType type, const glm::vec3 &p0, const glm::vec3 &p1)
+{
+	float minValue = 100000.f;
+	float t = 0.f;
+	float currentT = 0.f;
+	const int steps = 8;
+	const float increment = 1.f / (float)steps;
+
+	vector<glm::vec3> positions(steps + 1);
+	for (int i = 0; i <= steps; i++)
+	{
+		positions[i] = p0 + ((p1 - p0) * currentT);
+		currentT += increment;
+	}
+	for (int i = 0; i <= steps; i++)
+	{
+		float density = glm::abs(Density::GetNoise2D(type, positions[i]));
+		if (density < minValue)
+		{
+			minValue = density;
+			t = increment * i;
+		}
+	}
+
+	return p0 + ((p1 - p0) * t);
+}
+
 glm::vec3 Density::CalculateNormals(Density::DensityType type, const glm::vec3 &pos)
 {
 	const float H = 0.1f;
@@ -110,6 +136,22 @@ glm::vec3 Density::CalculateNormals(Density::DensityType type, const glm::vec3 &
 	return glm::normalize(d1 - d2);
 }
 
+glm::vec3 Density::CalculateNormals2D(Density::DensityType type, const glm::vec3 &pos)
+{
+	const float H = 0.01f;
+
+	if (pos.y <= 1.0f)
+	{
+		return glm::vec3(0.0f, 1.0f, 0.0f);
+	}
+
+	//finite difference method to get partial derivatives
+	const float dx = GetNoise2D(type, pos + glm::vec3(H, 0.f, 0.f)) - GetNoise2D(type, pos - glm::vec3(H, 0.f, 0.f));
+	const float dy = GetNoise2D(type, pos + glm::vec3(0.f, H, 0.f)) - GetNoise2D(type, pos - glm::vec3(0.f, H, 0.f));
+	const float dz = GetNoise2D(type, pos + glm::vec3(0.f, 0.f, H)) - GetNoise2D(type, pos - glm::vec3(0.f, 0.f, H));
+
+	return glm::normalize(glm::vec3(dx, dy, dz));
+}
 
 float Density::GetSphere(const glm::vec3& worldPosition, const glm::vec3& origin, float radius)
 {
@@ -165,6 +207,14 @@ float Density::GetDensity(DensityType type, const glm::vec3 & worldPosition)
 	densityGenTime += SDL_GetTicks() - time;
 	omp_unset_lock(&g_thread_lock);
 
+}
+
+float Density::GetNoise2D(DensityType type, const glm::vec3 & worldPosition)
+{
+	glm::vec3 voxelPos = worldPosition * invVoxelSize;
+	float height = terrainFN.GetSimplexFractal(voxelPos.x, voxelPos.z) * maxHeight * voxelSize; //convert to world Position
+
+	return worldPosition.y - height;
 }
 
 float *Density::GetDensitySet(DensityType type, const vector<glm::vec3> & positions)
@@ -234,7 +284,7 @@ void Density::GenerateTerrainIndices(const glm::vec3 &chunkPos, const glm::vec3 
 	glm::vec3 setSize = chunkSize + glm::vec3(1.0f);
 	
 	float *noiseSet = terrainFNSIMD->GetNoiseSet(voxelPos.x, voxelPos.y, voxelPos.z, setSize.x, setSize.y, setSize.z);
-
+	
 	for (int x = 0; x <= chunkSize.x; x++)
 	{
 		for (int y = 0; y <= chunkSize.y; y++)
@@ -297,4 +347,66 @@ void Density::GenerateMaterialIndices(DensityType type, const glm::vec3 &chunkPo
 	omp_set_lock(&g_thread_lock);
 	densityGenTime += SDL_GetTicks() - time;
 	omp_unset_lock(&g_thread_lock);
+}
+
+//2D heightmap noise
+void Density::GenerateHeightMap(const glm::vec3 &chunkPos, const glm::vec3 &chunkSize, vector<float> &heightMap)
+{
+	heightMap.resize((chunkSize.x + 1) * (chunkSize.z + 1), -696969.69696969);
+	glm::vec3 voxelPos = glm::ivec3(chunkPos * invVoxelSize);
+
+	//set heightmap
+	for (int x = 0; x <= chunkSize.x; x++)
+	{
+		for (int z = 0; z <= chunkSize.z; z++)
+		{ 
+			int index = GETINDEXCHUNKXZ(glm::ivec3(chunkSize + glm::vec3(1.0f)), x, z);
+			float height = terrainFN.GetSimplexFractal(voxelPos.x + x, voxelPos.z + z) * maxHeight * voxelSize; //convert to world Position
+			height = height < 1.0f ? 1.0f : height;
+			heightMap[index] = height;
+
+		}
+	}
+}
+
+//returns false if empty
+bool Density::GenerateMaterialIndices(const glm::vec3 &chunkPos, const glm::vec3 &chunkSize, vector<int> &materialIndices, vector <float> &heightMap)
+{
+	materialIndices.resize((chunkSize.x + 1) *  (chunkSize.y + 1) * (chunkSize.z + 1), -1);
+	glm::vec3 gridSize = chunkSize + glm::vec3(1.0f);
+
+	bool activeChunk = false;
+	int material;
+
+	for (int x = 0; x <= chunkSize.x; x++)
+	{
+		for (int z = 0; z <= chunkSize.z; z++)
+		{
+			int index = GETINDEXCHUNKXZ(gridSize, x, z);
+			float height = heightMap[index];
+
+			//set material indices
+			//probably bad cache performance
+			for (int y = 0; y <= chunkSize.y; y++)
+			{
+				float worldHeight = chunkPos.y + y * voxelSize;
+
+				////set material for voxels
+				int chunkIndex = GETINDEXCHUNK(gridSize, x, y, z);
+				materialIndices[chunkIndex] = worldHeight <= height ? MATERIAL_SOLID : MATERIAL_AIR;
+				
+				//check if chunk has a sign change
+				if (chunkIndex == 0)
+				{
+					material = materialIndices[chunkIndex];
+				}
+				else if (material != materialIndices[chunkIndex])
+				{
+					activeChunk = true;
+				}
+			}
+		}
+	}
+
+	return activeChunk;
 }

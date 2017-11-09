@@ -7,11 +7,13 @@ class VoxelManager
 		m_chunkSize;
 	glm::ivec3 m_playerPos;
 
-	vector<Chunk> m_chunks;
+	unordered_map<glm::ivec3, Chunk*> m_chunkMap;
+
 public:
 	VoxelManager();
 
 	void Init();
+	void AssignChunkNeighbors(Chunk *chunk);
 	void Close();
 	void Update();
 	void Render();

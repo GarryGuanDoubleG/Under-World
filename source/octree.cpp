@@ -67,6 +67,11 @@ void FindEdgeCrossing(Octree *node, const unordered_map<glm::vec3, EdgeInfo> &he
 				qef.add(edge.pos.x, edge.pos.y, edge.pos.z, edge.normal.x, edge.normal.y, edge.normal.z);
 				edgeCount++;
 			}
+			else
+			{
+				//slog("couldnt find edge");
+				float dsadas = 1.0f;
+			}
 			k++;
 		}
 
@@ -154,6 +159,58 @@ Octree * BottomUpTreeGen(const unordered_map<glm::vec3, Octree *> &map, const gl
 	return tree[0];
 }
 
+Octree * BottomUpTreeGen(const vector<Octree*> &nodes, const glm::vec3 &chunkPos)
+{
+	vector<Octree*> tree = nodes;
+	while (tree.size() > 1)
+	{
+		vector<Octree *> parents;
+
+		for (vector<Octree*>::iterator it = tree.begin(); it < tree.end(); ++it)
+		{
+			Octree *currNode = *it;
+			bool foundParent = false;
+			int parentSize = currNode->m_size << 1; //twice the size
+
+			glm::ivec3 currPos = currNode->m_minPos;
+			glm::ivec3 floorChunkPos = chunkPos;
+			glm::vec3 parentPos = currPos - ((currPos - floorChunkPos) % parentSize);
+
+			int x = currPos.x >= parentPos.x && currPos.x < parentPos.x + currNode->m_size ? 0 : 1;
+			int y = currPos.y >= parentPos.y && currPos.y < parentPos.y + currNode->m_size ? 0 : 1;
+			int z = currPos.z >= parentPos.z && currPos.z < parentPos.z + currNode->m_size ? 0 : 1;
+
+			int index = GETINDEXXYZ(x, y, z);
+
+			for (vector<Octree *>::iterator it = parents.begin(); it != parents.end(); it++)
+			{
+				Octree * parent = *it;
+				if (parent->m_minPos == parentPos)
+				{
+					foundParent = true;
+					parent->m_children[index] = currNode;
+					parent->m_childMask |= 1 << index;
+					break;
+				}
+			}
+			if (!foundParent)
+			{
+				Octree *parent = new Octree();
+				parent->InitNode(parentPos, parentSize, 0);
+				parent->m_flag |= OCTREE_ACTIVE | OCTREE_INNER;
+				parent->m_childMask |= 1 << index;
+				parent->m_children[index] = currNode;
+
+				parents.push_back(parent);
+			}
+		}
+
+		tree = parents;
+	}
+
+	return tree[0];
+}
+
 Octree::Octree() : m_flag (0), m_vertices(nullptr), m_corners(0), m_vertex_count(0)
 {
 }
@@ -213,7 +270,7 @@ void Octree::GenerateVertexBuffer(std::vector<VoxelVertex>& v_out)
 	}
 }
 
-void Octree::ProcessCell(std::vector<unsigned int>& indexes, float threshold)
+void Octree::ProcessCell(std::vector<GLboolean> &flipList, std::vector<unsigned int>& indexes, float threshold)
 {
 	if(m_flag & OCTREE_LEAF)
 		return;
@@ -221,7 +278,7 @@ void Octree::ProcessCell(std::vector<unsigned int>& indexes, float threshold)
 	for (int i = 0; i < 8; i++)
 	{
 		if(m_children[i])
-			m_children[i]->ProcessCell(indexes, threshold);
+			m_children[i]->ProcessCell(flipList, indexes, threshold);
 	}
 
 	Octree* face_nodes[2];
@@ -231,7 +288,7 @@ void Octree::ProcessCell(std::vector<unsigned int>& indexes, float threshold)
 		face_nodes[0] = m_children[edge_pairs[i][0]];
 		face_nodes[1] = m_children[edge_pairs[i][1]];
 
-		ProcessFace(face_nodes, edge_pairs[i][2], indexes, threshold);
+		ProcessFace(face_nodes, edge_pairs[i][2], flipList, indexes, threshold);
 	}
 
 	for (int i = 0; i < 6; i++)
@@ -241,11 +298,11 @@ void Octree::ProcessCell(std::vector<unsigned int>& indexes, float threshold)
 		edge_nodes[2] = m_children[cell_proc_edge_mask[i][2]];
 		edge_nodes[3] = m_children[cell_proc_edge_mask[i][3]];
 
-		ProcessEdge(edge_nodes, cell_proc_edge_mask[i][4], indexes, threshold);
+		ProcessEdge(edge_nodes, cell_proc_edge_mask[i][4], flipList, indexes, threshold);
 	}
 }
 
-void Octree::ProcessFace(Octree ** nodes, int direction, std::vector<unsigned int>& indexes, float threshold)
+void Octree::ProcessFace(Octree ** nodes, int direction, std::vector<GLboolean> &flipList, std::vector<unsigned int>& indexes, float threshold)
 {
 	if(!nodes[0] || !nodes[1])
 		return;
@@ -264,7 +321,7 @@ void Octree::ProcessFace(Octree ** nodes, int direction, std::vector<unsigned in
 					face_nodes[j] = nodes[j]->m_children[face_proc_face_mask[direction][i][j]];
 			}
 
-			ProcessFace(face_nodes, face_proc_face_mask[direction][i][2], indexes, threshold);
+			ProcessFace(face_nodes, face_proc_face_mask[direction][i][2], flipList, indexes, threshold);
 		}
 
 		const int orders[2][4] =
@@ -283,18 +340,18 @@ void Octree::ProcessFace(Octree ** nodes, int direction, std::vector<unsigned in
 					edge_nodes[j] = nodes[orders[face_proc_edge_mask[direction][i][0]][j]]->m_children[face_proc_edge_mask[direction][i][1 + j]];
 			}
 
-			ProcessEdge(edge_nodes, face_proc_edge_mask[direction][i][5], indexes, threshold);
+			ProcessEdge(edge_nodes, face_proc_edge_mask[direction][i][5], flipList, indexes, threshold);
 		}
 	}
 }
 
-void Octree::ProcessEdge(Octree ** nodes, int direction, std::vector<unsigned int>& indexes, float threshold)
+void Octree::ProcessEdge(Octree ** nodes, int direction, std::vector<GLboolean> &flipList, std::vector<unsigned int>& indexes, float threshold)
 {
 	if(!nodes[0] || !nodes[1] || !nodes[2] || !nodes[3])
 		return;
 
 	if(nodes[0]->m_flag & OCTREE_LEAF && nodes[1]->m_flag & OCTREE_LEAF && nodes[2]->m_flag & OCTREE_LEAF && nodes[3]->m_flag & OCTREE_LEAF)
-		ProcessIndexes(nodes, direction, indexes, threshold);
+		ProcessIndexes(nodes, direction, flipList, indexes, threshold);
 	else
 	{
 		Octree* edge_nodes[4];
@@ -308,12 +365,12 @@ void Octree::ProcessEdge(Octree ** nodes, int direction, std::vector<unsigned in
 					edge_nodes[j] = nodes[j]->m_children[edge_proc_edge_mask[direction][i][j]];
 			}
 
-			ProcessEdge(edge_nodes, edge_proc_edge_mask[direction][i][4], indexes, threshold);
+			ProcessEdge(edge_nodes, edge_proc_edge_mask[direction][i][4], flipList, indexes, threshold);
 		}
 	}
 }
 
-void Octree::ProcessIndexes(Octree ** nodes, int direction, std::vector<unsigned int>& indexes, float threshold)
+void Octree::ProcessIndexes(Octree ** nodes, int direction, std::vector<GLboolean> &flipList, std::vector<unsigned int>& indexes, float threshold)
 {
 	unsigned int min_size = 100000000;
 	unsigned int indices[4] = { -1,-1,-1,-1 };
@@ -377,10 +434,12 @@ void Octree::ProcessIndexes(Octree ** nodes, int direction, std::vector<unsigned
 
 	if(sign_changed)
 	{
-		if(!flip)
+		if(flip)
 		{
+			//later flip the normal too
 			if(indices[0] != -1 && indices[1] != -1 && indices[2] != -1 && indices[0] != indices[1] && indices[1] != indices[3])
 			{
+				flipList.push_back(GL_TRUE);
 				indexes.push_back(indices[0]);
 				indexes.push_back(indices[1]);
 				indexes.push_back(indices[3]);
@@ -388,6 +447,7 @@ void Octree::ProcessIndexes(Octree ** nodes, int direction, std::vector<unsigned
 
 			if(indices[0] != -1 && indices[2] != -1 && indices[3] != -1 && indices[0] != indices[2] && indices[2] != indices[3])
 			{
+				flipList.push_back(GL_TRUE);
 				indexes.push_back(indices[0]);
 				indexes.push_back(indices[3]);
 				indexes.push_back(indices[2]);
@@ -397,6 +457,7 @@ void Octree::ProcessIndexes(Octree ** nodes, int direction, std::vector<unsigned
 		{
 			if(indices[0] != -1 && indices[3] != -1 && indices[1] != -1 && indices[0] != indices[1] && indices[1] != indices[3])
 			{
+				flipList.push_back(GL_FALSE);
 				indexes.push_back(indices[0]);
 				indexes.push_back(indices[3]);
 				indexes.push_back(indices[1]);
@@ -404,6 +465,7 @@ void Octree::ProcessIndexes(Octree ** nodes, int direction, std::vector<unsigned
 
 			if(indices[0] != -1 && indices[2] != -1 && indices[3] != -1 && indices[0] != indices[2] && indices[2] != indices[3])
 			{
+				flipList.push_back(GL_FALSE);
 				indexes.push_back(indices[0]);
 				indexes.push_back(indices[2]);
 				indexes.push_back(indices[3]);
@@ -531,7 +593,7 @@ void Octree::ClusterCell(float error)
 					for (int k = 0; k < 9; k++)
 					{
 						int edge = internal_edges[v->in_cell][k];
-						e += v->eis[edge];
+ 						e += v->eis[edge];
 					}
 
 					euler += v->euler;

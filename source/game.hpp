@@ -49,6 +49,7 @@ using namespace std;
 #include "density.hpp"
 #include "octree.hpp"
 #include "chunk.hpp"
+#include "worldTree.h"
 #include "voxelManager.hpp"
 #include "graphics.hpp"
 #include "atmosphere.hpp"

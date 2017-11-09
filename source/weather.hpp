@@ -68,12 +68,12 @@ struct CloudParams
 	Texture *detailNoise3D;
 	Texture *curlNoise;
 
-	float atmosphereEndHeight = 7500;
-	float atmosphereStartHeight = 4500;
+	float atmosphereEndHeight = 80000;
+	float atmosphereStartHeight = 50000;
 	float atmosphereThickness = atmosphereEndHeight - atmosphereStartHeight;
 	float horizonDistance = 35000;
 
-	float maxDistance = 70242.f;
+	float maxDistance = 160000;
 	//float maxRayDistance = 22242.0f;
 	float BaseFBMScale = 2;
 	float DetailScale = 4;
@@ -126,7 +126,7 @@ struct CloudParams
 	float HorizonCoverageEnd = .7f;
 
 	float LODDistance = .313;
-	float RayMinimumY = .10;
+	float RayMinimumY = 0.0;
 };
 
 

@@ -1,6 +1,14 @@
 #include "game.hpp"
 
-extern const int corner_deltas[8] =
+
+const int edgevmap[12][2] =
+{
+	{ 0,4 },{ 1,5 },{ 2,6 },{ 3,7 },	// x-axis 
+	{ 0,2 },{ 1,3 },{ 4,6 },{ 5,7 },	// y-axis
+	{ 0,1 },{ 2,3 },{ 4,5 },{ 6,7 }		// z-axis
+};
+
+const int corner_deltas[8] =
 {
 	0b000,
 	0b001,
@@ -13,7 +21,7 @@ extern const int corner_deltas[8] =
 	0b111,
 };
 
-extern const glm::vec3 corner_deltas_f[8] =
+const glm::vec3 corner_deltas_f[8] =
 {
 	glm::vec3(0,0,0),
 	glm::vec3(0,0,1),
@@ -26,14 +34,14 @@ extern const glm::vec3 corner_deltas_f[8] =
 	glm::vec3(1,1,1)
 };
 
-extern const int edge_pairs[12][3] =
+const int edge_pairs[12][3] =
 {
 	{ 0, 4, 0 },{ 1, 5, 0 },{ 2, 6, 0 },{ 3 ,7, 0 },	// x-axis 
 	{ 0, 2, 1 },{ 1, 3, 1 },{ 4, 6, 1 },{ 5, 7, 1 },	// y-axis
 	{ 0, 1, 2 },{ 2, 3, 2 },{ 4, 5, 2 },{ 6, 7, 2 }	// z-axis
 };
 
-extern const int cell_proc_edge_mask[6][5] =
+const int cell_proc_edge_mask[6][5] =
 {
 	{ 0, 1, 2, 3, 0 },
 	{ 4, 5, 6, 7, 0 },
@@ -43,28 +51,28 @@ extern const int cell_proc_edge_mask[6][5] =
 	{ 1, 3, 5, 7, 2 }
 };
 
-extern const int face_proc_face_mask[3][4][3] =
+const int face_proc_face_mask[3][4][3] =
 {
 	{ { 4,0,0 },{ 5,1,0 },{ 6,2,0 },{ 7,3,0 } },
 	{ { 2,0,1 },{ 6,4,1 },{ 3,1,1 },{ 7,5,1 } },
 	{ { 1,0,2 },{ 3,2,2 },{ 5,4,2 },{ 7,6,2 } }
 };
 
-extern const int face_proc_edge_mask[3][4][6] =
+const int face_proc_edge_mask[3][4][6] =
 {
 	{ { 1,4,0,5,1,1 },{ 1,6,2,7,3,1 },{ 0,4,6,0,2,2 },{ 0,5,7,1,3,2 } },
 	{ { 0,2,3,0,1,0 },{ 0,6,7,4,5,0 },{ 1,2,0,6,4,2 },{ 1,3,1,7,5,2 } },
 	{ { 1,1,0,3,2,0 },{ 1,5,4,7,6,0 },{ 0,1,5,0,4,1 },{ 0,3,7,2,6,1 } }
 };
 
-extern const int edge_proc_edge_mask[3][2][5] =
+const int edge_proc_edge_mask[3][2][5] =
 {
 	{ { 3,2,1,0,0 },{ 7,6,5,4,0 } },
 	{ { 5,1,4,0,1 },{ 7,3,6,2,1 } },
 	{ { 6,4,2,0,2 },{ 7,5,3,1,2 } },
 };
 
-extern const int external_edges[8][3] =
+const int external_edges[8][3] =
 {
 	{ 0, 8, 4 },
 	{ 1, 8, 5 },
@@ -76,7 +84,7 @@ extern const int external_edges[8][3] =
 	{ 11, 3, 7 }
 };
 
-extern const int internal_edges[8][9] =
+const int internal_edges[8][9] =
 {
 	{ 1, 2, 3, 5, 6, 7, 9, 10, 11 },
 	{ 0, 2, 3, 4, 6, 7, 9, 10, 11 },
@@ -88,7 +96,7 @@ extern const int internal_edges[8][9] =
 	{ 0, 1, 2, 4, 5, 6, 8, 9, 10 }
 };
 
-extern const int faces[6][4] =
+const int faces[6][4] =
 {
 	{ 0, 6, 2, 4 },
 	{ 1, 7, 3, 5 },
@@ -98,14 +106,14 @@ extern const int faces[6][4] =
 	{ 6, 10, 7, 11 }
 };
 
-extern const int process_edge_mask[3][4] =
+const int process_edge_mask[3][4] =
 {
 	{ 3, 2, 1, 0 },
 	{ 7, 5, 6, 4 },
 	{ 11, 10, 9, 8 }
 };
 
-extern const int num_vertices[256] =
+const int num_vertices[256] =
 {
 	0, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1,
 	1, 1, 2, 1, 2, 1, 3, 1, 2, 2, 2, 1, 2, 1, 2, 1,
@@ -125,7 +133,7 @@ extern const int num_vertices[256] =
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0
 };
 
-extern const int edge_table[256][16] =
+const int edge_table[256][16] =
 {
 	{ -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 	{ 0, 4, 8, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },

@@ -31,21 +31,24 @@ void main()
 		FragColor = vec4(0,0,0,1.0f);
 		return;
 	}
-    vec3 Normal = texture(gNormal, UV).rgb;
+    vec3 Normal = normalize(texture(gNormal, UV).rgb);
+	//Normal = Normal * 2.0 - 1.0;
     vec3 Diffuse = texture(gAlbedoSpec, UV).rgb;
     float Specular = texture(gAlbedoSpec, UV).a;
     
     // then calculate lighting as usual
-    vec3 lighting  = Diffuse * 0.3; // hard-coded ambient component
+    vec3 lighting  = Diffuse * 0.2; // hard-coded ambient component
     vec3 viewDir  = normalize(viewPos - FragPos);
-	vec3 lightDir = sunDir * -1;
+	vec3 lightDir = sunDir;
 	//vec3 lightDir = vec3(-.2f, -1.f, -0.3f);
 	//lightDir *= -1;
     //for(int i = 0; i < lightCount; ++i)
     //{
     //    // diffuse
     //    vec3 lightDir = normalize(lights[i].Position - FragPos);
-    vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * vec3(1.0f) * .5f;
+    //vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * .5f;
+	vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse * .35f;
+	
     // specular
     vec3 halfwayDir = normalize(lightDir + viewDir);  
     float spec = pow(max(dot(Normal, halfwayDir), 0.0), 16.0);
@@ -56,7 +59,10 @@ void main()
         diffuse *= attenuation;
         specular *= attenuation*/;
     lighting += diffuse + specular;        
+	//lighting = diffuse;
     //}
-
+	
     FragColor = vec4(lighting, 1.0);
+	//FragColor = vec4(Normal, 1.0);
+	//FragColor = vec4(Diffuse, 1.0f);
 }

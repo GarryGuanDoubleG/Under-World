@@ -138,8 +138,8 @@ void Weather::RenderImGui()
 	//animations
 	ImGui::SliderFloat("Animation Scale", &m_cloudParams.animationScale, 0.0f, 1.0f);
 	ImGui::SliderFloat2("CoverageOffset Per Frame", &m_cloudParams.coverageOffsetPerFrame[0], 0.0f, 1.0f);
-	ImGui::SliderFloat3("BaseOffset Per Frame", &m_cloudParams.BaseOffset[0], 0, 1);
-	ImGui::SliderFloat3("DetailOffset Per Frame", &m_cloudParams.DetailOffset[0], 0, 1);
+	ImGui::SliderFloat3("BaseOffset Per Frame", &m_cloudParams.cloudBaseOffsetPerFrame[0], 0, 1);
+	ImGui::SliderFloat3("DetailOffset Per Frame", &m_cloudParams.cloudDetailOffsetPerFrame[0], 0, 1);
 
 	ImGui::SliderFloat("Base FBM Scale", &m_cloudParams.BaseFBMScale, 0.0f, 20.0f);
 	ImGui::SliderFloat("Detail Scale", &m_cloudParams.DetailScale, 0.0f, 20.0f);

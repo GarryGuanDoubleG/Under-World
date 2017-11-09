@@ -18,7 +18,7 @@ vec3 getTriPlanarBlend(vec3 _wNorm){
 vec3 GetTriPlanarTex(vec3 FragPos, vec3 blending, float scale, int index)
 {
 	vec3 xaxis = texture2D( voxelTexture[STONE], FragPos.yz * scale).rgb;
-	vec3 yaxis = texture2D( voxelTexture[GRASS], FragPos.xz * scale).rgb;
+	vec3 yaxis = texture2D( voxelTexture[STONE], FragPos.xz * scale).rgb;
 	vec3 zaxis = texture2D( voxelTexture[STONE], FragPos.xy * scale).rgb;
 
 	return xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
@@ -52,8 +52,13 @@ vec3 TriPlanarNormal(vec3 FragPos, vec3 normal, vec3 blending, float scale)
     vec3 Tz = dp2perp * duv1.z + dp1perp * duv2.z; 
 
 	vec3 norm1 = perturb_normal(normal, Ty, Tz, FragPos.yz * scale, normalMap[STONE]);
-	vec3 norm2 = perturb_normal(normal, Tx, Tz, FragPos.xz * scale, normalMap[GRASS]);
+	vec3 norm2 = perturb_normal(normal, Tx, Tz, FragPos.xz * scale, normalMap[STONE]);
 	vec3 norm3 = perturb_normal(normal, Tx, Ty, FragPos.xy * scale, normalMap[STONE]);
 
-	return norm1 * blending.x + norm2 * blending.y + norm3 * blending.z;
+	//x and y components should be switched for some reason
+	vec3 outNorm;
+	outNorm.yxz = norm1 * blending.x + norm2 * blending.y + norm3 * blending.z;
+	return outNorm;
+
+	//return norm1 * blending.x + norm2 * blending.y + norm3 * blending.z;
 }

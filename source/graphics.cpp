@@ -85,6 +85,9 @@ bool Graphics::InitGraphics(int winWidth, int winHeight)
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CCW);
+	glCullFace(GL_BACK);
 	// Accept fragment if it closer to the camera than the former one
 	glDepthFunc(GL_LEQUAL);
 	//glEnable(GL_BLEND);
@@ -512,6 +515,7 @@ void Graphics::DeferredRenderVoxels(Shader *shader)
 	GLint samplersNormalMap[] = { 15,16 };
 	glUniform1iv(shader->Uniform("voxelTexture"), 2, &samplers[0]);
 	glUniform1iv(shader->Uniform("normalMap"), 2, &samplersNormalMap[0]);
+	//glUniform3fv(shader->Uniform("sunDir"), 1, &m_skydome->m_sunDirection[0]);
 
 	g_game->m_voxelManager->Render();
 
@@ -543,7 +547,6 @@ void Graphics::RenderModel(const string &name, const glm::mat4 &modelMat)
 
 	model->Draw(shader);
 }
-
 
 void Graphics::RenderVoxels()
 {

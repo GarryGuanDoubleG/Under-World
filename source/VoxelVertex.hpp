@@ -15,6 +15,7 @@ public:
 	glm::vec3 position;
 	glm::vec3 normal;
 	int textureID;
+	int flip;
 
 	unsigned int index;
 	int surface_index;

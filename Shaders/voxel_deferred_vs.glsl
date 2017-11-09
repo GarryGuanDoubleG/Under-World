@@ -2,6 +2,7 @@
 layout (location = 0) in vec3 verts;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in int textureID;
+layout (location = 3) in int flip;
 
 out VS_OUT
 {
@@ -16,7 +17,9 @@ uniform mat4 projection;
 
 void main()
 {
-	vs_out.normal = transpose(inverse(mat3(model))) * normal;	
+	//vs_out.normal = transpose(inverse(mat3(model))) * normal;
+	vs_out.normal = normal;
+	//vs_out.normal *= flip > 0 ? -1.0f : 1.0f;
 	vs_out.FragPos = vec3(model * vec4(verts,1.0f));
 	vs_out.texID = textureID;
 

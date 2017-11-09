@@ -1,4 +1,5 @@
 #pragma once
+extern const int edgevmap[12][2];
 
 extern const int num_vertices[256];
 extern const int edge_table[256][16];

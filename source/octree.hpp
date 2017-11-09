@@ -9,8 +9,8 @@
 #define GETINDEXXYZ(x,y,z) ((4 * x) + (2 * y) + z)
 #define GETINDEXXZ(x,z) ((2 * x) + z)
 #define GETINDEXCHUNK(chunkSize, a, b, c) ((chunkSize.x * chunkSize.y * a) + (chunkSize.y * b) + c)
-
-
+//Finds the index of a chunk using x z coordinates. Mainly for heightmap approach
+#define GETINDEXCHUNKXZ(chunkSize, a, b) ((chunkSize.x * a) + b)
 const glm::vec3 CHILD_MIN_OFFSETS[] =
 {
 	// needs to match the vertunordered_map from Dual Contouring impl
@@ -39,6 +39,7 @@ class Octree;
 void FindEdgeCrossing(Octree *node, const unordered_map<glm::vec3, EdgeInfo> &hermite_map);
 
 Octree * BottomUpTreeGen(const unordered_map<glm::vec3, Octree *> &unordered_map, const glm::vec3 &chunkPos);
+Octree * BottomUpTreeGen(const vector<Octree*> &nodes, const glm::vec3 &chunkPos);
 
 class Octree
 {
@@ -65,10 +66,10 @@ public:
 	
 	void GenerateVertexBuffer(std::vector<VoxelVertex>& v_out);
 
-	void ProcessCell(std::vector<unsigned int>& indexes, float threshold);
-	void ProcessFace(Octree ** nodes, int direction, std::vector<unsigned int>& indexes, float threshold);
-	void ProcessEdge(Octree ** nodes, int direction, std::vector<unsigned int>& indexes, float threshold);
-	void ProcessIndexes(Octree ** nodes, int direction, std::vector<unsigned int>& indexes, float threshold);
+	void ProcessCell(std::vector<GLboolean> &flipList, std::vector<unsigned int>& indexes, const float threshold);
+	void ProcessFace(Octree ** nodes, int direction, std::vector<GLboolean> &flipList, std::vector<unsigned int>& indexes, float threshold);
+	void ProcessEdge(Octree ** nodes, int direction, std::vector<GLboolean> &flipList, std::vector<unsigned int>& indexes, float threshold);
+	void ProcessIndexes(Octree ** nodes, int direction, std::vector<GLboolean> &flipList, std::vector<unsigned int>& indexes, float threshold);
 	void ClusterCellBase(float error);
 	void ClusterCell(float error);
 	void ClusterFace(Octree ** nodes, int direction, int & surface_index, std::vector<VoxelVertex*>& collected_vertices);

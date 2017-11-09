@@ -34,26 +34,32 @@
     <Filter Include="Header Files\Utility\FastNoise">
       <UniqueIdentifier>{3976a62c-d512-48dc-8719-1bd1e7ae6012}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\Scattering">
-      <UniqueIdentifier>{f5b135e5-5c1f-4363-9c2f-9711c870fee2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders\Voxel">
       <UniqueIdentifier>{39fe005c-65e6-4319-8ffc-f23ea9076b88}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shaders\Model">
       <UniqueIdentifier>{0120fcfc-d642-4f45-9c4a-1be1cfa0239a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\Clouds">
-      <UniqueIdentifier>{22597dac-1a6c-432f-a7c5-f37f6e01edf5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shaders\Clouds\noise">
-      <UniqueIdentifier>{c135922d-9f2c-4d1a-b525-e4880fae3a82}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Utility\ImGUI">
       <UniqueIdentifier>{c198f875-b65d-41c1-a054-dfc3a573554f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Utility\ImGUI">
       <UniqueIdentifier>{0f035ecf-6b5c-463a-8bae-81509f0d34a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\PostProcessing">
+      <UniqueIdentifier>{dc10e74c-0fed-4006-a2d9-533fbfdc8de4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\PostProcessing\Clouds">
+      <UniqueIdentifier>{22597dac-1a6c-432f-a7c5-f37f6e01edf5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\PostProcessing\Clouds\noise">
+      <UniqueIdentifier>{c135922d-9f2c-4d1a-b525-e4880fae3a82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\PostProcessing\Scattering">
+      <UniqueIdentifier>{f5b135e5-5c1f-4363-9c2f-9711c870fee2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\PostProcessing\Ocean">
+      <UniqueIdentifier>{3fd32750-b996-4c2b-9863-8e17b9b14b9c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -101,46 +107,46 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\Scattering\add_delta_e.compute.glsl">
-      <Filter>Shaders\Scattering</Filter>
+      <Filter>Shaders\PostProcessing\Scattering</Filter>
     </None>
     <None Include="Shaders\Scattering\add_delta_sr.compute.glsl">
-      <Filter>Shaders\Scattering</Filter>
+      <Filter>Shaders\PostProcessing\Scattering</Filter>
     </None>
     <None Include="Shaders\Scattering\atmosphere_fs.glsl">
-      <Filter>Shaders\Scattering</Filter>
+      <Filter>Shaders\PostProcessing\Scattering</Filter>
     </None>
     <None Include="Shaders\Scattering\atmosphere_vs.glsl">
-      <Filter>Shaders\Scattering</Filter>
+      <Filter>Shaders\PostProcessing\Scattering</Filter>
     </None>
     <None Include="Shaders\Scattering\compute_scattering.inc.glsl">
-      <Filter>Shaders\Scattering</Filter>
+      <Filter>Shaders\PostProcessing\Scattering</Filter>
     </None>
     <None Include="Shaders\Scattering\copy_inscatter.compute.glsl">
-      <Filter>Shaders\Scattering</Filter>
+      <Filter>Shaders\PostProcessing\Scattering</Filter>
     </None>
     <None Include="Shaders\Scattering\copy_irradiance.compute.glsl">
-      <Filter>Shaders\Scattering</Filter>
+      <Filter>Shaders\PostProcessing\Scattering</Filter>
     </None>
     <None Include="Shaders\Scattering\delta_e.compute.glsl">
-      <Filter>Shaders\Scattering</Filter>
+      <Filter>Shaders\PostProcessing\Scattering</Filter>
     </None>
     <None Include="Shaders\Scattering\delta_j.compute.glsl">
-      <Filter>Shaders\Scattering</Filter>
+      <Filter>Shaders\PostProcessing\Scattering</Filter>
     </None>
     <None Include="Shaders\Scattering\delta_sm_sr.compute.glsl">
-      <Filter>Shaders\Scattering</Filter>
+      <Filter>Shaders\PostProcessing\Scattering</Filter>
     </None>
     <None Include="Shaders\Scattering\delta_sr.compute.glsl">
-      <Filter>Shaders\Scattering</Filter>
+      <Filter>Shaders\PostProcessing\Scattering</Filter>
     </None>
     <None Include="Shaders\Scattering\irradiance_n.compute.glsl">
-      <Filter>Shaders\Scattering</Filter>
+      <Filter>Shaders\PostProcessing\Scattering</Filter>
     </None>
     <None Include="Shaders\Scattering\scatterFunctions.inc.glsl">
-      <Filter>Shaders\Scattering</Filter>
+      <Filter>Shaders\PostProcessing\Scattering</Filter>
     </None>
     <None Include="Shaders\Scattering\transmittance.glsl">
-      <Filter>Shaders\Scattering</Filter>
+      <Filter>Shaders\PostProcessing\Scattering</Filter>
     </None>
     <None Include="Shaders\voxelTex_vs.glsl">
       <Filter>Shaders\Voxel</Filter>
@@ -185,34 +191,40 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\Clouds\noise.inc.glsl">
-      <Filter>Shaders\Clouds\noise</Filter>
+      <Filter>Shaders\PostProcessing\Clouds\noise</Filter>
     </None>
     <None Include="Shaders\common.inc.glsl">
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\Clouds\cloudHighFreqNoise.glsl">
-      <Filter>Shaders\Clouds\noise</Filter>
+      <Filter>Shaders\PostProcessing\Clouds\noise</Filter>
     </None>
     <None Include="Shaders\Clouds\cloudLowFreqNoise.glsl">
-      <Filter>Shaders\Clouds\noise</Filter>
+      <Filter>Shaders\PostProcessing\Clouds\noise</Filter>
     </None>
     <None Include="Shaders\Clouds\cloud_common.inc.glsl">
-      <Filter>Shaders\Clouds</Filter>
+      <Filter>Shaders\PostProcessing\Clouds</Filter>
     </None>
     <None Include="Shaders\Clouds\generateWeatherData.glsl">
-      <Filter>Shaders\Clouds</Filter>
+      <Filter>Shaders\PostProcessing\Clouds</Filter>
     </None>
     <None Include="Shaders\Clouds\cloudCurlNoise.glsl">
-      <Filter>Shaders\Clouds\noise</Filter>
+      <Filter>Shaders\PostProcessing\Clouds\noise</Filter>
     </None>
     <None Include="Shaders\Clouds\raymarch_clouds_vs.glsl">
-      <Filter>Shaders\Clouds</Filter>
+      <Filter>Shaders\PostProcessing\Clouds</Filter>
     </None>
     <None Include="Shaders\Clouds\raymarch_clouds_fs.glsl">
-      <Filter>Shaders\Clouds</Filter>
+      <Filter>Shaders\PostProcessing\Clouds</Filter>
     </None>
     <None Include="Shaders\Clouds\applyCloud_fs.glsl">
-      <Filter>Shaders\Clouds</Filter>
+      <Filter>Shaders\PostProcessing\Clouds</Filter>
+    </None>
+    <None Include="Shaders\Ocean\oceanFFT_vs.glsl">
+      <Filter>Shaders\PostProcessing\Ocean</Filter>
+    </None>
+    <None Include="Shaders\Ocean\oceanFFT_fs.glsl">
+      <Filter>Shaders\PostProcessing\Ocean</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -320,6 +332,9 @@
     </ClInclude>
     <ClInclude Include="utility\ImGui\imgui.h">
       <Filter>Header Files\Utility\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="source\worldTree.h">
+      <Filter>Header Files\Voxels</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -433,6 +448,9 @@
     </ClCompile>
     <ClCompile Include="utility\ImGui\imgui_impl_sdl_gl3.cpp">
       <Filter>Source Files\Utility\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\worldTree.cpp">
+      <Filter>Source Files\Voxels</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
