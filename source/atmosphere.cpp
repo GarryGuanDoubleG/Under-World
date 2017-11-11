@@ -266,6 +266,7 @@ Texture Atmosphere::Render(GBuffer &gbuffer, Texture *scene)
 
 	shader->Use();
 	shader->SetUniform3fv("cameraPos", camera->GetPosition());
+	shader->SetMat4("invViewMat", camera->GetInverseViewMat());
 	//shader->SetUniform1f("sun_azimuth", g_game->m_skydome->m_azimuth);
 	//shader->SetUniform1f("sun_altitude", g_game->m_skydome->m_altitude);
 	shader->SetUniform3fv("sunDir", g_game->m_skydome->m_sunDirection);

@@ -290,14 +290,15 @@ void Texture::SetDepthMap(GLuint width, GLuint height)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture::CreateTexture2D(int w, int h, GLuint internalFormat, GLuint format, GLuint type)
+void Texture::CreateTexture2D(int w, int h, GLuint internalFormat, GLuint format, GLuint type, const GLvoid *value)
 {
 	glGenTextures(1, &m_texID);
 	glBindTexture(GL_TEXTURE_2D, m_texID);
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, w, h, 0, format, type, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, w, h, 0, format, type, value);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	m_type = Tex2D;
 }
 
@@ -330,7 +331,6 @@ void Texture::CreateImage2D(int w, int h, GLuint texRepeat, GLuint internalForma
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
-
 
 void Texture::CreateImage3D(int w, int h, int d, bool float32)
 {

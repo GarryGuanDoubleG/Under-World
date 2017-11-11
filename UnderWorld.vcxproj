@@ -159,7 +159,6 @@
     <None Include="Shaders\Clouds\applyCloud_fs.glsl" />
     <None Include="Shaders\Clouds\cloudCurlNoise.glsl" />
     <None Include="Shaders\Clouds\cloud_common.inc.glsl" />
-    <None Include="Shaders\Clouds\cloud_vs.glsl" />
     <None Include="Shaders\Clouds\cloudHighFreqNoise.glsl" />
     <None Include="Shaders\Clouds\cloudLowFreqNoise.glsl" />
     <None Include="Shaders\Clouds\generateWeatherData.glsl" />
@@ -169,6 +168,9 @@
     <None Include="Shaders\common.inc.glsl" />
     <None Include="Shaders\deferredLighting_fs.glsl" />
     <None Include="Shaders\deferredLighting_vs.glsl" />
+    <None Include="Shaders\Deferred\SSAO_blur_fs.glsl" />
+    <None Include="Shaders\Deferred\SSAO_fs.glsl" />
+    <None Include="Shaders\Deferred\SSAO_vs.glsl" />
     <None Include="Shaders\deferred_fs.glsl" />
     <None Include="Shaders\deferred_vs.glsl" />
     <None Include="Shaders\depthShader_vs.glsl" />

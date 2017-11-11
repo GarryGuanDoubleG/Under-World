@@ -106,8 +106,6 @@ void Game::RenderImGUI()
 	ImGui::Render();
 }
 
-
-
 void Game::Update()
 {
 	ImGui_ImplSdlGL3_NewFrame(m_graphics->GetWindow());

@@ -66,10 +66,10 @@ public:
 	
 	void GenerateVertexBuffer(std::vector<VoxelVertex>& v_out);
 
-	void ProcessCell(std::vector<GLboolean> &flipList, std::vector<unsigned int>& indexes, const float threshold);
-	void ProcessFace(Octree ** nodes, int direction, std::vector<GLboolean> &flipList, std::vector<unsigned int>& indexes, float threshold);
-	void ProcessEdge(Octree ** nodes, int direction, std::vector<GLboolean> &flipList, std::vector<unsigned int>& indexes, float threshold);
-	void ProcessIndexes(Octree ** nodes, int direction, std::vector<GLboolean> &flipList, std::vector<unsigned int>& indexes, float threshold);
+	void ProcessCell(std::vector<unsigned int>& indexes, const float threshold);
+	void ProcessFace(Octree ** nodes, int direction, std::vector<unsigned int>& indexes, float threshold);
+	void ProcessEdge(Octree ** nodes, int direction, std::vector<unsigned int>& indexes, float threshold);
+	void ProcessIndexes(Octree ** nodes, int direction, std::vector<unsigned int>& indexes, float threshold);
 	void ClusterCellBase(float error);
 	void ClusterCell(float error);
 	void ClusterFace(Octree ** nodes, int direction, int & surface_index, std::vector<VoxelVertex*>& collected_vertices);

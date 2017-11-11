@@ -1,5 +1,10 @@
 #include "game.hpp"
 
+float MathUtil::lerp(float a, float b, float f)
+{
+	return a + f * (b - a);
+}
+
 void MathUtil::AssimpToGLMMat4(const aiMatrix4x4 * from, glm::mat4 & to)
 {
 	to[0][0] = from->a1; to[1][0] = from->a2;

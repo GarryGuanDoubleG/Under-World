@@ -8,6 +8,7 @@ class Density
 	static float voxelSize;
 	static float invVoxelSize;
 	static float maxHeight;
+	static float noiseScale;
 
 	static FastNoise terrainFN;
 
@@ -30,7 +31,6 @@ public:
 	static glm::vec3 CalculateNormals(Density::DensityType type, const glm::vec3 &pos);
 
 	static glm::vec3 CalculateNormals2D(Density::DensityType type, const glm::vec3 & pos);
-
 
 	static float GetSphere(const glm::vec3& worldPosition, const glm::vec3& origin, float radius);
 	static float GetTerrainDensity(const glm::vec3& worldPosition, float noise3D = 0, float noise2D = 0);

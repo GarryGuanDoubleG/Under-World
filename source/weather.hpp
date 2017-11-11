@@ -125,8 +125,8 @@ struct CloudParams
 	float HorizonCoverageStart = .4f;
 	float HorizonCoverageEnd = .7f;
 
-	float LODDistance = .313;
-	float RayMinimumY = 0.0;
+	float LODDistance = .313f;
+	float RayMinimumY = 0.0f;
 };
 
 

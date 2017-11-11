@@ -85,6 +85,7 @@ void Weather::Render(GBuffer gBuffer, Texture *shadedScene)
 	gBuffer.gPosition.Bind(0);
 	shader->SetUniform3fv("sunDir", g_game->m_skydome->GetSunDirection());
 	shader->SetUniform3fv("cameraPos", camera->GetPosition());
+	shader->SetMat4("invViewMat", camera->GetInverseViewMat());
 
 	m_cloudParams.LoadParams(shader);
 	RenderToQuad();

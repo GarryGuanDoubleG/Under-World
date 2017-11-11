@@ -73,12 +73,7 @@ uniform float _HorizonCoverageEnd;
 			
 uniform float _RayMinimumY;
 
-//vec3 _Random0 = normalize(vec3(random(vec3(1.0f), 1.0f)));
-//vec3 _Random1 = normalize(vec3(random(vec3(1.0f), 1.3213330f)));;
-//vec3 _Random2 = normalize(vec3(random(vec3(1.0f), 5.3213210f)));;
-//vec3 _Random3 = normalize(vec3(random(vec3(1.0f), 4.321310f)));;
-//vec3 _Random4 = normalize(vec3(random(vec3(1.0f), 3.232130f)));;
-//vec3 _Random5 = normalize(vec3(random(vec3(1.0f), 2.43430f)));;
+uniform mat4 invViewMat;
 
 vec3 _Random0 = vec3( 0.38051305f,  0.92453449f, -0.02111345f);
 vec3 _Random1 = vec3(-0.50625799f, -0.03590792f, -0.86163418f);
@@ -98,7 +93,7 @@ const vec4 CUMULUS_GRADIENT = vec4(0.01f, 0.0625f, 0.78f, 1.0f); // these fracti
 
 bool is_skybox(vec3 fragPos)
 {
-	return distance(fragPos, viewPos) > 40000;
+	return distance(fragPos, viewPos) > VIEW_DISTANCE;
 }
 //A remapping function, that maps values from one range to another, to be used when combining noises to make our clouds
 float Remap(float original_value, float original_min, float original_max, float new_min, float new_max)
@@ -390,10 +385,10 @@ void main()
 	vec4 color = vec4( 0.0, 0.0, 0.0, 0.0);
 	result = vec4(0.0f);
 
-	vec3 fragPos = texture(gPosition, UV).rgb;
+	vec3 fragPos = (invViewMat * vec4(texture(gPosition, UV).rgb, 1.0)).xyz;
 	if(!is_skybox(fragPos)) return;
 
-	vec3 rayDirection = normalize( fragPos - viewPos);
+	vec3 rayDirection = normalize(fragPos - viewPos);
 
 	vec2 uv = vec2(0.0f);
 
@@ -497,7 +492,7 @@ void main()
 	const float Exposure = 1.5f;
 	const float ExposureBias = 2.0;
 
-	const vec3 W = vec3(3.9);
+	const vec3 W = vec3(11);
 	color.rgb *= Exposure;
 	vec3 curr = FilmicTonemap(ExposureBias * color.rgb);
 	vec3 whiteScale = vec3(1.0f) / FilmicTonemap(W);

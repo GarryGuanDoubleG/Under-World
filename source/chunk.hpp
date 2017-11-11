@@ -36,7 +36,6 @@ class Chunk
 	glm::vec3 m_chunkSize;
 	glm::vec3 m_position;
 
-
 	//proc mesh
 	GLuint m_vao, m_vbo, m_ebo;
 public:
@@ -54,9 +53,10 @@ public:
 	vector<GLboolean> m_flipVerts;
 public:
 	Chunk();
+	~Chunk();
 
 	bool Init(glm::ivec3 chunkIndices, glm::vec3 chunkSize, int voxelSize);
-	bool Close();
+	bool ClearBufferedData();
 	glm::vec3 GetPosition();
 
 	void AssignNeighbor(Chunk * chunk, Side side);

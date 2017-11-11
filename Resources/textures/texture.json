@@ -3,6 +3,10 @@
     "path": "Resources\\textures\\grass\\0206 060x2 gld01.png",
     "normal": "Resources\\textures\\grass\\grass_lush_daisies_01_N.png"
   },
+  "rock": {
+    "path": "Resources\\textures\\rock\\diffus.tga",
+    "normal": "Resources\\textures\\rock\\normal.tga"
+  },
   "brick": {
     "path": "Resources\\textures\\bricks2.jpg",
     "height": "Resources\\textures\\bricks2_disp.jpg",

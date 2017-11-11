@@ -1,14 +1,10 @@
 #pragma once
-#include <string>
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
+#include <random>
 #include <SDL.h>
 #include <GL/glew.h>
 #include <SDL_opengl.h>
 #include <GL\freeglut.h>
 #include "game.hpp"
-
 
 Graphics::Graphics(int winWidth, int winHeight)
 {
@@ -22,7 +18,8 @@ Graphics::Graphics(int winWidth, int winHeight)
 	InitShapes();
 	InitDepthMap();
 	InitFBOS();
-	//RealInitFBO();
+	InitSSAOBuffers();
+	InitSSAONoise();
 
 	for (unsigned int i = 0; i < 32; i++)
 	{
@@ -215,10 +212,36 @@ void Graphics::InitDepthMap()
 
 void Graphics::InitFBOS()
 {
+	InitGBufferFBO();
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		cout << "Frame buffer not complete " << endl;
+
+	//post processing FBO
+	glGenFramebuffers(1, &m_sceneFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
+	Texture *shadedScene = new Texture();
+	shadedScene->CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, shadedScene->GetTexID(), 0);
+
+	m_textureMap["scene"] = shadedScene;
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		cout << "Frame buffer not complete " << endl;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Graphics::InitGBufferFBO()
+{
+	//TODO: MOVE FBOS TO hash MAP
 	//deferred rendering FBOs
 	glGenFramebuffers(1, &m_deferredFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFBO);
 
+	//set up gbuffer
 	m_GBuffer.gPosition.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB32F, GL_RGB);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_GBuffer.gPosition.GetTexID(), 0);
 
@@ -236,27 +259,64 @@ void Graphics::InitFBOS()
 	glBindRenderbuffer(GL_RENDERBUFFER, m_depthRBO);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCREEN_WIDTH, SCREEN_HEIGHT);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthRBO);
+}
 
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		cout << "Frame buffer not complete " << endl;
-	}
+//screen space ambient occlusion buffers
+void Graphics::InitSSAOBuffers()
+{
+	//bind main SSAO FBO
+	glGenFramebuffers(1, &m_ssaoFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_ssaoFBO);
+	
+	Texture *ssaoTex = new Texture();
+	ssaoTex->CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RED, GL_RGB, GL_FLOAT);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoTex->GetTexID(), 0);
 
-	//post processing FBO
-	glGenFramebuffers(1, &m_sceneFBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
-	Texture *shadedScene = new Texture();
-	shadedScene->CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, shadedScene->GetTexID(), 0);
+	m_textureMap["ssao"] = ssaoTex;
 
-	m_textureMap["scene"] = shadedScene;
+	//BIND the ssao Blur FBO
+	glGenFramebuffers(1, &m_ssaoBlurFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_ssaoBlurFBO);
 
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		cout << "Frame buffer not complete " << endl;
-	}
+	Texture *ssaoBlurTex = new Texture();
+	ssaoBlurTex->CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RED, GL_RGB, GL_FLOAT);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoBlurTex->GetTexID(), 0);
+
+	m_textureMap["ssaoBlur"] = ssaoBlurTex;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Graphics::InitSSAONoise()
+{
+	// generate sample kernel
+	// ----------------------
+	std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // generates random floats between 0.0 and 1.0
+	std::default_random_engine generator;
+	for (unsigned int i = 0; i < 64; ++i)
+	{
+		glm::vec3 sample(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, randomFloats(generator));
+		sample = glm::normalize(sample);
+		sample *= randomFloats(generator);
+		float scale = float(i) / 64.0;
+
+		// scale samples s.t. they're more aligned to center of kernel
+		scale = MathUtil::lerp(0.1f, 1.0f, scale * scale);
+		sample *= scale;
+		m_ssaoKernel.push_back(sample);
+	}
+
+	// generate noise texture
+	// ----------------------
+	Texture *ssaoNoiseTex = new Texture();
+	std::vector<glm::vec3> ssaoNoise;
+	for (unsigned int i = 0; i < 16; i++)
+	{
+		glm::vec3 noise(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, 0.0f); // rotate around z-axis (in tangent space)
+		ssaoNoise.push_back(noise);
+	}
+	ssaoNoiseTex->CreateTexture2D(4, 4, GL_RGB32F, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
+	m_textureMap["ssaoNoiseTex"] = ssaoNoiseTex;
 }
 
 void Graphics::SetCamera(Camera * camera)
@@ -321,7 +381,7 @@ void Graphics::RenderSkybox(Shader *shader)
 
 	glm::mat4 model(1.0f);
 	model = glm::translate(model, m_camera->GetPosition());
-	model = glm::scale(model, glm::vec3(10.f));
+	model = glm::scale(model, glm::vec3(20.f));
 	shader->SetMat4("model", model);
 	shader->SetMat4("view", m_camera->GetViewMat());
 	shader->SetMat4("projection", m_camera->GetProj());
@@ -345,20 +405,25 @@ GBuffer Graphics::DeferredRenderScene()
 	//render voxels
 	DeferredRenderVoxels(m_shaderMap["voxel_deferred"]);
 	
-	glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//render model
+	DeferredRenderModel(m_shaderMap["deferred"], "a", glm::mat4(1.0f));
+	
+	//SSAO
+	DeferredSSAO(m_shaderMap["ssao"]);
 
-	//render lighitng
+	//SSAO Blur
+	DeferredSSAOBlur(m_shaderMap["ssaoBlur"]);
+
+	//Deferred Lighting
 	DeferredRenderLighting(m_shaderMap["deferredLighting"]);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	Shader *quad = m_shaderMap["quad"];
-	quad->Use();
-	m_textureMap["scene"]->Bind(0);
-	RenderToQuad();
+	//Shader *quad = m_shaderMap["quad"];
+	//quad->Use();
+	//m_textureMap["ssaoBlur"]->Bind(0);
+	//RenderToQuad();
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_deferredFBO);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
@@ -368,28 +433,103 @@ GBuffer Graphics::DeferredRenderScene()
 	glBlitFramebuffer(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
 	return m_GBuffer;
+}
+
+void Graphics::DeferredSSAO(Shader *shader)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, m_ssaoFBO);
+	glClear(GL_COLOR_BUFFER_BIT);
+	shader->Use();
+	for (unsigned int i = 0; i < 64; i++)
+	{
+		shader->SetUniform3fv("samples[" + std::to_string(i) + "]", m_ssaoKernel[i]);
+	}
+	shader->SetMat4("projection", m_camera->GetProj());
+	m_GBuffer.gPosition.Bind(0);
+	m_GBuffer.gNormal.Bind(1);
+	m_textureMap["ssaoNoiseTex"]->Bind(2);
+
+	RenderToQuad();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Graphics::DeferredSSAOBlur(Shader *shader)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, m_ssaoBlurFBO);
+	glClear(GL_COLOR_BUFFER_BIT);
+	shader->Use();
+	m_textureMap["ssao"]->Bind(0);
+
+	RenderToQuad();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Graphics::DeferredRenderLighting(Shader *shader)
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shader->Use();
 
 	m_GBuffer.Bind(0);
+	m_textureMap["ssaoBlur"]->Bind(3);
+
 	shader->SetUniform1i("gPosition", 0);
 	shader->SetUniform1i("gNormal", 1);
 	shader->SetUniform1i("gAlbedoSpec", 2);
+	shader->SetUniform1i("ssao", 3);
 
-	//shader->SetUniform1i("lightCount", 0);
-	shader->SetUniform3fv("viewPos", m_camera->GetPosition());
 	shader->SetUniform3fv("sunDir", m_skydome->m_sunDirection);
 
 	RenderToQuad();
 	m_GBuffer.Unbind();
+	m_textureMap["ssaoBlur"]->Unbind();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void Graphics::DeferredRenderModel(Shader *shader, const string &name, const glm::mat4 &modelMat)
+{
+	Model * model = m_modelMap["arissa"];
+	shader->Use();
+
+	shader->SetMat4("model", modelMat);
+	shader->SetMat4("projection", m_camera->GetProj());
+	shader->SetMat4("view", m_camera->GetViewMat());
+
+	model->Draw(shader);
+}
+
+void Graphics::DeferredRenderVoxels(Shader *shader)
+{
+	shader = m_shaderMap["voxel_deferred"];
+	shader->Use();
+	shader->SetMat4("projection", m_camera->GetProj());
+	shader->SetMat4("model", glm::mat4(1.0f));
+	shader->SetMat4("view", m_camera->GetViewMat());
+
+	m_textureMap["grass"]->Bind(3);
+	m_textureMap["brick"]->Bind(4);
+
+	m_textureMap["grassNormal"]->Bind(15);
+	m_textureMap["brickNormal"]->Bind(16);
+
+	GLint samplers[] = { 3, 4 };
+	GLint samplersNormalMap[] = { 15,16 };
+	glUniform1iv(shader->Uniform("voxelTexture"), 2, &samplers[0]);
+	glUniform1iv(shader->Uniform("normalMap"), 2, &samplersNormalMap[0]);
+	//glUniform3fv(shader->Uniform("sunDir"), 1, &m_skydome->m_sunDirection[0]);
+
+	g_game->m_voxelManager->Render();
+
+	m_textureMap["brick"]->Unbind();
+	m_textureMap["brickNormal"]->Unbind();
+
+	m_textureMap["grass"]->Unbind();
+	m_textureMap["grassNormal"]->Unbind();
+}
+
+//////FORWARD RENDERING
 void Graphics::RenderScene()
 {
 	if (m_flag & SKYBOX_MODE)
@@ -483,47 +623,6 @@ void Graphics::RenderCube(glm::mat4 model)
 
 	tex->Unbind();
 	glBindVertexArray(0);
-}
-
-void Graphics::DeferredRenderModel(Shader *shader, const string &name, const glm::mat4 &modelMat)
-{
-	Model * model = m_modelMap["arissa"];
-	shader->Use();
-
-	shader->SetMat4("model", modelMat);
-	shader->SetMat4("projection", m_camera->GetProj());
-	shader->SetMat4("view", m_camera->GetViewMat());
-
-	model->Draw(shader);
-}
-
-void Graphics::DeferredRenderVoxels(Shader *shader)
-{
-	shader = m_shaderMap["voxel_deferred"];
-	shader->Use();
-	shader->SetMat4("projection", m_camera->GetProj());
-	shader->SetMat4("model", glm::mat4(1.0f));
-	shader->SetMat4("view", m_camera->GetViewMat());
-
-	m_textureMap["grass"]->Bind(3);
-	m_textureMap["brick"]->Bind(4);
-
-	m_textureMap["grassNormal"]->Bind(15);
-	m_textureMap["brickNormal"]->Bind(16);
-
-	GLint samplers[] = { 3, 4 };
-	GLint samplersNormalMap[] = { 15,16 };
-	glUniform1iv(shader->Uniform("voxelTexture"), 2, &samplers[0]);
-	glUniform1iv(shader->Uniform("normalMap"), 2, &samplersNormalMap[0]);
-	//glUniform3fv(shader->Uniform("sunDir"), 1, &m_skydome->m_sunDirection[0]);
-
-	g_game->m_voxelManager->Render();
-
-	m_textureMap["brick"]->Unbind();
-	m_textureMap["brickNormal"]->Unbind();
-
-	m_textureMap["grass"]->Unbind();
-	m_textureMap["grassNormal"]->Unbind();
 }
 
 void Graphics::RenderModel(const string &name, const glm::mat4 &modelMat)

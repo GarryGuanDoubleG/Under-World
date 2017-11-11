@@ -10,8 +10,13 @@ static const glm::vec3 AXIS_OFFSET[3] =
 	glm::vec3(0.f, 0.f, 1.f)
 };
 
-Chunk::Chunk() : m_flag(0), m_init(false)
+Chunk::Chunk() : m_flag(0), m_init(false), m_vao(0), m_vbo(0), m_ebo(0)
 {
+}
+
+Chunk::~Chunk()
+{
+	ClearBufferedData();
 }
 
 bool Chunk::Init(glm::ivec3 chunkIndices, glm::vec3 chunkSize, int voxelSize)
@@ -69,9 +74,15 @@ bool Chunk::Init(glm::ivec3 chunkIndices, glm::vec3 chunkSize, int voxelSize)
 	return true;
 }
 
-bool Chunk::Close()
+bool Chunk::ClearBufferedData()
 {
-	
+	if (m_vao) glDeleteVertexArrays(1, &m_vao);
+	if (m_vbo) glDeleteBuffers(1, &m_vbo);
+	if (m_ebo) glDeleteBuffers(1, &m_ebo);
+
+	m_vao = m_vbo = m_ebo = 0;
+
+	return true;
 }
 
 glm::vec3 Chunk::GetPosition()
@@ -162,11 +173,10 @@ void Chunk::GenerateMesh()
 	}
 
 	m_flag |= CHUNK_ACTIVE;
-
 	
 	m_root->ClusterCellBase(2000000.f);
 	m_root->GenerateVertexBuffer(m_vertices);
-	m_root->ProcessCell(m_flipVerts, m_triIndices, 2000000.f);
+	m_root->ProcessCell(m_triIndices, 2000000.f);
 
 	slog("Finished Chunk Index: %i, %i, %i\n", m_chunkIndex.x, m_chunkIndex.y, m_chunkIndex.z);
 }
@@ -244,7 +254,7 @@ void Chunk::GenerateSeam()
 	Octree* root = BottomUpTreeGen(nodes, m_position);
 
 	root->GenerateVertexBuffer(m_vertices);
-	root->ProcessCell(m_flipVerts, m_triIndices, 1000.f);
+	root->ProcessCell(m_triIndices, 1000.f);
 }
 
 void Chunk::GenerateMesh(vector<float> &heightmap)
@@ -273,25 +283,7 @@ void Chunk::GenerateMesh(vector<float> &heightmap)
 
 	//m_root->ClusterCellBase(2000000.f);
 	m_root->GenerateVertexBuffer(m_vertices);
-	m_root->ProcessCell(m_flipVerts, m_triIndices, 2000000.f);
-
-	//for (int i = 0; i < m_flipVerts.size(); i++)
-	//{
-	//	int triIndex = i * 3;
-	//	for (int j = 0; j < 3; j++)
-	//	{
-	//		m_vertices[m_triIndices[triIndex]].flip = m_flipVerts[i];
-	//		triIndex++;
-	//	}
-	//}
-	//for (auto &vert : m_vertices)
-	//{
-	//	if (vert.position.y <= 1.0f)
-	//	{
-	//		glm::vec3 norm = vert.normal;
-	//		float a = 1.0f;
-	//	}
-	//}
+	m_root->ProcessCell(m_triIndices, 2000000.f);
 	
 
 	slog("Finished Chunk Index: %i, %i, %i\n", m_chunkIndex.x, m_chunkIndex.y, m_chunkIndex.z);
@@ -386,9 +378,7 @@ void Chunk::GenerateHermiteHeightMap2D(vector<float> &heightmap)
 
 void Chunk::BindMesh()
 {
-	glDeleteVertexArrays(1, &m_vao);
-	glDeleteBuffers(1, &m_vbo);
-	glDeleteBuffers(1, &m_ebo);
+	ClearBufferedData();
 
 	if((m_vertices.size() == 0) || m_triIndices.size() == 0)
 	{
@@ -398,6 +388,11 @@ void Chunk::BindMesh()
 
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
+
+	if (m_vao == 1)
+	{
+		float a = 1.0;
+	}
 
 	glGenBuffers(1, &m_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
@@ -417,9 +412,6 @@ void Chunk::BindMesh()
 	glEnableVertexAttribArray(2);
 	glVertexAttribIPointer(2, 1, GL_INT, sizeof(VoxelVertex), (GLvoid*)offsetof(VoxelVertex, textureID));
 	
-	glEnableVertexAttribArray(3);
-	glVertexAttribIPointer(3, 1, GL_INT, sizeof(GL_BOOL), (GLvoid*)offsetof(VoxelVertex, flip));
-
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

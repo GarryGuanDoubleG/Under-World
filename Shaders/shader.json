@@ -43,6 +43,14 @@
     "vs": "Shaders/lighting_vs.glsl",
     "fs": "Shaders/lighting_fs.glsl"
   },
+  "ssao": {
+    "vs": "Shaders/Deferred/SSAO_vs.glsl",
+    "fs": "Shaders/Deferred/SSAO_fs.glsl"
+  },
+  "ssaoBlur": {
+    "vs": "Shaders/Deferred/SSAO_vs.glsl",
+    "fs": "Shaders/Deferred/SSAO_blur_fs.glsl"
+  },
   "deferred": {
     "vs": "Shaders/deferred_vs.glsl",
     "fs": "Shaders/deferred_fs.glsl"

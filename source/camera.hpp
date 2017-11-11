@@ -21,6 +21,8 @@ class Camera
 	glm::mat4 m_perspect_proj; /**< projection matrix*/
 	glm::mat4 m_ortho_proj;
 
+	glm::mat4 m_invView_mat;//inverse view matrix
+
 	GLfloat m_zoom;
 	GLfloat m_speed;
 
@@ -40,6 +42,8 @@ public:
 	* @return the view matrix
 	*/
 	glm::mat4 GetViewMat();
+
+	glm::mat4 GetInverseViewMat();
 	/**
 	* @brief returns the projection matrix
 	* @return the projection matrix

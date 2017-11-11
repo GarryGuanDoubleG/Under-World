@@ -46,6 +46,12 @@ class Graphics
 	GLuint m_sceneFBO;
 	GLuint m_depthRBO;
 	GBuffer m_GBuffer;
+	//SSAO
+	GLuint m_ssaoFBO;
+	GLuint m_ssaoBlurFBO;
+	std::vector<glm::vec3> m_ssaoKernel;
+
+
 	glm::vec3 lightPositions[32];
 
 	GLuint gBuffer, gPosition, gNormal, gAlbedoSpec, rboDepth;
@@ -63,6 +69,12 @@ public:
 	void InitDepthMap();
 
 	void InitFBOS();
+
+	void InitGBufferFBO();
+
+	void InitSSAOBuffers();
+
+	void InitSSAONoise();
 
 	void SetCamera(Camera *camera);
 	void SetShaders(map<string, Shader*> &shaders);
@@ -82,6 +94,8 @@ public:
 	void RenderBackground(GLfloat bg_color[4]);
 	void RenderSkybox(Shader * shader);
 	GBuffer DeferredRenderScene();
+	void DeferredSSAO(Shader * shader);
+	void DeferredSSAOBlur(Shader * shader);
 	void DeferredRenderLighting(Shader *shader);
 	void RenderScene();
 	void RenderToQuad();

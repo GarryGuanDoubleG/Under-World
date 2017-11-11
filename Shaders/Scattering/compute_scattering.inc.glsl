@@ -38,12 +38,12 @@ const float EPSILON_INSCATTER = 0.01f;
 
 bool is_skybox(vec3 pos, vec3 cameraPos)
 {
-	return distance(pos, cameraPos) > 40000.0;
+	return distance(pos, cameraPos) > VIEW_DISTANCE;
 }
 
 bool is_skybox(vec3 pos)
 {
-	return distance(pos, viewPos) > 40000.0;
+	return distance(pos, viewPos) > VIEW_DISTANCE;
 }
 
 

@@ -39,7 +39,7 @@ public:
 
 	void SetDepthMap(GLuint width, GLuint height);
 
-	void CreateTexture2D(int w, int h, GLuint internalFormat, GLuint format, GLuint type = GL_FLOAT);
+	void CreateTexture2D(int w, int h, GLuint internalFormat, GLuint format, GLuint type = GL_FLOAT, const GLvoid * value = NULL);
 
 	void CreateImage2D(int w, int h, bool float32);
 	void CreateImage2D(int w, int h, GLuint texRepeat, GLuint internalFormat, GLuint format, GLuint type);

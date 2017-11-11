@@ -1,7 +1,8 @@
 #include "game.hpp"
 float Density::voxelSize = 32.0f;
 float Density::invVoxelSize = 1.0f;
-float Density::maxHeight = 32.0f; //max number of voxels high
+float Density::maxHeight = 64.0f; //max number of voxels high
+float Density::noiseScale;
 float Density::densityGenTime;
 
 FastNoise Density::terrainFN;
@@ -9,7 +10,6 @@ FastNoiseSIMD *Density::terrainFNSIMD;
 FastNoiseSIMD *Density::caveFNSIMD;
 
 omp_lock_t g_thread_lock;
-
 
 void Density::SetVoxelSize(const float & voxelSize)
 {
@@ -27,6 +27,8 @@ void Density::SetMaxVoxelHeight(const float & height)
 void Density::Initialize()
 {
 	omp_init_lock(&g_thread_lock);
+
+	noiseScale = .2f;
 
 	terrainFN.SetFractalOctaves(4);
 	terrainFN.SetFrequency(0.01f);
@@ -211,7 +213,7 @@ float Density::GetDensity(DensityType type, const glm::vec3 & worldPosition)
 
 float Density::GetNoise2D(DensityType type, const glm::vec3 & worldPosition)
 {
-	glm::vec3 voxelPos = worldPosition * invVoxelSize;
+	glm::vec3 voxelPos = worldPosition * invVoxelSize * noiseScale;
 	float height = terrainFN.GetSimplexFractal(voxelPos.x, voxelPos.z) * maxHeight * voxelSize; //convert to world Position
 
 	return worldPosition.y - height;
@@ -354,6 +356,7 @@ void Density::GenerateHeightMap(const glm::vec3 &chunkPos, const glm::vec3 &chun
 {
 	heightMap.resize((chunkSize.x + 1) * (chunkSize.z + 1), -696969.69696969);
 	glm::vec3 voxelPos = glm::ivec3(chunkPos * invVoxelSize);
+	//voxelPos *= noiseScale;
 
 	//set heightmap
 	for (int x = 0; x <= chunkSize.x; x++)
@@ -361,7 +364,7 @@ void Density::GenerateHeightMap(const glm::vec3 &chunkPos, const glm::vec3 &chun
 		for (int z = 0; z <= chunkSize.z; z++)
 		{ 
 			int index = GETINDEXCHUNKXZ(glm::ivec3(chunkSize + glm::vec3(1.0f)), x, z);
-			float height = terrainFN.GetSimplexFractal(voxelPos.x + x, voxelPos.z + z) * maxHeight * voxelSize; //convert to world Position
+			float height = terrainFN.GetSimplexFractal(noiseScale * (voxelPos.x + x), noiseScale * (voxelPos.z + z)) * maxHeight * voxelSize; //convert to world Position
 			height = height < 1.0f ? 1.0f : height;
 			heightMap[index] = height;
 

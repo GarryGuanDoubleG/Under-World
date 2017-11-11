@@ -6,6 +6,8 @@ in vec3 FragPos;
 in vec2 UV;
 in vec3 viewPos;
 
+#pragma include "common.inc.glsl"
+
 layout (binding = 0) uniform sampler2D texIrradiance;
 layout (binding = 1) uniform sampler2D texTransmittance;
 layout (binding = 2) uniform sampler3D texInscatter;
@@ -17,12 +19,13 @@ layout (binding = 5) uniform sampler2D gAlbedoSpec;
 layout (binding = 6) uniform sampler2D ShadedScene;
 //const float sunIntensity = 30.0f;
 uniform float sunIntensity;
+uniform mat4 invViewMat;
 
-#pragma include "common.inc.glsl"
+const float EXPOSURE = 1.f;
+
 #pragma include "scatterFunctions.inc.glsl"
 #pragma include "compute_scattering.inc.glsl"
 
-const float EXPOSURE = 1.f;
 
 vec3 HDR(vec3 color)
 {
@@ -31,13 +34,13 @@ vec3 HDR(vec3 color)
 
 void main()
 {	
-	vec3 surfacePos = texture(gPosition, UV).rgb;
+	vec4 FragPos = vec4(texture(gPosition, UV).rgb, 1.0);
+
+	vec3 surfacePos = vec3(invViewMat * FragPos);
 	vec3 viewDir = normalize(surfacePos - viewPos);
 	vec3 normal = texture(gNormal, UV).rgb;
 	vec3 diffuse = texture(gAlbedoSpec, UV).rgb;
 	float Specular = texture(gAlbedoSpec, UV).a;
-
-	//viewDir.y *= -1;
 
 	vec3 attenutation = vec3(1.f);
 	float irradianceFactor = 0.0f;

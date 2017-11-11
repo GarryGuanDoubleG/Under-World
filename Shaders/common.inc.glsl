@@ -14,6 +14,7 @@
 #define ASPECT_RATIO WINDOW_WIDTH / WINDOW_HEIGHT
 
 #define PLANET_RADIUS 6371000
+#define VIEW_DISTANCE 100000
 
 #define get_half_texcoord() vec2((ivec2(gl_FragCoord.xy) * 2 + 0.5) / SCREEN_SIZE)
 

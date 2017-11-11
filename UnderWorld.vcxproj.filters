@@ -34,9 +34,6 @@
     <Filter Include="Header Files\Utility\FastNoise">
       <UniqueIdentifier>{3976a62c-d512-48dc-8719-1bd1e7ae6012}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\Voxel">
-      <UniqueIdentifier>{39fe005c-65e6-4319-8ffc-f23ea9076b88}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders\Model">
       <UniqueIdentifier>{0120fcfc-d642-4f45-9c4a-1be1cfa0239a}</UniqueIdentifier>
     </Filter>
@@ -61,15 +58,27 @@
     <Filter Include="Shaders\PostProcessing\Ocean">
       <UniqueIdentifier>{3fd32750-b996-4c2b-9863-8e17b9b14b9c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Forward Rendering">
+      <UniqueIdentifier>{a949d35d-00e9-4155-93a2-d9a3e7e5c648}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Deferred Rendering">
+      <UniqueIdentifier>{59ce0ff0-4105-40e5-9152-538efb47cb65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Deferred Rendering\Voxel">
+      <UniqueIdentifier>{c08ab21e-8554-42dc-9ec9-37801dbf8617}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Forward Rendering\Voxel">
+      <UniqueIdentifier>{39fe005c-65e6-4319-8ffc-f23ea9076b88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Common">
+      <UniqueIdentifier>{717ddaaa-080f-4048-a2e5-e2f33767e2f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Deferred Rendering\SSAO">
+      <UniqueIdentifier>{690ed9b9-90e0-4cec-8729-d5082535f435}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Shaders\skybox_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\skybox_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Resources\config.json">
       <Filter>Resource Files</Filter>
     </None>
@@ -91,20 +100,8 @@
     <None Include="Resources\models\models.json">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Shaders\depthShader_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\shader.json">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Shaders\depthShader_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\quad_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\quad_fs.glsl">
-      <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\Scattering\add_delta_e.compute.glsl">
       <Filter>Shaders\PostProcessing\Scattering</Filter>
@@ -149,16 +146,10 @@
       <Filter>Shaders\PostProcessing\Scattering</Filter>
     </None>
     <None Include="Shaders\voxelTex_vs.glsl">
-      <Filter>Shaders\Voxel</Filter>
+      <Filter>Shaders\Forward Rendering\Voxel</Filter>
     </None>
     <None Include="Shaders\voxelTex_fs.glsl">
-      <Filter>Shaders\Voxel</Filter>
-    </None>
-    <None Include="Shaders\deferred_vs.glsl">
-      <Filter>Shaders\Model</Filter>
-    </None>
-    <None Include="Shaders\deferred_fs.glsl">
-      <Filter>Shaders\Model</Filter>
+      <Filter>Shaders\Forward Rendering\Voxel</Filter>
     </None>
     <None Include="Shaders\object_vs.glsl">
       <Filter>Shaders\Model</Filter>
@@ -172,29 +163,8 @@
     <None Include="Shaders\object_fs.glsl">
       <Filter>Shaders\Model</Filter>
     </None>
-    <None Include="Shaders\voxel_deferred_vs.glsl">
-      <Filter>Shaders\Voxel</Filter>
-    </None>
-    <None Include="Shaders\voxel_deferred_fs.glsl">
-      <Filter>Shaders\Voxel</Filter>
-    </None>
-    <None Include="Shaders\voxelCommon.inc.glsl">
-      <Filter>Shaders\Voxel</Filter>
-    </None>
-    <None Include="Shaders\deferredLighting_fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\deferredLighting_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\Clouds\cloud_vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="Shaders\Clouds\noise.inc.glsl">
       <Filter>Shaders\PostProcessing\Clouds\noise</Filter>
-    </None>
-    <None Include="Shaders\common.inc.glsl">
-      <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\Clouds\cloudHighFreqNoise.glsl">
       <Filter>Shaders\PostProcessing\Clouds\noise</Filter>
@@ -225,6 +195,57 @@
     </None>
     <None Include="Shaders\Ocean\oceanFFT_fs.glsl">
       <Filter>Shaders\PostProcessing\Ocean</Filter>
+    </None>
+    <None Include="Shaders\skybox_vs.glsl">
+      <Filter>Shaders\Forward Rendering</Filter>
+    </None>
+    <None Include="Shaders\skybox_fs.glsl">
+      <Filter>Shaders\Forward Rendering</Filter>
+    </None>
+    <None Include="Shaders\deferredLighting_fs.glsl">
+      <Filter>Shaders\Deferred Rendering</Filter>
+    </None>
+    <None Include="Shaders\voxel_deferred_vs.glsl">
+      <Filter>Shaders\Deferred Rendering\Voxel</Filter>
+    </None>
+    <None Include="Shaders\voxel_deferred_fs.glsl">
+      <Filter>Shaders\Deferred Rendering\Voxel</Filter>
+    </None>
+    <None Include="Shaders\common.inc.glsl">
+      <Filter>Shaders\Common</Filter>
+    </None>
+    <None Include="Shaders\voxelCommon.inc.glsl">
+      <Filter>Shaders\Common</Filter>
+    </None>
+    <None Include="Shaders\depthShader_fs.glsl">
+      <Filter>Shaders\Forward Rendering</Filter>
+    </None>
+    <None Include="Shaders\depthShader_vs.glsl">
+      <Filter>Shaders\Forward Rendering</Filter>
+    </None>
+    <None Include="Shaders\deferredLighting_vs.glsl">
+      <Filter>Shaders\Deferred Rendering</Filter>
+    </None>
+    <None Include="Shaders\Deferred\SSAO_fs.glsl">
+      <Filter>Shaders\Deferred Rendering\SSAO</Filter>
+    </None>
+    <None Include="Shaders\Deferred\SSAO_vs.glsl">
+      <Filter>Shaders\Deferred Rendering\SSAO</Filter>
+    </None>
+    <None Include="Shaders\Deferred\SSAO_blur_fs.glsl">
+      <Filter>Shaders\Deferred Rendering\SSAO</Filter>
+    </None>
+    <None Include="Shaders\quad_fs.glsl">
+      <Filter>Shaders\Common</Filter>
+    </None>
+    <None Include="Shaders\quad_vs.glsl">
+      <Filter>Shaders\Common</Filter>
+    </None>
+    <None Include="Shaders\deferred_fs.glsl">
+      <Filter>Shaders\Deferred Rendering</Filter>
+    </None>
+    <None Include="Shaders\deferred_vs.glsl">
+      <Filter>Shaders\Deferred Rendering</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
