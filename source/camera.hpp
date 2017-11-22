@@ -6,6 +6,7 @@
 */
 class Camera
 {
+public:
 	float m_farPlane;
 	float m_nearPlane;
 	float m_fieldOfView;

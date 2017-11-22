@@ -92,16 +92,15 @@ void Game::RenderImGUI()
 	bool show_another_window = false;
 	//default debug imgui window
 	{
-		ImGui::Text("Hello, world!");
 		if (ImGui::Button("Cloud Params")) m_weather->m_showCloudParams ^= 1;
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		ImGui::Text("Position %5f, %5f, %5f", m_camera->GetPosition().x, m_camera->GetPosition().y, m_camera->GetPosition().z);
+		ImGui::InputFloat3("Position ", &m_camera->m_pos[0], 5);
+		ImGui::InputFloat("Speed", &m_camera->m_speed, 5);
 		ImGui::Text("LookDir %5f, %5f, %5f", m_camera->GetForward().x, m_camera->GetForward().y, m_camera->GetForward().z);
 		ImGui::InputFloat3("Sun Dir", &m_skydome->m_sunDirection[0], 5);
 	}
 
 	m_weather->RenderImGui();
-
 	ImGui::Render();
 }
 

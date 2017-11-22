@@ -48,14 +48,13 @@ void main()
 
 	vec3 inscatterLight = DoScattering(surfacePos, viewDir, sky_clip) * sunIntensity;
 
-
 	if(is_skybox(surfacePos))
 	{
 		inscatterLight *= M_PI;
 		vec3 silhouette_col = vec3(sunIntensity) * inscatterLight * sky_clip;
 
         silhouette_col *= 2.0;
-        float disk_factor = pow(clamp(dot(viewDir, sunDir) + 0.0069, 0, 1), 23.0 * 1e5);		
+        float disk_factor = pow(clamp(dot(viewDir, -sunDir) + 0.0069, 0, 1), 23.0 * 1e5);		
         float upper_disk_factor = smoothstep(0, 1, (viewDir.y + 45.f) * 1.0);
         inscatterLight += vec3(1, 0.1, 0.3) * disk_factor * upper_disk_factor * silhouette_col * 3.0 * 1e3;
 	}

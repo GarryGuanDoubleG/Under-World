@@ -207,7 +207,7 @@ void Graphics::InitShadowMaps()
 
 	//define range of each shadow map
 	m_shadowRange[0] = m_camera->GetNearPlane();
-	m_shadowRange[1] = 500.0f;
+	m_shadowRange[1] = 1000.0f;
 	m_shadowRange[2] = 20000.0f;
 	m_shadowRange[3] = m_camera->GetFarPlane() * .5f;
 
@@ -403,7 +403,7 @@ void Graphics::CalculateShadowProj()
 {
 	glm::mat4 invViewMat = m_camera->GetInverseViewMat();
 	glm::mat4 lightSpaceView = glm::lookAt(m_camera->GetPosition(), 
-											m_camera->GetPosition() - m_skydome->m_sunDirection, 
+											m_camera->GetPosition() + m_skydome->m_sunDirection, 
 											glm::vec3(0.0, 1.0, 0.0));
 
 	float verticalFOV = SCREEN_HEIGHT / SCREEN_WIDTH;

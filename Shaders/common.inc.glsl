@@ -93,4 +93,4 @@ float CalculateMaxRayDistance(float earthRadius, float atmosphereStartHeight, fl
 
 //#define get_sun_vector() sun_azimuth_to_angle(sun_azimuth, sun_altitude);
 #define get_sun_vector() sunDir
-#define sun_vector sunDir
+#define sun_vector -sunDir

@@ -98,10 +98,10 @@ void Camera::HandleInput(SDL_Event event)
 			m_pos += m_right * cam_speed;
 			break;
 		case SDLK_e:
-			m_speed += 20;
+			m_speed *= 2;
 			break;
 		case SDLK_r:
-			m_speed -= 20;
+			m_speed *= .5f;
 			break;
 		default:
 			break;

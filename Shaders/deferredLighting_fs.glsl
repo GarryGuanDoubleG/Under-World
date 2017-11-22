@@ -43,7 +43,7 @@ float ShadowCalculation(int cascadeIndex, vec4 FragPosLightSpace, vec3 normal)
 	float closestDepth = texture(g_shadowMap[cascadeIndex], projCoords.xy).r;
 	float currentDepth = projCoords.z;
 
-	float bias = max(0.05 * (1.0 - dot(normal, sunDir)), 0.05);
+	float bias = max(0.05 * (1.0 - dot(normal, -sunDir)), 0.05);
 	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 	vec2 texelSize = 1.0 / textureSize(g_shadowMap[cascadeIndex], 0);
 	
@@ -97,7 +97,7 @@ void main()
     // diffuse lighting
     vec3 lighting  = Diffuse * .3f * AmbientOcclusion; // hard-coded ambient component
 	vec3 viewDir = normalize(-FragPos);
-	vec3 lightDir = sunDir;
+	vec3 lightDir = -sunDir;
 	vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse;
 	
     // specular
@@ -106,11 +106,5 @@ void main()
     vec3 specular = vec3(1.0f) * spec * Specular;
 
     lighting += (1.0f - shadow) * (diffuse + specular); 
-
-	vec3 color = vec3(0.0f);
-	color[texID] = 1.f;
-	//FragColor = vec4(color + lighting, 1.0f);
-
-
 	FragColor = vec4(lighting, 1.0f);
 }
