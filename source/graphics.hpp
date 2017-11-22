@@ -1,5 +1,7 @@
 #pragma once
 
+#define NUM_SHADOW_MAPS 3
+
 struct GBuffer {
 	Texture gPosition;
 	Texture gNormal;
@@ -31,7 +33,7 @@ class Graphics
 	Camera *m_camera;
 	Skydome *m_skydome;
 
-	GLuint m_depthMapFBO;
+	GLuint m_shadowMapFBO;
 
 	map<string, GLuint> m_vaoMap;
 	map<string, GLuint> m_vboMap;
@@ -39,6 +41,11 @@ class Graphics
 	map<string, Shader*> m_shaderMap;
 	map<string, Model*> m_modelMap;
 	
+	//Cascading Shadow Maps
+	vector<Texture> m_shadowMaps;
+	glm::mat4 m_lightProjViewMats[NUM_SHADOW_MAPS];
+	float m_shadowRange[NUM_SHADOW_MAPS + 1]; /* < float how far each bounding box extends for shadow maps*/
+
 	vector<LightSource> m_lightSources;
 
 	//deferred rendering
@@ -51,22 +58,21 @@ class Graphics
 	GLuint m_ssaoBlurFBO;
 	std::vector<glm::vec3> m_ssaoKernel;
 
-
 	glm::vec3 lightPositions[32];
 
-	GLuint gBuffer, gPosition, gNormal, gAlbedoSpec, rboDepth;
+	GLuint gBuffer, rboDepth;
 public:
 	GLuint m_flag;
 
 public:
 
-	Graphics(int winWidth, int winHeight);
+	Graphics(int winWidth, int winHeight, Camera * camera);
 	~Graphics();
 	bool InitGraphics(int winWidth, int winHeight);
 	void InitShapes();
 	Skydome* InitSkybox();
 
-	void InitDepthMap();
+	void InitShadowMaps();//Uses Cascading shadow maps
 
 	void InitFBOS();
 
@@ -93,9 +99,11 @@ public:
 	void Display();
 	void RenderBackground(GLfloat bg_color[4]);
 	void RenderSkybox(Shader * shader);
+	void CalculateShadowProj();
 	GBuffer DeferredRenderScene();
 	void DeferredSSAO(Shader * shader);
 	void DeferredSSAOBlur(Shader * shader);
+	void DeferredShadowMap(Shader * shader);
 	void DeferredRenderLighting(Shader *shader);
 	void RenderScene();
 	void RenderToQuad();

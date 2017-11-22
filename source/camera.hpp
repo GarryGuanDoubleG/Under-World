@@ -6,6 +6,10 @@
 */
 class Camera
 {
+	float m_farPlane;
+	float m_nearPlane;
+	float m_fieldOfView;
+
 	glm::vec3 m_pos; /**< position of camera */
 	glm::vec3 m_target; /**<the position the camera looks at */
 	glm::vec3 m_forward; /**< the direction the camera loks at */
@@ -27,6 +31,7 @@ class Camera
 	GLfloat m_speed;
 
 	glm::vec3 m_ray;
+
 public:
 	/**
 	* A constructor
@@ -52,9 +57,12 @@ public:
 	glm::vec3 GetRight();
 	glm::vec3 GetUp();
 	glm::vec3 GetForward();
+	float GetFOV();
 	glm::vec3 GetRotation();
 	glm::vec3 GetPosition();
+	float GetFarPlane();
 
+	float GetNearPlane();
 
 	/**
 	* @brief adjusts camera on user input

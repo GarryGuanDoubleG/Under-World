@@ -18,9 +18,9 @@ uniform mat4 projection;
 
 void main()
 {
-	vec4 worldFragPos = model * vec4(verts, 1.0f);
+	vec4 worldFragPos = vec4(verts, 1.0f);
 
-	vs_out.normal = transpose(inverse(mat3(model))) * normal;
+	vs_out.normal = normal;
 	vs_out.WorldFragPos = vec3(worldFragPos.xyz);
 	vs_out.ScreenFragPos = (view * worldFragPos).xyz;
 	vs_out.texID = textureID;

@@ -20,24 +20,30 @@ const glm::vec3 Skydome::horizon_midnight = { 0.f, 0.01f, 0.05f };
 
 const float Skydome::altitude_margin = -0.12f;
 
-Skydome::Skydome(Model * model)
+Skydome::Skydome(Model * model, Camera *camera)
 {
 	m_sphere = model;
 
 
 	m_timeScale= .003f;
 	m_timeOfDay = 12.f;
-	m_sunDirection = glm::vec3(0, 1, 0);
+	m_sunDirection = glm::vec3(.7f, .3f, 0);
+
+	//float orthoSize = 50000.0f;
+	////glm::mat4 orthoLightProj = glm::ortho(-camera->GetFarPlane(), camera->GetFarPlane(), -camera->GetFarPlane(), camera->GetFarPlane(), 1.0f, camera->GetFarPlane());
+	//m_orthoLightProj = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, -orthoSize, 2.0f * orthoSize);
+	//glm::mat4 lightViewMat = glm::lookAt(camera->GetPosition(), camera->GetPosition() - m_sunDirection, glm::vec3(0.0, 1.0, 0.0));
+	//m_lightSpaceMatrix = m_orthoLightProj * lightViewMat;
 }
 
 Skydome::~Skydome()
 {
 }
 
-void Skydome::Update()
+void Skydome::Update(Camera *camera)
 {
 	propagate_time(g_game->GetDeltaTime());
-	CalculateSun();
+	CalculateSun(camera);
 }
 
 void Skydome::Draw(Shader *shader)
@@ -89,7 +95,7 @@ glm::vec3 spherical_to_vector(float theta, float phi) {
 	));
 }
 
-void Skydome::CalculateSun()
+void Skydome::CalculateSun(Camera *camera)
 {
 	//// Assuming declination = 0
 	float latitude = 45 * M_PI / 180.f; // lat 40 deg in rad
@@ -106,9 +112,9 @@ void Skydome::CalculateSun()
 	//m_sunDirection = glm::vec3(.95, .05, 0);
 	//m_sunDirection = glm::vec3(0, 1.0, 0);
 	//m_sunDirection = spherical_to_vector(m_altitude, m_azimuth);
+	m_sunDirection = glm::normalize(m_sunDirection);
+	//m_lightSpaceMatrix = m_orthoLightProj * glm::lookAt(camera->GetPosition(), camera->GetPosition() -m_sunDirection, glm::vec3(0.0, 1.0, 0.0));
 	m_sunIntensity = 10.0f;
-
-
 }
 
 float Skydome::GetAzimuth()

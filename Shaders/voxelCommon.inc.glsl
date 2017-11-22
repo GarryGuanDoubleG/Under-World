@@ -31,13 +31,10 @@ vec3 perturb_normal(vec3 N, vec3 B, vec3 T, vec2 texcoord, sampler2D texture)
 
 	vec3 map = texture2D(texture, texcoord).rgb;
 
-	map = map * 2.0 - 1.0f;
-
-	map = map * TBN;
-	map = normalize(map);
+	map = normalize(map * 2.0 - 1.0f);
+	map = normalize(TBN * map);
 	return map;
 }
-
 
 vec3 TriPlanarNormal(vec3 FragPos, vec3 normal, vec3 blending, float scale)
 {
@@ -55,10 +52,5 @@ vec3 TriPlanarNormal(vec3 FragPos, vec3 normal, vec3 blending, float scale)
 	vec3 norm2 = perturb_normal(normal, Tx, Tz, FragPos.xz * scale, normalMap[STONE]);
 	vec3 norm3 = perturb_normal(normal, Tx, Ty, FragPos.xy * scale, normalMap[STONE]);
 
-	//x and y components should be switched for some reason
-	vec3 outNorm;
-	outNorm.yxz = norm1 * blending.x + norm2 * blending.y + norm3 * blending.z;
-	return outNorm;
-
-	//return norm1 * blending.x + norm2 * blending.y + norm3 * blending.z;
+	return normalize(norm1 * blending.x + norm2 * blending.y + norm3 * blending.z);
 }

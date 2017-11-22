@@ -6,7 +6,9 @@
 #include <GL\freeglut.h>
 #include "game.hpp"
 
-Graphics::Graphics(int winWidth, int winHeight)
+#define NUM_FRUSTUM_CORNERS 8
+
+Graphics::Graphics(int winWidth, int winHeight, Camera *camera)
 {
 	if(!InitGraphics(winWidth, winHeight))
 	{
@@ -14,9 +16,11 @@ Graphics::Graphics(int winWidth, int winHeight)
 		Cleanup();
 		exit(1);
 	}
+	//set player camera
+	SetCamera(camera);
 
 	InitShapes();
-	InitDepthMap();
+	InitShadowMaps();
 	InitFBOS();
 	InitSSAOBuffers();
 	InitSSAONoise();
@@ -188,26 +192,32 @@ void Graphics::InitShapes()
 
 Skydome * Graphics::InitSkybox()
 {
-	m_skydome = new Skydome(m_modelMap["skydome"]);
+	m_skydome = new Skydome(m_modelMap["skydome"], m_camera);
 	return m_skydome;
 }
 
-void Graphics::InitDepthMap()
+void Graphics::InitShadowMaps()
 {
-	Texture *depthMap = new Texture();
-	depthMap->SetDepthMap(1680, 1080);
-	m_textureMap.insert(pair<string, Texture*>("depthMap", depthMap));
-	
-	glBindTexture(GL_TEXTURE_2D, depthMap->GetTexID());
+	for (int i = 0; i < NUM_SHADOW_MAPS; i++)
+	{
+		Texture shadowMap;
+		shadowMap.SetDepthMap(SCREEN_WIDTH, SCREEN_HEIGHT);
+		m_shadowMaps.push_back(shadowMap);
+	}
 
-	glGenFramebuffers(1, &m_depthMapFBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_depthMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap->GetTexID(), 0);
+	//define range of each shadow map
+	m_shadowRange[0] = m_camera->GetNearPlane();
+	m_shadowRange[1] = 500.0f;
+	m_shadowRange[2] = 20000.0f;
+	m_shadowRange[3] = m_camera->GetFarPlane() * .5f;
+
+	//bind buffers
+	glGenFramebuffers(1, &m_shadowMapFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowMaps[0].GetTexID(), 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Graphics::InitFBOS()
@@ -217,7 +227,7 @@ void Graphics::InitFBOS()
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		cout << "Frame buffer not complete " << endl;
 
-	//post processing FBO
+	//texture output of shaded scene
 	glGenFramebuffers(1, &m_sceneFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
 	Texture *shadedScene = new Texture();
@@ -227,9 +237,7 @@ void Graphics::InitFBOS()
 	m_textureMap["scene"] = shadedScene;
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
 		cout << "Frame buffer not complete " << endl;
-	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -390,11 +398,70 @@ void Graphics::RenderSkybox(Shader *shader)
 	glEnable(GL_DEPTH_TEST);
 }
 
+//code based on http://ogldev.atspace.co.uk/www/tutorial49/tutorial49.html
+void Graphics::CalculateShadowProj()
+{
+	glm::mat4 invViewMat = m_camera->GetInverseViewMat();
+	glm::mat4 lightSpaceView = glm::lookAt(m_camera->GetPosition(), 
+											m_camera->GetPosition() - m_skydome->m_sunDirection, 
+											glm::vec3(0.0, 1.0, 0.0));
+
+	float verticalFOV = SCREEN_HEIGHT / SCREEN_WIDTH;
+	float TanHorizontalFOV = glm::tan(glm::radians(m_camera->GetFOV() * .5f));
+	float TanVerticalFOV = glm::tan(glm::radians((m_camera->GetFOV() * verticalFOV) * .5f));
+
+	for (int i = 0; i < NUM_SHADOW_MAPS; i++)
+	{
+		float xn = m_shadowRange[i] * TanHorizontalFOV;
+		float xf = m_shadowRange[i + 1] * TanHorizontalFOV;
+		float yn = m_shadowRange[i] * TanVerticalFOV;
+		float yf = m_shadowRange[i + 1] * TanVerticalFOV;
+
+		glm::vec4 frustumCorners[8] = {
+			// near face
+			glm::vec4(xn, yn, m_shadowRange[i], 1.0),
+			glm::vec4(-xn, yn, m_shadowRange[i], 1.0),
+			glm::vec4(xn, -yn, m_shadowRange[i], 1.0),
+			glm::vec4(-xn, -yn, m_shadowRange[i], 1.0),
+			// far face
+			glm::vec4(xf, yf, m_shadowRange[i + 1], 1.0),
+			glm::vec4(-xf, yf, m_shadowRange[i + 1], 1.0),
+			glm::vec4(xf, -yf, m_shadowRange[i + 1], 1.0),
+			glm::vec4(-xf, -yf, m_shadowRange[i + 1], 1.0)
+		};
+
+		glm::vec4 frustumCornersL[NUM_FRUSTUM_CORNERS];
+		float minX = FLT_MAX;
+		float maxX = FLT_MIN;
+		float minY = FLT_MAX;
+		float maxY = FLT_MIN;
+		float minZ = FLT_MAX;
+		float maxZ = FLT_MIN;
+
+		for (int j = 0; j < NUM_FRUSTUM_CORNERS; j++) 
+		{
+			// Transform the frustum coordinate from world to light space
+			frustumCornersL[j] = lightSpaceView /** invViewMat */* frustumCorners[j];
+
+			minX = min(minX, frustumCornersL[j].x);
+			maxX = max(maxX, frustumCornersL[j].x);
+			minY = min(minY, frustumCornersL[j].y);
+			maxY = max(maxY, frustumCornersL[j].y);
+			minZ = min(minZ, frustumCornersL[j].z);
+			maxZ = max(maxZ, frustumCornersL[j].z);
+		}
+
+		m_lightProjViewMats[i] = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ) * lightSpaceView;
+	}
+}
+
 GBuffer Graphics::DeferredRenderScene()
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	//get depthMap for voxels and entites
+	DeferredShadowMap(m_shaderMap["depthMap"]);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFBO);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -406,7 +473,7 @@ GBuffer Graphics::DeferredRenderScene()
 	DeferredRenderVoxels(m_shaderMap["voxel_deferred"]);
 	
 	//render model
-	DeferredRenderModel(m_shaderMap["deferred"], "a", glm::mat4(1.0f));
+	DeferredRenderModel(m_shaderMap["deferred"], "a", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 300.f, 0.0f)));
 	
 	//SSAO
 	DeferredSSAO(m_shaderMap["ssao"]);
@@ -419,12 +486,6 @@ GBuffer Graphics::DeferredRenderScene()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-	//Shader *quad = m_shaderMap["quad"];
-	//quad->Use();
-	//m_textureMap["ssaoBlur"]->Bind(0);
-	//RenderToQuad();
-
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_deferredFBO);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
 											   // blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
@@ -432,6 +493,12 @@ GBuffer Graphics::DeferredRenderScene()
 											   // depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
 	glBlitFramebuffer(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//Shader *quad = m_shaderMap["quad"];
+	//quad->Use();
+	//m_textureMap["scene"]->Bind(0);
+	////m_shadowMaps[0].Bind(0);
+	//RenderToQuad();
 
 	return m_GBuffer;
 }
@@ -465,6 +532,37 @@ void Graphics::DeferredSSAOBlur(Shader *shader)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void Graphics::DeferredShadowMap(Shader *shader)
+{
+	//get orthographic projections for each cascading shadow map
+	CalculateShadowProj();
+
+	//bind frame buffers
+	shader->Use();
+
+	//generate depth textures
+	for (int i = 0; i < NUM_SHADOW_MAPS; i++)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMapFBO);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowMaps[i].GetTexID(), 0);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		shader->SetMat4("lightSpaceMat", m_lightProjViewMats[i]);
+
+		//render entities
+		shader->SetMat4("model", glm::mat4(1.0f));
+		//render voxels
+		g_game->m_voxelManager->Render();
+		shader->SetMat4("model", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 300.f, 0.0f)));
+		m_modelMap["arissa"]->DrawVertices();
+
+		glm::mat4 sphereMat = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(1000.0f, 4000.f, 10000.0f)), glm::vec3(5000.0f));
+		shader->SetMat4("model", sphereMat);
+		m_modelMap["sphere"]->DrawVertices();
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void Graphics::DeferredRenderLighting(Shader *shader)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
@@ -472,17 +570,31 @@ void Graphics::DeferredRenderLighting(Shader *shader)
 	shader->Use();
 
 	m_GBuffer.Bind(0);
-	m_textureMap["ssaoBlur"]->Bind(3);
+	m_textureMap["ssaoBlur"]->Bind(3); //ssao  tex
+
+	int shadowLoc[] = { 4,5,6 };
 
 	shader->SetUniform1i("gPosition", 0);
 	shader->SetUniform1i("gNormal", 1);
 	shader->SetUniform1i("gAlbedoSpec", 2);
 	shader->SetUniform1i("ssao", 3);
+	
+	//shadow info
+	m_shadowMaps[0].Bind(4);
+	m_shadowMaps[1].Bind(5);
+	m_shadowMaps[2].Bind(6);
+	glUniform1iv(shader->Uniform("g_shadowMap"), NUM_SHADOW_MAPS, &shadowLoc[0]);
+	glUniformMatrix4fv(shader->Uniform("g_lightSpaceMatrix"), NUM_SHADOW_MAPS, GL_FALSE, (const GLfloat *)&m_lightProjViewMats[0][0]);
+	glUniform1fv(shader->Uniform("g_shadowRanges"), NUM_SHADOW_MAPS, &m_shadowRange[1]);
 
 	shader->SetUniform3fv("sunDir", m_skydome->m_sunDirection);
+	shader->SetMat4("InvViewMat", m_camera->GetInverseViewMat());
 
 	RenderToQuad();
 	m_GBuffer.Unbind();
+	m_shadowMaps[0].Unbind();
+	m_shadowMaps[1].Unbind();
+	m_shadowMaps[2].Unbind();
 	m_textureMap["ssaoBlur"]->Unbind();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -498,12 +610,17 @@ void Graphics::DeferredRenderModel(Shader *shader, const string &name, const glm
 	shader->SetMat4("view", m_camera->GetViewMat());
 
 	model->Draw(shader);
+
+	//draw sphere
+	glm::mat4 sphereMat = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(1000.0f, 4000.f, 10000.0f)), glm::vec3(5000.0f));
+	shader->SetMat4("model", sphereMat);
+	m_modelMap["sphere"]->DrawVertices();
 }
 
 void Graphics::DeferredRenderVoxels(Shader *shader)
 {
-	shader = m_shaderMap["voxel_deferred"];
 	shader->Use();
+
 	shader->SetMat4("projection", m_camera->GetProj());
 	shader->SetMat4("model", glm::mat4(1.0f));
 	shader->SetMat4("view", m_camera->GetViewMat());
@@ -513,6 +630,7 @@ void Graphics::DeferredRenderVoxels(Shader *shader)
 
 	m_textureMap["grassNormal"]->Bind(15);
 	m_textureMap["brickNormal"]->Bind(16);
+
 
 	GLint samplers[] = { 3, 4 };
 	GLint samplersNormalMap[] = { 15,16 };
@@ -560,7 +678,7 @@ void Graphics::RenderScene()
 
 void Graphics::RenderShadowMap()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, m_depthMapFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	 
 	Shader *shader = m_shaderMap["depthMap"];
@@ -571,7 +689,7 @@ void Graphics::RenderShadowMap()
 
 	glm::vec3 lightPos(700.0f, 700, 700.f);
 
-	glm::mat4 lightProjection = glm::ortho(-840.0f, 840.0f, -540.0f, 540.0f, near_plane, far_plane);
+	glm::mat4 lightProjection = glm::ortho(-840.0f, 840.0f, -540.0f, 540.0f, -far_plane, far_plane);
 	glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 	glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
@@ -654,28 +772,12 @@ void Graphics::RenderVoxels()
 	Shader *shader = m_shaderMap["voxelTex"];
 	shader->Use();
 
-	if(m_flag & SHADOW_MODE)
-	{
-		float near_plane = 1.0f;
-		float far_plane = 1000.f;
-
-		glm::vec3 lightPos(700.0f, 700, 700.f);
-
-		glm::mat4 lightProjection = glm::ortho(-840.0f, 840.0f, -540.0f, 540.0f, near_plane, far_plane);
-		glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-		shader->SetMat4("lightSpaceMatrix", lightSpaceMatrix);
-		m_textureMap["depthMap"]->Bind(16);
-		shader->SetUniform1i("shadowMap", 16);
-	}
-
 	shader->SetMat4("model", glm::mat4(1.0f));
 	shader->SetMat4("projection", m_camera->GetProj());
 	shader->SetMat4("view", m_camera->GetViewMat());
 
 	glm::vec3 light_color(1.0f, 1.0f, 1.0f);
 	glm::vec3 light_dir = g_game->m_skydome->m_sunDirection;
-
 
 	glUniform3fv(shader->Uniform("viewPos"), 1, &m_camera->GetPosition()[0]);
 	glUniform3fv(shader->Uniform("lightColor"), 1, &light_color[0]);
@@ -700,8 +802,6 @@ void Graphics::RenderVoxels()
 
 	m_textureMap["grass"]->Unbind();
 	m_textureMap["grassNormal"]->Unbind();
-
-	if(m_flag & SHADOW_MODE) m_textureMap["depthMap"]->Unbind();
 }
 
 void Graphics::Display()

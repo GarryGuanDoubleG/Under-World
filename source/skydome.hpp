@@ -30,12 +30,13 @@ public:
 
 	glm::vec3 m_sunDirection;
 	glm::vec3 m_sunColor;
-
+	glm::mat4 m_orthoLightProj;
+	glm::mat4 m_lightSpaceMatrix;
 public:
-	Skydome(Model *model);
+	Skydome(Model *model, Camera *camera);
 	~Skydome();
 
-	void Update();
+	void Update(Camera *camera);
 	void Draw(Shader * shader);
 	void upload_sun(const GLuint shader, const Camera &camera);
 	void update_light_space(const Camera &camera);
@@ -46,7 +47,7 @@ public:
 
 	//update per frame
 
-	void CalculateSun();
+	void CalculateSun(Camera *camera);
 	float GetAzimuth();
 	float GetAltitude();
 	glm::vec3 GetSunColor();

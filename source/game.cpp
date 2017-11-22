@@ -21,11 +21,10 @@ Game::Game() : m_running(true)
 	m_resManager = new ResManager();
 	m_camera = new Camera(glm::vec3(20, 150, 20), glm::vec3(0.f));
 
-	m_graphics = new Graphics(SCREEN_WIDTH, SCREEN_HEIGHT);
+	m_graphics = new Graphics(SCREEN_WIDTH, SCREEN_HEIGHT, m_camera);
 	m_graphics->SetShaders(m_resManager->LoadShaders());
 	m_graphics->SetTextures(m_resManager->LoadTextures());
 	m_graphics->SetModel(m_resManager->LoadModels());
-	m_graphics->SetCamera(m_camera);
 	m_skydome = m_graphics->InitSkybox();
 
 	ImGui_ImplSdlGL3_Init(m_graphics->GetWindow());
@@ -111,7 +110,7 @@ void Game::Update()
 	ImGui_ImplSdlGL3_NewFrame(m_graphics->GetWindow());
 
 	m_voxelManager->Update();
-	m_skydome->Update();
+	m_skydome->Update(m_camera);
 	m_weather->Update();
 
 	if(m_flag & FP_MODE) 

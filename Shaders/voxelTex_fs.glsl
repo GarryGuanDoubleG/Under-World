@@ -62,7 +62,8 @@ void main(void)
 	float scale = .0015f;
 	vec3 blending = getTriPlanarBlend(fs_in.normal);
 	vec3 tex = GetTriPlanarTex(fs_in.FragPos, blending, scale, index);
-	vec3 norm = TriPlanarNormal(fs_in.FragPos, fs_in.normal, blending, scale);
+	//vec3 norm = TriPlanarNormal(fs_in.FragPos, fs_in.normal, blending, scale);
+	vec3 norm = fs_in.normal;
 
 	//specular uses direction towards light source
 	/*******SPECULAR ***************/
@@ -76,11 +77,11 @@ void main(void)
 	float diff = max(dot(norm, -lightDir), 0.0);
 	vec3 diffuse = diff * lightColor * 1.5f;
 	
-	float ambientStrength = 0.6f;
+	float ambientStrength = 0.3f;
 	vec3 ambient = ambientStrength * lightColor;
 
-	float shadow = ShadowCalculation(fs_in.FragPosLightSpace);
-    vec3 result = (ambient + (1.0 - shadow) * (diffuse + specular)) * tex;
+	//float shadow = ShadowCalculation(fs_in.FragPosLightSpace);
+    vec3 result = (ambient + (diffuse + specular)) * tex;
 	//vec3 result = diffuse;
 	color = vec4(result, 1.0f);
 }

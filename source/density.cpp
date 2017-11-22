@@ -1,7 +1,7 @@
 #include "game.hpp"
 float Density::voxelSize = 32.0f;
 float Density::invVoxelSize = 1.0f;
-float Density::maxHeight = 64.0f; //max number of voxels high
+float Density::maxHeight = 32.0f; //max number of voxels high
 float Density::noiseScale;
 float Density::densityGenTime;
 
@@ -28,9 +28,9 @@ void Density::Initialize()
 {
 	omp_init_lock(&g_thread_lock);
 
-	noiseScale = .2f;
+	noiseScale = 0.3f;
 
-	terrainFN.SetFractalOctaves(4);
+	terrainFN.SetFractalOctaves(10);
 	terrainFN.SetFrequency(0.01f);
 	terrainFN.SetFractalLacunarity(2.0f);
 	terrainFN.SetFractalType(terrainFN.FBM);
@@ -39,7 +39,7 @@ void Density::Initialize()
 
 	terrainFNSIMD = FastNoiseSIMD::NewFastNoiseSIMD();
 	terrainFNSIMD->SetFractalOctaves(8);
-	terrainFNSIMD->SetFrequency(0.02f);
+	terrainFNSIMD->SetFrequency(0.04f);
 	terrainFNSIMD->SetFractalLacunarity(2.0f);
 	terrainFNSIMD->SetFractalType(terrainFNSIMD->FBM);
 	terrainFNSIMD->SetFractalGain(0.5);
@@ -140,7 +140,7 @@ glm::vec3 Density::CalculateNormals(Density::DensityType type, const glm::vec3 &
 
 glm::vec3 Density::CalculateNormals2D(Density::DensityType type, const glm::vec3 &pos)
 {
-	const float H = 0.01f;
+	const float H = 0.1f;
 
 	if (pos.y <= 1.0f)
 	{
@@ -364,10 +364,10 @@ void Density::GenerateHeightMap(const glm::vec3 &chunkPos, const glm::vec3 &chun
 		for (int z = 0; z <= chunkSize.z; z++)
 		{ 
 			int index = GETINDEXCHUNKXZ(glm::ivec3(chunkSize + glm::vec3(1.0f)), x, z);
-			float height = terrainFN.GetSimplexFractal(noiseScale * (voxelPos.x + x), noiseScale * (voxelPos.z + z)) * maxHeight * voxelSize; //convert to world Position
-			height = height < 1.0f ? 1.0f : height;
+			float height = terrainFN.GetSimplexFractal(noiseScale * (voxelPos.x + x), noiseScale * (voxelPos.z + z));
+			height = (height * maxHeight * voxelSize);//convert to world Position
+			height = glm::max(height, 1.0f);
 			heightMap[index] = height;
-
 		}
 	}
 }
