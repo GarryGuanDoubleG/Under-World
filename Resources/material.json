@@ -1,0 +1,8 @@
+{
+  "iron": {
+    "albedo": "Resources\\materials\\iron\\albedo.png",
+    "normal": "Resources\\materials\\iron\\normal.png",
+    "metallic": "Resources\\materials\\iron\\metallic.png",
+    "roughness": "Resources\\materials\\iron\\roughness.png"
+  }
+}

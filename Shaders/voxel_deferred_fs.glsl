@@ -6,6 +6,9 @@
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec3 gNormal;
 layout (location = 2) out vec4 gAlbedoSpec;
+layout (location = 3) out float outMetallic;
+layout (location = 4) out float outRoughness;
+
 
 in VS_OUT
 {
@@ -24,14 +27,18 @@ void main()
 
 	vec3 blending = getTriPlanarBlend(fs_in.normal);
 
+	//position
     gPosition = fs_in.ScreenFragPos;
-    // also store the per-fragment normals into the gbuffer
+    
+	// also store the per-fragment normals into the gbuffer
     gNormal = TriPlanarNormal(fs_in.WorldFragPos, fs_in.normal, blending, scale);
-	//gNormal = fs_in.normal;
 
     // and the diffuse per-fragment color
     gAlbedoSpec.rgb = GetTriPlanarTex(fs_in.WorldFragPos, blending, scale, index).rgb;
 
-    // store specular intensity in gAlbedoSpec's alpha component
-    gAlbedoSpec.a = .75f;
+	//metallic
+	outMetallic = 1.0f;
+
+	//roughness
+	outRoughness = 0.0f;
 }

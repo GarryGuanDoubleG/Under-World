@@ -67,9 +67,11 @@ void Texture::LoadTexture(string filepath)
 
 	int mode = GL_RGB;
 
-	if(texture->format->BytesPerPixel == 4) {
+	if (texture->format->BytesPerPixel == 1)
+		mode = GL_RED;
+	else if(texture->format->BytesPerPixel == 4)
 		mode = GL_RGBA;
-	}
+
 	//now generate texture with data
 	glGenTextures(1, &m_texID);
 	glBindTexture(GL_TEXTURE_2D, m_texID);
@@ -196,10 +198,11 @@ void Texture::TriFiltering()
 	glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-void Texture::Bind(GLuint activeTex)
+void Texture::Bind(GLuint shaderLoc, GLuint activeTex)
 {
 	m_activeTex = activeTex;
 	glActiveTexture(GL_TEXTURE0 + activeTex); // Active proper texture unit before binding
+	glUniform1i(shaderLoc, activeTex);
 
 	switch (m_type)
 	{
@@ -261,6 +264,9 @@ void Texture::SetTexType(aiTextureType type)
 		break;
 	case aiTextureType_AMBIENT:
 		m_type = Ambient;
+		break;
+	case aiTextureType_NORMALS:
+		m_type = Normal;
 		break;
 	default:
 		break;

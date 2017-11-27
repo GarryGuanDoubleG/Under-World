@@ -20,20 +20,20 @@ struct DeferredBuffer
 		Roughness.CreateTexture2D(width, height, GL_RED, GL_RGB, GL_FLOAT);
 	}
 
-	void BindGBuffer(GLuint activeTex)
+	void BindGBuffer(Shader *shader, GLuint activeTex)
 	{
-		Position.Bind(activeTex);
-		Normal.Bind(activeTex + 1);
-		AlbedoSpec.Bind(activeTex + 2);
+		Position.Bind(shader->Uniform("gPosition"), activeTex);
+		Normal.Bind(shader->Uniform("gNormal"), activeTex + 1);
+		AlbedoSpec.Bind(shader->Uniform("gAlbedoSpec"), activeTex + 2);
 	}
 
-	void Bind(GLuint activeTex)
+	void Bind(Shader *shader, GLuint activeTex)
 	{
-		Position.Bind(activeTex);
-		Normal.Bind(activeTex + 1);
-		AlbedoSpec.Bind(activeTex + 2);
-		Metallic.Bind(activeTex + 3);
-		Roughness.Bind(activeTex + 4);
+		Position.Bind(shader->Uniform("gPosition"), activeTex);
+		Normal.Bind(shader->Uniform("gNormal"), activeTex + 1);
+		AlbedoSpec.Bind(shader->Uniform("gAlbedoSpec"), activeTex + 2);
+		Metallic.Bind(shader->Uniform("gMetallic"), activeTex + 3);
+		Roughness.Bind(shader->Uniform("gRoughness"), activeTex + 4);
 	}
 
 	void UnbindGBuffer()
@@ -115,6 +115,7 @@ public:
 	void SetShaders(map<string, Shader*> &shaders);
 	void SetTextures(map<string, Texture*> &textures);
 	void SetModel(map<string, Model*>& models);
+	void SetMaterials(map<string, Material*>& materials);
 	void SetFlag(GLuint flag);
 
 	void XORSetFlag(GLuint flag);

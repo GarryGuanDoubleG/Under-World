@@ -25,6 +25,8 @@ Game::Game() : m_running(true)
 	m_graphics->SetShaders(m_resManager->LoadShaders());
 	m_graphics->SetTextures(m_resManager->LoadTextures());
 	m_graphics->SetModel(m_resManager->LoadModels());
+	m_graphics->SetMaterials(m_resManager->LoadMaterials());
+
 	m_skydome = m_graphics->InitSkybox();
 
 	ImGui_ImplSdlGL3_Init(m_graphics->GetWindow());

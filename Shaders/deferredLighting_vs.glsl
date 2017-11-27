@@ -4,7 +4,6 @@ layout (location = 1) in vec2 uv;
 
 out vec2 UV;
 
-
 void main()
 {
     UV = uv;

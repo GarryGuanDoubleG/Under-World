@@ -111,7 +111,7 @@ map<string, Material*> ResManager::LoadMaterials()
 		string key = it.key();
 		
 		Texture materialTex[4];
-		
+		 
 		if (obj.find("albedo") != obj.end())
 			materialTex[0] = Texture(obj["albedo"].get<string>());
 		if (obj.find("normal") != obj.end())

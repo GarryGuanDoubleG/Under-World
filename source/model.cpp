@@ -61,7 +61,7 @@ Texture Model::LoadEmbeddedTexture(aiString embededIndex)
 */
 void Model::LoadModel(string model_path)
 {
-	m_scene = m_importer.ReadFile(model_path, aiProcess_Triangulate | aiProcess_FlipUVs);
+	m_scene = m_importer.ReadFile(model_path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 	if(!m_scene || m_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !m_scene->mRootNode)
 	{
@@ -70,10 +70,10 @@ void Model::LoadModel(string model_path)
 	}
 
 	string directory = model_path.substr(0, model_path.find_last_of('\\') + 1);
-
+	                                          
 	this->ProcessNode(m_scene->mRootNode, directory);
 
-	//LoadEmbeddedTextures();
+	//LoadEmbeddedTextures(); 
 }
 
 void Model::LoadAnimations(const vector<string> &animations, const vector<string> &animNames)
@@ -154,7 +154,7 @@ vector<Texture> Model::LoadMaterials(aiMaterial *mat, aiTextureType type, string
 		//texture is embedded
 		if(path.data[0] == '*')
 			tex = LoadEmbeddedTexture(path);
-		else
+		else //load from directory
 			tex = Texture(path.C_Str(), directory.c_str());
 
 		//check if load failed
@@ -238,35 +238,24 @@ void Model::LoadBones(aiMesh*mesh, vector<glm::ivec4> &boneIds, vector<glm::vec4
 	//}
 }
 
-vector<Vertex> LoadVertices(aiMesh*mesh)
+vector<Vertex> LoadVertices(aiMesh * mesh)
 {
 	vector<Vertex> vertices;
 	for (GLuint i = 0; i < mesh->mNumVertices; i++)
 	{
 		Vertex vertex;
 
-		glm::vec3 vert, normal;
+		glm::vec3 vert;
 		glm::vec2 uv;
 
-		vert.x = mesh->mVertices[i].x;
-		vert.y = mesh->mVertices[i].y;
-		vert.z = mesh->mVertices[i].z;
-
-		normal.x = mesh->mNormals[i].x;
-		normal.y = mesh->mNormals[i].y;
-		normal.z = mesh->mNormals[i].z;
+		vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+		vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+		vertex.tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
 
 		if(mesh->mTextureCoords[0])
-		{
-			uv.x = mesh->mTextureCoords[0][i].x;
-			uv.y = mesh->mTextureCoords[0][i].y;
-		}
+			vertex.uv = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
 		else
-			uv = glm::vec2(0.0f, 0.0f);
-
-		vertex.position = vert;
-		vertex.normal = normal;
-		vertex.uv = uv;
+			vertex.uv = glm::vec2(0.0f, 0.0f);
 
 		vertices.push_back(vertex);
 	}
@@ -348,6 +337,9 @@ Mesh Model::ProcessMesh(aiMesh *mesh, string directory)
 
 		vector<Texture> specularMaps = LoadMaterials(material, aiTextureType_SPECULAR, directory);
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+		vector<Texture> normalMaps = LoadMaterials(material, aiTextureType_NORMALS, directory);
+		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 	}
 
 	//load skeletal data

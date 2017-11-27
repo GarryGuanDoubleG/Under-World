@@ -7,10 +7,10 @@ struct CloudParams
 
 	void LoadParams(Shader *shader) {
 
-		detailNoise3D->Bind(1);
-		baseNoise3D->Bind(2);
-		curlNoise->Bind(3);
-		weatherTex->Bind(4);
+		detailNoise3D->Bind(shader->Uniform("_WorleyNoise"), 1);
+		baseNoise3D->Bind(shader->Uniform("_PerlinWorleyNoise"), 2);
+		curlNoise->Bind(shader->Uniform("_CurlNoise"), 3);
+		weatherTex->Bind(shader->Uniform("_WeatherTexture"), 4);
 
 		shader->SetUniform1f("_CloudBottomFade", CloudBottomFade);
 
@@ -153,5 +153,6 @@ public:
 	void RenderToQuad();
 
 	void Render(DeferredBuffer gBuffer, Texture *shadedScene);
+	void ApplyToScene(Texture * shadedScene);
 	void RenderImGui();
 };

@@ -17,18 +17,19 @@ void Mesh::Draw(Shader *shader)
 
 	for (GLuint i = 0; i < m_textures.size(); i++)
 	{
-		m_textures[i].Bind(i);
-
 		switch (m_textures[i].GetTexType())
 		{
 		case Diffuse:
-			shader->SetUniform1i("textureDiffuse", i);
+			m_textures[i].Bind(shader->Uniform("textureDiffuse"), i);
 			break;
 		case Specular:
-			shader->SetUniform1i("textureSpecular", i);
+			m_textures[i].Bind(shader->Uniform("textureSpecular"), i);
+			break;
+		case Normal:
+			m_textures[i].Bind(shader->Uniform("textureNormal"), i);
 			break;
 		case Ambient:
-			shader->SetUniform1i("textureAmbient", i);
+			m_textures[i].Bind(shader->Uniform("textureAmbient"), i);
 			break;
 		}
 	}
@@ -79,12 +80,18 @@ void Mesh::MeshInit()
 	//location 0 should be verts
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
-	//now normals
+	
+	//normals
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normal));
-	//now textures
+	
+	//textures
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, uv));
+
+	//tangent
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, tangent));
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

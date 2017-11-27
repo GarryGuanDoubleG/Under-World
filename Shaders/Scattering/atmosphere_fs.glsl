@@ -13,10 +13,8 @@ layout (binding = 1) uniform sampler2D texTransmittance;
 layout (binding = 2) uniform sampler3D texInscatter;
 
 layout (binding = 3) uniform sampler2D gPosition;
-layout (binding = 4) uniform sampler2D gNormal;
-layout (binding = 5) uniform sampler2D gAlbedoSpec;
 
-layout (binding = 6) uniform sampler2D ShadedScene;
+layout (binding = 4) uniform sampler2D ShadedScene;
 //const float sunIntensity = 30.0f;
 uniform float sunIntensity;
 uniform mat4 invViewMat;
@@ -38,9 +36,6 @@ void main()
 
 	vec3 surfacePos = vec3(invViewMat * FragPos);
 	vec3 viewDir = normalize(surfacePos - viewPos);
-	vec3 normal = texture(gNormal, UV).rgb;
-	vec3 diffuse = texture(gAlbedoSpec, UV).rgb;
-	float Specular = texture(gAlbedoSpec, UV).a;
 
 	vec3 attenutation = vec3(1.f);
 	float irradianceFactor = 0.0f;

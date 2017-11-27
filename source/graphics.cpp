@@ -347,6 +347,11 @@ void Graphics::SetModel(map<string, Model*> &models)
 	m_modelMap = models;
 }
 
+void Graphics::SetMaterials(map<string, Material *> &materials)
+{
+	m_materialMap = materials;
+}
+
 void Graphics::SetFlag(GLuint flag)
 {
 	m_flag = flag;
@@ -513,9 +518,9 @@ void Graphics::DeferredSSAO(Shader *shader)
 		shader->SetUniform3fv("samples[" + std::to_string(i) + "]", m_ssaoKernel[i]);
 	}
 	shader->SetMat4("projection", m_camera->GetProj());
-	m_deferredBuffer.Position.Bind(0);
-	m_deferredBuffer.Normal.Bind(1);
-	m_textureMap["ssaoNoiseTex"]->Bind(2);
+	m_deferredBuffer.Position.Bind(shader->Uniform("gPosition"), 0);
+	m_deferredBuffer.Normal.Bind(shader->Uniform("gNormal"), 1);
+	m_textureMap["ssaoNoiseTex"]->Bind(shader->Uniform("texNoise"), 2);
 
 	RenderToQuad();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -526,7 +531,7 @@ void Graphics::DeferredSSAOBlur(Shader *shader)
 	glBindFramebuffer(GL_FRAMEBUFFER, m_ssaoBlurFBO);
 	glClear(GL_COLOR_BUFFER_BIT);
 	shader->Use();
-	m_textureMap["ssao"]->Bind(0);
+	m_textureMap["ssao"]->Bind(shader->Uniform("ssaoInput"), 0);
 
 	RenderToQuad();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -569,11 +574,11 @@ void Graphics::DeferredRenderLighting(Shader *shader)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shader->Use();
 
-	m_deferredBuffer.Bind(0);//binds 0-4 inclusive
-	m_textureMap["ssaoBlur"]->Bind(5); //ssao  tex
-	m_shadowMaps[0].Bind(6);
-	m_shadowMaps[1].Bind(7);
-	m_shadowMaps[2].Bind(8);
+	m_deferredBuffer.Bind(shader, 0);//binds 0-4 inclusive
+	m_textureMap["ssaoBlur"]->Bind(shader->Uniform("gSSAO"), 5); //ssao tex
+	m_shadowMaps[0].Bind(shader->Uniform("g_shadowMap[0]"), 6);
+	m_shadowMaps[1].Bind(shader->Uniform("g_shadowMap[1]"), 7);
+	m_shadowMaps[2].Bind(shader->Uniform("g_shadowMap[2]"), 8);
 	
 	//shadow info
 	//glUniform1iv(shader->Uniform("g_shadowMap"), NUM_SHADOW_MAPS, &shadowLoc[0]);
@@ -606,7 +611,7 @@ void Graphics::DeferredRenderModel(Shader *shader, const string &name, const glm
 
 	//draw sphere
 	Material *ironMat = m_materialMap["iron"];
-	ironMat->BindMaterial(0);
+	ironMat->BindMaterial(shader, 0);
 
 	glm::mat4 sphereMat = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(1000.0f, 40000.f, 10000.0f)), glm::vec3(5000.0f));
 	shader->SetMat4("model", sphereMat);
@@ -615,24 +620,28 @@ void Graphics::DeferredRenderModel(Shader *shader, const string &name, const glm
 
 void Graphics::DeferredRenderVoxels(Shader *shader)
 {
+	int maxTextures = 15;
+
 	shader->Use();
 
 	shader->SetMat4("projection", m_camera->GetProj());
 	shader->SetMat4("model", glm::mat4(1.0f));
 	shader->SetMat4("view", m_camera->GetViewMat());
 
-	m_textureMap["grass"]->Bind(3);
-	m_textureMap["brick"]->Bind(4);
+	//max 15 diffuse textures
+	m_textureMap["grass"]->Bind(shader->Uniform("voxelTexture[3]"), 3);
+	m_textureMap["brick"]->Bind(shader->Uniform("voxelTexture[4]"), 4);
 
-	m_textureMap["grassNormal"]->Bind(15);
-	m_textureMap["brickNormal"]->Bind(16);
+	//max 15 normal maps
+	m_textureMap["grassNormal"]->Bind(shader->Uniform("normalMap[0]"), maxTextures);
+	m_textureMap["brickNormal"]->Bind(shader->Uniform("normalMap[1]"), maxTextures + 1);
 
 
-	GLint samplers[] = { 3, 4 };
-	GLint samplersNormalMap[] = { 15,16 };
-	glUniform1iv(shader->Uniform("voxelTexture"), 2, &samplers[0]);
-	glUniform1iv(shader->Uniform("normalMap"), 2, &samplersNormalMap[0]);
-	//glUniform3fv(shader->Uniform("sunDir"), 1, &m_skydome->m_sunDirection[0]);
+	//GLint samplers[] = { 3, 4 };
+	//GLint samplersNormalMap[] = { 15,16 };
+	//glUniform1iv(shader->Uniform("voxelTexture"), 2, &samplers[0]);
+	//glUniform1iv(shader->Uniform("normalMap"), 2, &samplersNormalMap[0]);
+	////glUniform3fv(shader->Uniform("sunDir"), 1, &m_skydome->m_sunDirection[0]);
 
 	g_game->m_voxelManager->Render();
 
@@ -648,7 +657,7 @@ void Graphics::RenderScene()
 {
 	if (m_flag & SKYBOX_MODE)
 	{
-		m_textureMap["grass"]->Bind(0);
+		m_textureMap["grass"]->Bind(1, 0);
 		RenderSkybox(m_shaderMap["object"]);
 		m_textureMap["grass"]->Unbind();
 
@@ -718,7 +727,7 @@ void Graphics::RenderCube(glm::mat4 model)
 	shader->Use();
 
 	Texture *tex = m_textureMap["grass"];
-	tex->Bind(0);
+	tex->Bind(shader->Uniform("texture_diffuse1"), 0);
 
 	glBindVertexArray(m_vaoMap["cube"]);
 
@@ -765,6 +774,8 @@ void Graphics::RenderVoxels()
 {
 	if(~m_flag & VOXEL_MODE) return;
 
+	int maxTextures = 15;
+
 	Shader *shader = m_shaderMap["voxelTex"];
 	shader->Use();
 
@@ -779,18 +790,19 @@ void Graphics::RenderVoxels()
 	glUniform3fv(shader->Uniform("lightColor"), 1, &light_color[0]);
 	glUniform3fv(shader->Uniform("lightDirection"), 1, &light_dir[0]);
 
-	m_textureMap["grass"]->Bind(0);
-	m_textureMap["brick"]->Bind(1);
+	m_textureMap["grass"]->Bind(shader->Uniform("voxelTexture[3]"), 3);
+	m_textureMap["brick"]->Bind(shader->Uniform("voxelTexture[4]"), 4);
 
-	m_textureMap["grassNormal"]->Bind(15);
-	m_textureMap["brickNormal"]->Bind(16);
+	//max 15 normal maps
+	m_textureMap["grassNormal"]->Bind(shader->Uniform("normalMap[" + std::to_string(maxTextures) + "]"), maxTextures);
+	m_textureMap["brickNormal"]->Bind(shader->Uniform("normalMap[" + std::to_string(maxTextures + 1) + "]"), maxTextures + 1);
 
 	
 	//m_textureMap["brickHeight"]->Bind(6);
-	GLint samplers[] = { 0, 1, 2, 3, 4 };
-	GLint samplersNormalMap[] = { 15,16,17,19 };
-	glUniform1iv(shader->Uniform("voxelTexture"), 5, &samplers[0]);
-	glUniform1iv(shader->Uniform("normalMap"), 5, &samplersNormalMap[0]);
+	//GLint samplers[] = { 0, 1, 2, 3, 4 };
+	//GLint samplersNormalMap[] = { 15,16,17,19 };
+	//glUniform1iv(shader->Uniform("voxelTexture"), 5, &samplers[0]);
+	//glUniform1iv(shader->Uniform("normalMap"), 5, &samplersNormalMap[0]);
 	g_game->m_voxelManager->Render();
 
 	m_textureMap["brick"]->Unbind();

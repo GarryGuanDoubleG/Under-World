@@ -10,8 +10,8 @@ in vec2 UV;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
-uniform sampler2D gMetallic
-uniform sampler2D gRoughness
+uniform sampler2D gMetallic;
+uniform sampler2D gRoughness;
 uniform sampler2D gSSAO;
 
 //shadow map info
@@ -81,7 +81,7 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
 
 	float nom = a2;
 	float demon = (NdotH2 * (a2 - 1.0) + 1.0);
-	demon = PI * demon * demon;
+	demon = M_PI * demon * demon;
 
 	return nom / demon;
 }
@@ -92,7 +92,7 @@ float GeometrySchlickGGX(float NdotV, float roughness)
 	float k = (r * r) / 8.0;
 
 	float nom = NdotV;
-	float demon = NDotV * (1.0 - k) + k;
+	float demon = NdotV * (1.0 - k) + k;
 
 	return nom / demon;
 }
@@ -105,6 +105,57 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 	float ggx1 = GeometrySchlickGGX(NdotL, roughness);
 
 	return ggx1 * ggx2;
+}
+
+float CascadeShadows(vec3 FragPos, vec3 viewPos, vec3 normal)
+{
+	float shadow;
+	float depth = distance(FragPos, viewPos);
+	int texID = 0;
+
+	for(int i = 0; i < NUM_SHADOW_MAPS; i++)
+	{
+		if(depth <= g_shadowRanges[i])
+		{
+			vec4 FragPosLightSpace = g_lightSpaceMatrix[i] * InvViewMat * vec4(FragPos, 1.0f);
+			shadow = ShadowCalculation(i, FragPosLightSpace, normal);
+			texID = i;
+			break;
+		}
+	}
+
+	return shadow;
+}
+
+vec3 CalculateLighting(vec3 viewDir, vec3 normal, vec3 albedo, float roughness, float metallic)
+{
+	vec3 lightDir = -sunDir;
+	vec3 radiance = vec3(1.0f); // light color
+	vec3 halfVec = normalize(lightDir + viewDir);
+	vec3 Lo = vec3(0.0f);//color with correction
+
+	 // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
+    // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
+    vec3 F0 = vec3(0.04); 
+    F0 = mix(F0, albedo, metallic);
+
+
+	float NDF = DistributionGGX(normal, halfVec, roughness);
+	float G = GeometrySmith(normal, viewDir, lightDir, roughness);
+	vec3 F = fresnelSchlick(max(dot(halfVec, viewDir), 0.0), F0);
+	
+	vec3 kS = F;
+	vec3 kD = vec3(1.0) - kS;
+	kD *= 1.0 - metallic;
+
+	vec3 nominator = NDF * G * F;
+	float denominator = 4.0 * max(dot(normal, viewDir), 0.0) * max(dot(normal, lightDir), 0.0);
+	vec3 specular = nominator / max(denominator, 0.001);
+
+	float NdotL = max(dot(normal, lightDir), 0.0);
+	Lo += (kD * albedo / M_PI + specular) * radiance * NdotL;
+
+	return Lo;
 }
 
 //pbr lighting using Cook-Torrance BRDF
@@ -120,48 +171,22 @@ void main()
 
     vec3 normal = normalize(texture(gNormal, UV).rgb);
     vec3 albedo = texture(gAlbedoSpec, UV).rgb;
-    float specular = texture(gAlbedoSpec, UV).a;
+	float roughness = texture(gRoughness, UV).r;
+	float metallic = texture(gMetallic, UV).r;
     float ao = texture(gSSAO, UV).r;
+	vec3 viewDir = normalize(-FragPos);
 
-	float shadow;
-	float depth = distance(FragPos, viewPos);
-	int texID = 0;
-
-	for(int i = 0; i < NUM_SHADOW_MAPS; i++)
-	{
-		if(depth <= g_shadowRanges[i])
-		{
-			vec4 FragPosLightSpace = g_lightSpaceMatrix[i] * InvViewMat * vec4(FragPos, 1.0f);
-			shadow = ShadowCalculation(i, FragPosLightSpace, Normal);
-			texID = i;
-			break;
-		}
-	}
+	//calculate shadows
+	float shadow = CascadeShadows(FragPos, viewPos, normal);
 	
-	//halfway vector
-	vec3 lightDir = -sunDir;
-	vec3 H = normalize(lightDir + viewDir);
-	vec3 radiance = vec3(1.0f); // light color
+	//physically based rendering
+	vec3 Lo = CalculateLighting(viewDir, normal, albedo, roughness, metallic);
 
-	float NDF = DistributionGGX(N, H, roughness);
-	float G = GeomtrySmith(N, viewDir, lightDir, roughness);
-	vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
-	
-	vec3 kS = F;
-	vec3 kD = vec3(1.0) - ks;
-	kD = 1.0 - metallic;
-
-	vec3 nominator = NDF * G * F;
-	float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-	vec3 specular = nominator / max(denominator, 0.001);
-
-	float NdotL = max(dot(N, L), 0.0);
-	Lo += (kD * albedo / PI + specular) * radiance * NdotL;
-
+	//ambient component
 	vec3 ambient = vec3(0.03) * albedo * ao;
-	vec3 color = ambient + (1.0 - shadow) * Lo;
 
-	//gamma correction
+	//gamma correction with shadowing
+	vec3 color = ambient + (1.0 - shadow) * Lo;
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0 / 2.2));
 

@@ -87,8 +87,7 @@ void Atmosphere::PrecomputeDeltaE(Texture &deltaE)
 	Shader *shader = g_game->GetShader("delta_e");
 
 	shader->Use();
-	shader->SetUniform1i("transmittanceSampler", 0);
-	transmittance->Bind(0);
+	transmittance->Bind(shader->Uniform("transmittanceSampler"), 0);
 
 	glBindImageTexture(0, deltaE.GetTexID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F);
 	glDispatchCompute(m_skyW / workGroupSize, m_skyH / workGroupSize, 1);
@@ -103,8 +102,7 @@ void Atmosphere::PrecomputeDeltaSMSR(Texture & deltaSR, Texture &deltaSM)
 	Shader *shader = g_game->GetShader("delta_sm_sr");
 
 	shader->Use();
-	shader->SetUniform1i("transmittanceSampler", 0);
-	transmittance->Bind(0);
+	transmittance->Bind(shader->Uniform("transmittanceSampler"), 0);
 	
 	//3D textures must use layers
 	glBindImageTexture(0, deltaSR.GetTexID(), 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
@@ -123,9 +121,8 @@ void Atmosphere::CopyIrradiance(Texture & deltaE)
 	
 	copy_irradiance->Use();
 	copy_irradiance->SetUniform1f("k", 0.0f);
-	copy_irradiance->SetUniform1i("deltaESampler", 0);
 
-	deltaE.Bind(0);
+	deltaE.Bind(copy_irradiance->Uniform("deltaESampler"), 0);
 	glBindImageTexture(0, irradiance->GetTexID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F);
 	glDispatchCompute(m_skyW / workGroupSize, m_skyH / workGroupSize, 1);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
@@ -138,11 +135,9 @@ void Atmosphere::CopyInscatter(Texture & deltaSM, Texture &deltaSR)
 	Shader *shader = g_game->GetShader("copy_inscatter");
 	
 	shader->Use();
-	shader->SetUniform1i("deltaSRSampler", 0);
-	shader->SetUniform1i("deltaSMSampler", 1);
 
-	deltaSR.Bind(0);
-	deltaSM.Bind(1);
+	deltaSR.Bind(shader->Uniform("deltaSRSampler"), 0);
+	deltaSM.Bind(shader->Uniform("deltaSMSampler"), 1);
 
 	glBindImageTexture(0, inscatter->GetTexID(), 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
 	glDispatchCompute(m_inscatterW / workGroupSize, m_inscatterH / workGroupSize, m_inscatterD / workGroupSize);
@@ -158,12 +153,9 @@ void Atmosphere::PrecomputeDeltaJ(Texture &deltaJ, Texture &deltaSR, Texture& de
 	Shader *shader = g_game->GetShader("delta_j");
 
 	shader->Use();
-	shader->SetUniform1i("deltaSRSampler", 0);
-	deltaSR.Bind(0);
-	shader->SetUniform1i("deltaSMSampler", 1);
-	deltaSM.Bind(1);
-	shader->SetUniform1i("deltaESampler", 2);
-	deltaE.Bind(2);
+	deltaSR.Bind(shader->Uniform("deltaSRSampler"), 0);
+	deltaSM.Bind(shader->Uniform("deltaSMSampler"), 1);
+	deltaE.Bind(shader->Uniform("deltaESampler"), 2);
 	shader->SetUniform1i("first", first);
 
 	//3D textures must use layers
@@ -182,10 +174,9 @@ void Atmosphere::PrecomputeIrradiance_N(Texture &deltaJ, Texture &deltaSR, Textu
 	Shader *shader = g_game->GetShader("irradiance_n");
 
 	shader->Use();
-	shader->SetUniform1i("deltaSRSampler", 0);
-	deltaSR.Bind(0);
-	shader->SetUniform1i("deltaSMSampler", 1);
-	deltaSM.Bind(1);
+
+	deltaSR.Bind(shader->Uniform("deltaSRSampler"), 0);
+	deltaSM.Bind(shader->Uniform("deltaSMSampler"), 1);
 	shader->SetUniform1i("first", first);
 
 	//3D textures must use layers
@@ -203,11 +194,10 @@ void Atmosphere::PrecomputeDeltaSR(Texture &deltaSR, Texture& deltaJ)
 	Shader *shader = g_game->GetShader("delta_sr");
 
 	shader->Use();
-	shader->SetUniform1i("deltaJSampler", 0);
-	deltaJ.Bind(0);
 
-	shader->SetUniform1i("transmittanceSampler", 1);
-	transmittance->Bind(1);
+	//bind textures
+	deltaJ.Bind(shader->Uniform("deltaJSampler"), 0);
+	transmittance->Bind(shader->Uniform("transmittanceSampler"), 1);
 	
 	//3D textures must use layers
 	glBindImageTexture(0, deltaSR.GetTexID(), 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
@@ -226,7 +216,7 @@ void Atmosphere::AddDeltas(Texture& deltaE, Texture& deltaSR)
 
 	shader->Use();
 	shader->SetUniform1i("deltaESampler", 0);
-	deltaE.Bind(0);
+	deltaE.Bind(shader->Uniform("deltaESampler"), 0);
 
 	//3D textures must use layers
 	glBindImageTexture(0, irradiance->GetTexID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F);
@@ -241,8 +231,7 @@ void Atmosphere::AddDeltas(Texture& deltaE, Texture& deltaSR)
 
 	shader->Use();
 
-	shader->SetUniform1i("deltaSSampler", 0);
-	deltaSR.Bind(0);
+	deltaSR.Bind(shader->Uniform("deltaSSampler"), 0);
 
 	glBindImageTexture(0, inscatter->GetTexID(), 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
 	glDispatchCompute(m_inscatterW / workGroupSize, m_inscatterH / workGroupSize, m_inscatterD / workGroupSize);
@@ -272,11 +261,11 @@ Texture Atmosphere::Render(DeferredBuffer &gbuffer, Texture *scene)
 	shader->SetUniform3fv("sunDir", g_game->m_skydome->m_sunDirection);
 	shader->SetUniform1f("sunIntensity", g_game->m_skydome->m_sunIntensity);
 
-	irradiance->Bind(0);
-	transmittance->Bind(1);
-	inscatter->Bind(2);
-	gbuffer.BindGBuffer(3);//binds textures 3-5
-	scene->Bind(6);
+	//irradiance->Bind(shader->Uniform("texIrradiance"), 0);
+	//transmittance->Bind(shader->Uniform("texTransmittance"), 1);
+	inscatter->Bind(shader->Uniform("texInscatter"), 2);
+	gbuffer.Position.Bind(shader->Uniform("gPosition"), 3);
+	scene->Bind(shader->Uniform("ShadedScene"), 4);
 
 	RenderToQuad();
 

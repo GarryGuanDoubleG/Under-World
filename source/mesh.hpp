@@ -9,6 +9,7 @@ typedef struct Vertex_S
 	glm::vec3 position; /**< vertex postion in ndc */
 	glm::vec3 normal; /**< normal value of vertex */
 	glm::vec2 uv; /**< texture coordinates */
+	glm::vec3 tangent;
 }Vertex;
 
 struct Weight

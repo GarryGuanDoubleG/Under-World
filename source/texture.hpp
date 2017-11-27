@@ -8,7 +8,10 @@ enum TextureType
 	Ambient = 3,
 	Diffuse = 4,
 	Specular = 5,
-	DepthMap = 6
+	Normal = 6,
+	Metallic = 7,
+	Roughness =8,
+	DepthMap = 9
 };
 
 class Texture
@@ -30,7 +33,7 @@ public:
 	void Destroy();
 	void TriFiltering();
 	
-	void Bind(GLuint activeTex);
+	void Bind(GLuint shaderLoc, GLuint activeTex);
 	void Unbind();
 
 	void SetTexType(TextureType type);

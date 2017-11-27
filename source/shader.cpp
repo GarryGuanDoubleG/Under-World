@@ -9,7 +9,7 @@
 */
 GLuint check_shader_err(char *name, GLuint shader)
 {
-	GLchar infoLog[512];
+	GLchar infoLog[4096];
 
 	GLint result = GL_FALSE;
 	GLint InfoLogLength;

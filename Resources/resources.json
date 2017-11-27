@@ -1,4 +1,5 @@
 {
+  "materials": "Resources\\material.json",
   "models": "Resources\\models\\models.json",
   "menu": "Resources\\gui\\menu.json",
   "hud": "Resources\\gui\\HUD.json",

@@ -82,7 +82,7 @@ void Weather::Render(DeferredBuffer gBuffer, Texture *shadedScene)
 	shader->Use();
 	//render clouds
 
-	gBuffer.Position.Bind(0);
+	gBuffer.Position.Bind(shader->Uniform("gPosition"), 0);
 	shader->SetUniform3fv("sunDir", g_game->m_skydome->GetSunDirection());
 	shader->SetUniform3fv("cameraPos", camera->GetPosition());
 	shader->SetMat4("invViewMat", camera->GetInverseViewMat());
@@ -93,16 +93,19 @@ void Weather::Render(DeferredBuffer gBuffer, Texture *shadedScene)
 
 	//render to final scene
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	ApplyToScene(shadedScene);
+}
 
-	shader = g_game->GetShader("applyCloud");
+void Weather::ApplyToScene(Texture * shadedScene)
+{
+	Shader * shader = g_game->GetShader("applyCloud");
 	shader->Use();
-	m_cloudTex.Bind(0);
-	shadedScene->Bind(1);
+	m_cloudTex.Bind(shader->Uniform("cloudsTex"), 0);
+	shadedScene->Bind(shader->Uniform("shadedScene"), 1);
 	RenderToQuad();
 	m_cloudTex.Unbind();
 	shadedScene->Unbind();
 }
-
 
 void Weather::RenderImGui()
 {
