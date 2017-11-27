@@ -34,6 +34,7 @@ using namespace std;
 
 #include "shader.hpp"
 #include "texture.hpp"
+#include "material.hpp"
 #include "camera.hpp"
 #include "animController.hpp"
 #include "mesh.hpp"

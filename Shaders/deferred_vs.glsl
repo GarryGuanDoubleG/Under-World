@@ -14,6 +14,8 @@ uniform mat4 projection;
 void main()
 {
     vec4 worldPos = model * vec4(aPos, 1.0);
+
+	//fragment position in screenspace
     FragPos = vec3(view * worldPos);
     TexCoords = aTexCoords;
     

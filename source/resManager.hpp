@@ -17,6 +17,7 @@ public:
 
 	void LoadResources();
 	map<string, Texture*> LoadTextures();
+	map<string, Material *> LoadMaterials();
 	map<string, Shader *> LoadShaders();
 	map<string, Model *> LoadModels();
 

@@ -10,7 +10,9 @@ in vec2 UV;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
-uniform sampler2D ssao;
+uniform sampler2D gMetallic
+uniform sampler2D gRoughness
+uniform sampler2D gSSAO;
 
 //shadow map info
 uniform sampler2D g_shadowMap[NUM_SHADOW_MAPS];
@@ -65,6 +67,47 @@ float ShadowCalculation(int cascadeIndex, vec4 FragPosLightSpace, vec3 normal)
 	return shadow;
 }
 
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
+{
+	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+	float a = roughness * roughness;
+	float a2 = a * a;
+	float NdotH = max(dot(H, H), 0.0);
+	float NdotH2 = NdotH * NdotH;
+
+	float nom = a2;
+	float demon = (NdotH2 * (a2 - 1.0) + 1.0);
+	demon = PI * demon * demon;
+
+	return nom / demon;
+}
+
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+	float r = (roughness + 1.0);
+	float k = (r * r) / 8.0;
+
+	float nom = NdotV;
+	float demon = NDotV * (1.0 - k) + k;
+
+	return nom / demon;
+}
+
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+	float NdotV = max(dot(N, V), 0.0);
+	float NdotL = max(dot(N, L), 0.0);
+	float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+	float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+
+	return ggx1 * ggx2;
+}
+
+//pbr lighting using Cook-Torrance BRDF
 void main()
 {             
     // retrieve data from gbuffer
@@ -75,10 +118,10 @@ void main()
 		return;
 	}
 
-    vec3 Normal = normalize(texture(gNormal, UV).rgb);
-    vec3 Diffuse = texture(gAlbedoSpec, UV).rgb;
-    float Specular = texture(gAlbedoSpec, UV).a;
-    float AmbientOcclusion = texture(ssao, UV).r;
+    vec3 normal = normalize(texture(gNormal, UV).rgb);
+    vec3 albedo = texture(gAlbedoSpec, UV).rgb;
+    float specular = texture(gAlbedoSpec, UV).a;
+    float ao = texture(gSSAO, UV).r;
 
 	float shadow;
 	float depth = distance(FragPos, viewPos);
@@ -94,17 +137,33 @@ void main()
 			break;
 		}
 	}
-    // diffuse lighting
-    vec3 lighting  = Diffuse * .3f * AmbientOcclusion; // hard-coded ambient component
-	vec3 viewDir = normalize(-FragPos);
-	vec3 lightDir = -sunDir;
-	vec3 diffuse = max(dot(Normal, lightDir), 0.0) * Diffuse;
 	
-    // specular
-    vec3 halfwayDir = normalize(lightDir + viewDir);  
-    float spec = pow(max(dot(Normal, halfwayDir), 0.0), 16.0);
-    vec3 specular = vec3(1.0f) * spec * Specular;
+	//halfway vector
+	vec3 lightDir = -sunDir;
+	vec3 H = normalize(lightDir + viewDir);
+	vec3 radiance = vec3(1.0f); // light color
 
-    lighting += (1.0f - shadow) * (diffuse + specular); 
-	FragColor = vec4(lighting, 1.0f);
+	float NDF = DistributionGGX(N, H, roughness);
+	float G = GeomtrySmith(N, viewDir, lightDir, roughness);
+	vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+	
+	vec3 kS = F;
+	vec3 kD = vec3(1.0) - ks;
+	kD = 1.0 - metallic;
+
+	vec3 nominator = NDF * G * F;
+	float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+	vec3 specular = nominator / max(denominator, 0.001);
+
+	float NdotL = max(dot(N, L), 0.0);
+	Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+
+	vec3 ambient = vec3(0.03) * albedo * ao;
+	vec3 color = ambient + (1.0 - shadow) * Lo;
+
+	//gamma correction
+	color = color / (color + vec3(1.0));
+	color = pow(color, vec3(1.0 / 2.2));
+
+	FragColor = vec4(color, 1.0);
 }

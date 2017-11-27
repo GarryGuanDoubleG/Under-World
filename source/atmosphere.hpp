@@ -29,7 +29,7 @@ public:
 	void AddDeltas(Texture & deltaE, Texture & deltaSR);
 
 	void RenderToQuad();
-	Texture Render(GBuffer & gbuffer, Texture *scene);
+	Texture Render(DeferredBuffer & gbuffer, Texture *scene);
 private:
 
 };

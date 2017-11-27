@@ -257,7 +257,7 @@ void Atmosphere::RenderToQuad()
 	glBindVertexArray(0);
 }
 
-Texture Atmosphere::Render(GBuffer &gbuffer, Texture *scene)
+Texture Atmosphere::Render(DeferredBuffer &gbuffer, Texture *scene)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
 
@@ -275,7 +275,7 @@ Texture Atmosphere::Render(GBuffer &gbuffer, Texture *scene)
 	irradiance->Bind(0);
 	transmittance->Bind(1);
 	inscatter->Bind(2);
-	gbuffer.Bind(3);//binds textures 3-5
+	gbuffer.BindGBuffer(3);//binds textures 3-5
 	scene->Bind(6);
 
 	RenderToQuad();

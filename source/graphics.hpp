@@ -2,26 +2,52 @@
 
 #define NUM_SHADOW_MAPS 3
 
-struct GBuffer {
-	Texture gPosition;
-	Texture gNormal;
-	Texture gAlbedoSpec;
+struct DeferredBuffer
+{
+	Texture Position;
+	Texture Normal;
+	Texture AlbedoSpec;
+	Texture Metallic;
+	Texture Roughness;
 
-	//GBuffer(const GBuffer &) = delete;
-	//GBuffer & operator =(const GBuffer&) = delete;
+	void Create(int width, int height)
+	{
+		//set up gbuffer
+		Position.CreateTexture2D(width, height, GL_RGB32F, GL_RGB);
+		Normal.CreateTexture2D(width, height, GL_RGB16F, GL_RGB);
+		AlbedoSpec.CreateTexture2D(width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
+		Metallic.CreateTexture2D(width, height, GL_RED, GL_RGB, GL_FLOAT);
+		Roughness.CreateTexture2D(width, height, GL_RED, GL_RGB, GL_FLOAT);
+	}
+
+	void BindGBuffer(GLuint activeTex)
+	{
+		Position.Bind(activeTex);
+		Normal.Bind(activeTex + 1);
+		AlbedoSpec.Bind(activeTex + 2);
+	}
 
 	void Bind(GLuint activeTex)
 	{
-		gPosition.Bind(activeTex);
-		gNormal.Bind(activeTex + 1);
-		gAlbedoSpec.Bind(activeTex + 2);
+		Position.Bind(activeTex);
+		Normal.Bind(activeTex + 1);
+		AlbedoSpec.Bind(activeTex + 2);
+		Metallic.Bind(activeTex + 3);
+		Roughness.Bind(activeTex + 4);
+	}
+
+	void UnbindGBuffer()
+	{
+		Position.Unbind();
+		Normal.Unbind();
+		AlbedoSpec.Unbind();
 	}
 
 	void Unbind()
 	{
-		gPosition.Unbind();
-		gNormal.Unbind();
-		gAlbedoSpec.Unbind();
+		UnbindGBuffer();
+		Metallic.Unbind();
+		Roughness.Unbind();
 	}
 };
 
@@ -35,11 +61,13 @@ class Graphics
 
 	GLuint m_shadowMapFBO;
 
+	//maps for rendering
 	map<string, GLuint> m_vaoMap;
 	map<string, GLuint> m_vboMap;
 	map<string, Texture*> m_textureMap;
 	map<string, Shader*> m_shaderMap;
 	map<string, Model*> m_modelMap;
+	map<string, Material*> m_materialMap;
 	
 	//Cascading Shadow Maps
 	vector<Texture> m_shadowMaps;
@@ -52,15 +80,16 @@ class Graphics
 	GLuint m_deferredFBO;
 	GLuint m_sceneFBO;
 	GLuint m_depthRBO;
-	GBuffer m_GBuffer;
+
+	//buffers
+	DeferredBuffer m_deferredBuffer;
+
 	//SSAO
 	GLuint m_ssaoFBO;
 	GLuint m_ssaoBlurFBO;
 	std::vector<glm::vec3> m_ssaoKernel;
 
 	glm::vec3 lightPositions[32];
-
-	GLuint gBuffer, rboDepth;
 public:
 	GLuint m_flag;
 
@@ -76,7 +105,7 @@ public:
 
 	void InitFBOS();
 
-	void InitGBufferFBO();
+	void InitDeferredFBO();
 
 	void InitSSAOBuffers();
 
@@ -100,11 +129,14 @@ public:
 	void RenderBackground(GLfloat bg_color[4]);
 	void RenderSkybox(Shader * shader);
 	void CalculateShadowProj();
-	GBuffer DeferredRenderScene();
+
+	//deferred rendering pipeline
+	DeferredBuffer DeferredRenderScene();
 	void DeferredSSAO(Shader * shader);
 	void DeferredSSAOBlur(Shader * shader);
 	void DeferredShadowMap(Shader * shader);
 	void DeferredRenderLighting(Shader *shader);
+
 	void RenderScene();
 	void RenderToQuad();
 	void RenderShadowMap();

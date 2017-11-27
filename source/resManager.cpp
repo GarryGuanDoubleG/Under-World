@@ -45,7 +45,6 @@ void ResManager::ReserveMemory()
 	//m_memory = malloc(MAX_MEMORY);
 }
 
-
 map<string, Texture*> ResManager::LoadTextures()
 {
 	map<string, Texture*> texture_map;
@@ -91,6 +90,42 @@ map<string, Texture*> ResManager::LoadTextures()
 
 	return texture_map;
 	
+}
+
+map<string, Material*> ResManager::LoadMaterials()
+{
+	map<string, Material *> materialMap;
+
+	ifstream in(m_resources["materials"].get<string>());
+	if (!in.is_open()) {
+		cout << "Incorrect filename: " << m_resources["materials"].get<string>() << endl;
+		return materialMap;
+	}
+
+	Json materials;
+	in >> materials;
+
+	for (Json::iterator it = materials.begin(); it != materials.end(); ++it)
+	{
+		Json obj = it.value();
+		string key = it.key();
+		
+		Texture materialTex[4];
+		
+		if (obj.find("albedo") != obj.end())
+			materialTex[0] = Texture(obj["albedo"].get<string>());
+		if (obj.find("normal") != obj.end())
+			materialTex[1] = Texture(obj["normal"].get<string>());
+		if (obj.find("metallic") != obj.end())
+			materialTex[2] = Texture(obj["metallic"].get<string>());
+		if (obj.find("roughness") != obj.end())
+			materialTex[3] = Texture(obj["roughness"].get<string>());
+
+		materialMap[key] = new Material(materialTex[0], materialTex[1], materialTex[2], materialTex[3]);
+	}
+
+	in.close();
+	return materialMap;
 }
 
 map<string, Shader *> ResManager::LoadShaders()

@@ -76,6 +76,9 @@
     <Filter Include="Shaders\Deferred Rendering\SSAO">
       <UniqueIdentifier>{690ed9b9-90e0-4cec-8729-d5082535f435}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Deferred Rendering\PBR">
+      <UniqueIdentifier>{ccd4c7f9-26c5-4046-8b5d-349270a74f0f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -247,6 +250,15 @@
     <None Include="Shaders\deferred_vs.glsl">
       <Filter>Shaders\Deferred Rendering</Filter>
     </None>
+    <None Include="Shaders\deferredPBR_vs.glsl">
+      <Filter>Shaders\Deferred Rendering\PBR</Filter>
+    </None>
+    <None Include="Shaders\deferredPBR_fs.glsl">
+      <Filter>Shaders\Deferred Rendering\PBR</Filter>
+    </None>
+    <None Include="Resources\material.json">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\game.hpp">
@@ -356,6 +368,9 @@
     </ClInclude>
     <ClInclude Include="source\worldTree.h">
       <Filter>Header Files\Voxels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\material.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -472,6 +487,9 @@
     </ClCompile>
     <ClCompile Include="source\worldTree.cpp">
       <Filter>Source Files\Voxels</Filter>
+    </ClCompile>
+    <ClCompile Include="source\material.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

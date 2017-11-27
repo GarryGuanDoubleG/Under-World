@@ -152,6 +152,6 @@ public:
 
 	void RenderToQuad();
 
-	void Render(GBuffer gBuffer, Texture *shadedScene);
+	void Render(DeferredBuffer gBuffer, Texture *shadedScene);
 	void RenderImGui();
 };

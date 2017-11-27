@@ -69,14 +69,13 @@ void Game::Draw()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	GBuffer gBuffer;
 	if (m_flag & DEFERRED_MODE)
 	{
 		m_graphics->RenderScene();
 	}
 	else
 	{
-		gBuffer = m_graphics->DeferredRenderScene();
+		DeferredBuffer gBuffer = m_graphics->DeferredRenderScene();
 		Texture postProcessing = m_atmosphere->Render(gBuffer, GetTexture("scene"));
 		m_weather->Render(gBuffer, &postProcessing);
 	}

@@ -222,7 +222,8 @@ void Graphics::InitShadowMaps()
 
 void Graphics::InitFBOS()
 {
-	InitGBufferFBO();
+	//initialize deferred fbo
+	InitDeferredFBO();
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		cout << "Frame buffer not complete " << endl;
@@ -231,7 +232,7 @@ void Graphics::InitFBOS()
 	glGenFramebuffers(1, &m_sceneFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
 	Texture *shadedScene = new Texture();
-	shadedScene->CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
+	shadedScene->CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, shadedScene->GetTexID(), 0);
 
 	m_textureMap["scene"] = shadedScene;
@@ -242,25 +243,24 @@ void Graphics::InitFBOS()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Graphics::InitGBufferFBO()
+void Graphics::InitDeferredFBO()
 {
 	//TODO: MOVE FBOS TO hash MAP
 	//deferred rendering FBOs
 	glGenFramebuffers(1, &m_deferredFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_deferredFBO);
 
+	//initializes output textures for deferred renderin
+	m_deferredBuffer.Create(SCREEN_WIDTH, SCREEN_HEIGHT);
 	//set up gbuffer
-	m_GBuffer.gPosition.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB32F, GL_RGB);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_GBuffer.gPosition.GetTexID(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_deferredBuffer.Position.GetTexID(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_deferredBuffer.Normal.GetTexID(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_deferredBuffer.AlbedoSpec.GetTexID(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_deferredBuffer.Metallic.GetTexID(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, m_deferredBuffer.Roughness.GetTexID(), 0);
 
-	m_GBuffer.gNormal.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGB16F, GL_RGB);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_GBuffer.gNormal.GetTexID(), 0);
-
-	m_GBuffer.gAlbedoSpec.CreateTexture2D(SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_GBuffer.gAlbedoSpec.GetTexID(), 0);
-
-	unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-	glDrawBuffers(3, attachments);
+	unsigned int attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
+	glDrawBuffers(5, attachments);
 
 	//depth map
 	glGenRenderbuffers(1, &m_depthRBO);
@@ -455,7 +455,7 @@ void Graphics::CalculateShadowProj()
 	}
 }
 
-GBuffer Graphics::DeferredRenderScene()
+DeferredBuffer Graphics::DeferredRenderScene()
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -473,7 +473,7 @@ GBuffer Graphics::DeferredRenderScene()
 	DeferredRenderVoxels(m_shaderMap["voxel_deferred"]);
 	
 	//render model
-	DeferredRenderModel(m_shaderMap["deferred"], "a", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 300.f, 0.0f)));
+	DeferredRenderModel(m_shaderMap["deferredPBR"], "a", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 300.f, 0.0f)));
 	
 	//SSAO
 	DeferredSSAO(m_shaderMap["ssao"]);
@@ -500,7 +500,7 @@ GBuffer Graphics::DeferredRenderScene()
 	////m_shadowMaps[0].Bind(0);
 	//RenderToQuad();
 
-	return m_GBuffer;
+	return m_deferredBuffer;
 }
 
 void Graphics::DeferredSSAO(Shader *shader)
@@ -513,8 +513,8 @@ void Graphics::DeferredSSAO(Shader *shader)
 		shader->SetUniform3fv("samples[" + std::to_string(i) + "]", m_ssaoKernel[i]);
 	}
 	shader->SetMat4("projection", m_camera->GetProj());
-	m_GBuffer.gPosition.Bind(0);
-	m_GBuffer.gNormal.Bind(1);
+	m_deferredBuffer.Position.Bind(0);
+	m_deferredBuffer.Normal.Bind(1);
 	m_textureMap["ssaoNoiseTex"]->Bind(2);
 
 	RenderToQuad();
@@ -569,21 +569,14 @@ void Graphics::DeferredRenderLighting(Shader *shader)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shader->Use();
 
-	m_GBuffer.Bind(0);
-	m_textureMap["ssaoBlur"]->Bind(3); //ssao  tex
-
-	int shadowLoc[] = { 4,5,6 };
-
-	shader->SetUniform1i("gPosition", 0);
-	shader->SetUniform1i("gNormal", 1);
-	shader->SetUniform1i("gAlbedoSpec", 2);
-	shader->SetUniform1i("ssao", 3);
+	m_deferredBuffer.Bind(0);//binds 0-4 inclusive
+	m_textureMap["ssaoBlur"]->Bind(5); //ssao  tex
+	m_shadowMaps[0].Bind(6);
+	m_shadowMaps[1].Bind(7);
+	m_shadowMaps[2].Bind(8);
 	
 	//shadow info
-	m_shadowMaps[0].Bind(4);
-	m_shadowMaps[1].Bind(5);
-	m_shadowMaps[2].Bind(6);
-	glUniform1iv(shader->Uniform("g_shadowMap"), NUM_SHADOW_MAPS, &shadowLoc[0]);
+	//glUniform1iv(shader->Uniform("g_shadowMap"), NUM_SHADOW_MAPS, &shadowLoc[0]);
 	glUniformMatrix4fv(shader->Uniform("g_lightSpaceMatrix"), NUM_SHADOW_MAPS, GL_FALSE, (const GLfloat *)&m_lightProjViewMats[0][0]);
 	glUniform1fv(shader->Uniform("g_shadowRanges"), NUM_SHADOW_MAPS, &m_shadowRange[1]);
 
@@ -591,7 +584,7 @@ void Graphics::DeferredRenderLighting(Shader *shader)
 	shader->SetMat4("InvViewMat", m_camera->GetInverseViewMat());
 
 	RenderToQuad();
-	m_GBuffer.Unbind();
+	m_deferredBuffer.Unbind();
 	m_shadowMaps[0].Unbind();
 	m_shadowMaps[1].Unbind();
 	m_shadowMaps[2].Unbind();
@@ -602,17 +595,20 @@ void Graphics::DeferredRenderLighting(Shader *shader)
 
 void Graphics::DeferredRenderModel(Shader *shader, const string &name, const glm::mat4 &modelMat)
 {
-	Model * model = m_modelMap["arissa"];
 	shader->Use();
 
-	shader->SetMat4("model", modelMat);
-	shader->SetMat4("projection", m_camera->GetProj());
-	shader->SetMat4("view", m_camera->GetViewMat());
+	//Model * model = m_modelMap["arissa"];
+	//shader->SetMat4("model", modelMat);
+	//shader->SetMat4("projection", m_camera->GetProj());
+	//shader->SetMat4("view", m_camera->GetViewMat());
 
-	model->Draw(shader);
+	//model->Draw(shader);
 
 	//draw sphere
-	glm::mat4 sphereMat = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(1000.0f, 4000.f, 10000.0f)), glm::vec3(5000.0f));
+	Material *ironMat = m_materialMap["iron"];
+	ironMat->BindMaterial(0);
+
+	glm::mat4 sphereMat = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(1000.0f, 40000.f, 10000.0f)), glm::vec3(5000.0f));
 	shader->SetMat4("model", sphereMat);
 	m_modelMap["sphere"]->DrawVertices();
 }

@@ -151,6 +151,7 @@
     <None Include="packages.config" />
     <None Include="Resources\config.json" />
     <None Include="Resources\entity.json" />
+    <None Include="Resources\material.json" />
     <None Include="Resources\models\models.json" />
     <None Include="Resources\resources.json" />
     <None Include="Resources\sound.json" />
@@ -181,6 +182,8 @@
     <None Include="Shaders\object_vs.glsl" />
     <None Include="Shaders\Ocean\oceanFFT_vs.glsl" />
     <None Include="Shaders\Ocean\oceanFFT_fs.glsl" />
+    <None Include="Shaders\deferredPBR_fs.glsl" />
+    <None Include="Shaders\deferredPBR_vs.glsl" />
     <None Include="Shaders\quad_fs.glsl" />
     <None Include="Shaders\quad_vs.glsl" />
     <None Include="Shaders\Scattering\add_delta_e.compute.glsl" />
@@ -212,6 +215,7 @@
     <ClInclude Include="source\atmosphere.hpp" />
     <ClInclude Include="source\camera.hpp" />
     <ClInclude Include="source\chunk.hpp" />
+    <ClInclude Include="source\material.hpp" />
     <ClInclude Include="source\weather.hpp" />
     <ClInclude Include="source\density.hpp" />
     <ClInclude Include="source\entity.hpp" />
@@ -264,6 +268,7 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="source\material.cpp" />
     <ClCompile Include="source\weather.cpp" />
     <ClCompile Include="source\density.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotSet</EnableEnhancedInstructionSet>

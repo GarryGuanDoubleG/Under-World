@@ -51,6 +51,10 @@
     "vs": "Shaders/Deferred/SSAO_vs.glsl",
     "fs": "Shaders/Deferred/SSAO_blur_fs.glsl"
   },
+  "deferredPBR": {
+    "vs": "Shaders/deferredPBR_vs.glsl",
+    "fs": "Shaders/deferredPBR_fs.glsl"
+  },
   "deferred": {
     "vs": "Shaders/deferred_vs.glsl",
     "fs": "Shaders/deferred_fs.glsl"
