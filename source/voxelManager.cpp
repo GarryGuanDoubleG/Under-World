@@ -9,7 +9,7 @@ void VoxelManager::Init()
 {
 	m_voxelSize = 1024;
 	m_renderRange = 3;
-	m_chunkSize = 32;
+	m_chunkSize = 16;
 	 
 	std::cout << "Voxel Init\n";
 	float time = g_game->GetElapsedTime();
@@ -138,23 +138,23 @@ void VoxelManager::GenerateChunksInRange()
 
 void VoxelManager::Update()
 {
-	const glm::ivec3 playerChunkIndex = glm::vec3(1, 0, 1) *g_game->GetPlayerPosition() / (float)m_voxelSize / (float)m_chunkSize;
-	if (m_playerPos != playerChunkIndex)
-	{
-		m_playerPos = playerChunkIndex;
-		//#pragma omp concurrent
-		GenerateChunksInRange();
-	}
+	//const glm::ivec3 playerChunkIndex = glm::vec3(1, 0, 1) *g_game->GetPlayerPosition() / (float)m_voxelSize / (float)m_chunkSize;
+	//if (m_playerPos != playerChunkIndex)
+	//{
+	//	m_playerPos = playerChunkIndex;
+	//	//#pragma omp concurrent
+	//	GenerateChunksInRange();
+	//}
 
-	if (m_newChunks.size() != 0)
-	{
-		for (auto &chunk : m_newChunks) 
-		{
-			chunk->BindMesh();
-			m_renderList.push_back(chunk);
-		}
-		m_newChunks.clear();
-	}
+	//if (m_newChunks.size() != 0)
+	//{
+	//	for (auto &chunk : m_newChunks) 
+	//	{
+	//		chunk->BindMesh();
+	//		m_renderList.push_back(chunk);
+	//	}
+	//	m_newChunks.clear();
+	//}
 }
 
 void VoxelManager::Render()

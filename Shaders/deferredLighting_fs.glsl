@@ -91,6 +91,7 @@ float GeometrySchlickGGX(float NdotV, float roughness)
 
     return nom / denom;
 }
+
 // ----------------------------------------------------------------------------
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 {
@@ -101,12 +102,14 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 
     return ggx1 * ggx2;
 }
+
 // ----------------------------------------------------------------------------
 vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
-float CascadeShadows(vec3 FragPos, vec3 viewPos, vec3 normal)
+
+float CascadeShadows(vec3 FragPos, vec3 normal)
 {
 	float shadow;
 	float depth = distance(FragPos, viewPos);
@@ -116,7 +119,7 @@ float CascadeShadows(vec3 FragPos, vec3 viewPos, vec3 normal)
 	{
 		if(depth <= g_shadowRanges[i])
 		{
-			vec4 FragPosLightSpace = g_lightSpaceMatrix[i] * InvViewMat * vec4(FragPos, 1.0f);
+			vec4 FragPosLightSpace = g_lightSpaceMatrix[i] * vec4(FragPos, 1.0f);
 			shadow = ShadowCalculation(i, FragPosLightSpace, normal);
 			texID = i;
 			break;
@@ -129,31 +132,65 @@ float CascadeShadows(vec3 FragPos, vec3 viewPos, vec3 normal)
 vec3 CalculateLighting(vec3 viewDir, vec3 normal, vec3 albedo, float roughness, float metallic)
 {
 	vec3 lightDir = -normalize(sunDir);
-	vec3 radiance = 5.0f * vec3(1.0f); // light color
+	vec3 radiance = vec3(35.0f); // light color
 	vec3 halfVec = normalize(lightDir + viewDir);
-	vec3 Lo = vec3(0.0f);//color with correction
 
-	 // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
-    // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
-    vec3 F0 = vec3(0.04); 
+	vec3 N = normal;
+	vec3 H = halfVec;
+	vec3 V = viewDir;
+	vec3 L = lightDir;
+
+	vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo, metallic);
 
-	float NDF = DistributionGGX(normal, halfVec, roughness);
-	float G = GeometrySmith(normal, viewDir, lightDir, roughness);
-	vec3 F = fresnelSchlick(max(dot(halfVec, viewDir), 0.0), F0);
-	
-	vec3 kS = F;
-	vec3 kD = vec3(1.0) - kS;
-	kD *= 1.0 - metallic;
+    // reflectance equation
+    vec3 Lo = vec3(0.0);
+	// calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
+    // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
+	// Cook-Torrance BRDF
+    float NDF = DistributionGGX(N, H, roughness);   
+    float G   = GeometrySmith(N, V, L, roughness);      
+    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
+           
+    vec3 nominator    = NDF * G * F; 
+    float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001; // 0.001 to prevent divide by zero.
+    vec3 specular = nominator / denominator;
+        
+    // kS is equal to Fresnel
+    vec3 kS = F;
+    // for energy conservation, the diffuse and specular light can't
+    // be above 1.0 (unless the surface emits light); to preserve this
+    // relationship the diffuse component (kD) should equal 1.0 - kS.
+    vec3 kD = vec3(1.0) - kS;
+    // multiply kD by the inverse metalness such that only non-metals 
+    // have diffuse lighting, or a linear blend if partly metal (pure metals
+    // have no diffuse light).
+    kD *= 1.0 - metallic;	  
 
-	vec3 nominator = NDF * G * F;
-	float denominator = 4.0 * max(dot(normal, viewDir), 0.0) * max(dot(normal, lightDir), 0.0) + 0.001;
-	vec3 specular = nominator / denominator;
+    // scale light by NdotL
+    float NdotL = max(dot(N, L), 0.0);        
 
-	float NdotL = max(dot(normal, lightDir), 0.0);
-	Lo += (kD * albedo / M_PI + specular) * radiance * NdotL;
+    // add to outgoing radiance Lo
+    Lo += (kD * albedo / M_PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 
 	return Lo;
+}
+
+vec3 PhongLighting(vec3 albedo, vec3 normal, vec3 viewDir, vec3 ao, float shadow)
+{
+		// diffuse lighting
+    vec3 lighting  = albedo * .3f * ao; // hard-coded ambient component
+	//vec3 viewDir = normalize(-FragPos);
+	vec3 lightDir = -sunDir;
+	vec3 diffuse = max(dot(normal, lightDir), 0.0) * albedo;
+	
+    // specular
+    vec3 halfwayDir = normalize(lightDir + viewDir);  
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), 16.0);
+    vec3 specular = vec3(1.0f) * spec * .75f;
+
+    lighting += (1.0f - shadow) * (diffuse + specular); 
+	return lighting;
 }
 
 //pbr lighting using Cook-Torrance BRDF
@@ -161,6 +198,7 @@ void main()
 {             
     // retrieve data from gbuffer
     vec3 FragPos = texture(gPosition, UV).rgb;
+	FragPos = (InvViewMat * vec4(FragPos, 1.0f)).rgb;
 	if(distance(FragPos, viewPos) > VIEW_DISTANCE)
 	{
 		FragColor = vec4(0,0,0,1.0f);
@@ -168,18 +206,16 @@ void main()
 	}
 
     vec3 albedo = pow(texture(gAlbedoSpec, UV).rgb, vec3(2.2));
-	vec3 normal = normalize(texture(gNormal, UV).rgb);
+	vec3 normal = texture(gNormal, UV).rgb;
 	float roughness = texture(gRoughness, UV).r;
 	float metallic = texture(gMetallic, UV).r;
     float ao = texture(gSSAO, UV).r;
-
 
 	vec3 viewDir = normalize(viewPos - FragPos);
 	//vec3 viewDir = normalize(viewPos - vec3(InvViewMat * vec4(FragPos, 1.0f)));
 
 	//calculate shadows
-	float shadow = CascadeShadows(FragPos, viewPos, normal);
-	shadow = min(shadow, 0.0f);
+	float shadow = CascadeShadows(FragPos, normal);
 	//float shadow = 0;
 	//physically based rendering
 	vec3 Lo = CalculateLighting(viewDir, normal, albedo, roughness, metallic);

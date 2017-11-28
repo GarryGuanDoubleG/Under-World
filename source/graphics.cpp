@@ -561,8 +561,8 @@ void Graphics::DeferredShadowMap(Shader *shader)
 		shader->SetMat4("model", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 300.f, 0.0f)));
 		m_modelMap["arissa"]->DrawVertices();
 
-		glm::mat4 sphereMat = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(1000.0f, 4000.f, 10000.0f)), glm::vec3(10.0));
-		shader->SetMat4("model", sphereMat);
+		glm::mat4 sphereMatrix = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(1000, 4000, 1000)), glm::vec3(10.0));
+		shader->SetMat4("model", sphereMatrix);
 		m_modelMap["sphere"]->DrawVertices();
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -587,6 +587,8 @@ void Graphics::DeferredRenderLighting(Shader *shader)
 
 	shader->SetUniform3fv("sunDir", m_skydome->m_sunDirection);
 	shader->SetMat4("InvViewMat", m_camera->GetInverseViewMat());
+	shader->SetUniform3fv("viewPos", m_camera->m_pos);
+
 
 	RenderToQuad();
 	m_deferredBuffer.Unbind();
@@ -613,7 +615,7 @@ void Graphics::DeferredRenderModel(Shader *shader, const string &name, const glm
 	Material *ironMat = m_materialMap["iron"];
 	ironMat->BindMaterial(shader, 0);
 
-	glm::mat4 sphereMatrix = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(1000.0f, 4000.f, 10000.0f)), glm::vec3(1000.0));
+	glm::mat4 sphereMatrix = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(1000, 4000, 1000)), glm::vec3(10.0));
 	shader->SetMat4("model", sphereMatrix);
 	m_modelMap["sphere"]->DrawVertices();
 }
@@ -632,7 +634,7 @@ void Graphics::DeferredRenderVoxels(Shader *shader)
 	m_textureMap["grass"]->Bind(shader->Uniform("voxelTexture[0]"), 5);
 	//m_textureMap["brick"]->Bind(shader->Uniform("voxelTexture[1]"), 6);
 
-	Material * brickMat = m_materialMap["brick"];
+	Material * brickMat = m_materialMap["iron"];
 	brickMat->m_albedo.Bind(shader->Uniform("voxelTexture[1]"), 6);
 	brickMat->m_normal.Bind(shader->Uniform("normalMap[1]"),  maxTextures + 1);
 	brickMat->m_metallic.Bind(shader->Uniform("metallicTexture[1]"), 2 * maxTextures + 1);
@@ -797,12 +799,12 @@ void Graphics::RenderVoxels()
 	glUniform3fv(shader->Uniform("lightColor"), 1, &light_color[0]);
 	glUniform3fv(shader->Uniform("lightDirection"), 1, &light_dir[0]);
 
-	m_textureMap["grass"]->Bind(shader->Uniform("voxelTexture[3]"), 3);
-	m_textureMap["brick"]->Bind(shader->Uniform("voxelTexture[4]"), 4);
+	m_textureMap["grass"]->Bind(shader->Uniform("voxelTexture[0]"), 3);
+	m_textureMap["brick"]->Bind(shader->Uniform("voxelTexture[1]"), 4);
 
 	//max 15 normal maps
-	m_textureMap["grassNormal"]->Bind(shader->Uniform("normalMap[" + std::to_string(maxTextures) + "]"), maxTextures);
-	m_textureMap["brickNormal"]->Bind(shader->Uniform("normalMap[" + std::to_string(maxTextures + 1) + "]"), maxTextures + 1);
+	m_textureMap["grassNormal"]->Bind(shader->Uniform("normalMap[0]"), maxTextures);
+	m_textureMap["brickNormal"]->Bind(shader->Uniform("normalMap[1]"), maxTextures + 1);
 
 	
 	//m_textureMap["brickHeight"]->Bind(6);

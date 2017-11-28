@@ -6,6 +6,7 @@ layout (location = 3) in vec3 tangent;
 
 out vec2 UV;
 out vec3 FragPos;
+out vec3 Normal;
 out mat3 TBN;
 
 //uniforms
@@ -18,12 +19,13 @@ void main(void)
 {
 	vec4 worldPos  = model * vec4(verts, 1.0f);
 
-	FragPos = vec3(worldPos);//fragment position in view space for ssao
+	FragPos = vec3(view * worldPos);//fragment position in view space for ssao
 	UV = verts_UV;
+	Normal = normal;
 
-	
-	vec3 T = normalize(vec3(model * vec4(tangent, 0.0)));
-	vec3 N = normalize(vec3(model * vec4(normal, 0.0)));
+	mat3 normalMat = transpose(inverse(mat3(model)));
+	vec3 T = normalize(vec3(normalMat * tangent));
+	vec3 N = normalize(vec3(normalMat * normal));
 	vec3 B = cross(N, T);
 
 	// re-orthogonalize T with respect to N

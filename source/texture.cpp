@@ -62,6 +62,7 @@ void Texture::LoadTexture(string filepath)
 	if(!texture)
 	{
 		cout << "Could not load image " << filepath << endl;
+		cout << IMG_GetError() << endl;
 		return;
 	}
 
