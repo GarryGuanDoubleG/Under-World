@@ -499,11 +499,11 @@ DeferredBuffer Graphics::DeferredRenderScene()
 	glBlitFramebuffer(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	//Shader *quad = m_shaderMap["quad"];
-	//quad->Use();
-	//m_textureMap["scene"]->Bind(0);
-	////m_shadowMaps[0].Bind(0);
-	//RenderToQuad();
+	Shader *quad = m_shaderMap["quad"];
+	quad->Use();
+	//m_deferredBuffer.Normal.Bind(quad->Uniform("tex"), 0);
+	m_textureMap["scene"]->Bind(quad->Uniform("tex"), 0);
+	RenderToQuad();
 
 	return m_deferredBuffer;
 }
@@ -561,7 +561,7 @@ void Graphics::DeferredShadowMap(Shader *shader)
 		shader->SetMat4("model", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 300.f, 0.0f)));
 		m_modelMap["arissa"]->DrawVertices();
 
-		glm::mat4 sphereMat = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(1000.0f, 4000.f, 10000.0f)), glm::vec3(5000.0f));
+		glm::mat4 sphereMat = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(1000.0f, 4000.f, 10000.0f)), glm::vec3(10.0));
 		shader->SetMat4("model", sphereMat);
 		m_modelMap["sphere"]->DrawVertices();
 	}
@@ -604,8 +604,8 @@ void Graphics::DeferredRenderModel(Shader *shader, const string &name, const glm
 
 	//Model * model = m_modelMap["arissa"];
 	//shader->SetMat4("model", modelMat);
-	//shader->SetMat4("projection", m_camera->GetProj());
-	//shader->SetMat4("view", m_camera->GetViewMat());
+	shader->SetMat4("projection", m_camera->GetProj());
+	shader->SetMat4("view", m_camera->GetViewMat());
 
 	//model->Draw(shader);
 
@@ -613,8 +613,8 @@ void Graphics::DeferredRenderModel(Shader *shader, const string &name, const glm
 	Material *ironMat = m_materialMap["iron"];
 	ironMat->BindMaterial(shader, 0);
 
-	glm::mat4 sphereMat = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(1000.0f, 40000.f, 10000.0f)), glm::vec3(5000.0f));
-	shader->SetMat4("model", sphereMat);
+	glm::mat4 sphereMatrix = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(1000.0f, 4000.f, 10000.0f)), glm::vec3(1000.0));
+	shader->SetMat4("model", sphereMatrix);
 	m_modelMap["sphere"]->DrawVertices();
 }
 
@@ -629,12 +629,18 @@ void Graphics::DeferredRenderVoxels(Shader *shader)
 	shader->SetMat4("view", m_camera->GetViewMat());
 
 	//max 15 diffuse textures
-	m_textureMap["grass"]->Bind(shader->Uniform("voxelTexture[3]"), 3);
-	m_textureMap["brick"]->Bind(shader->Uniform("voxelTexture[4]"), 4);
+	m_textureMap["grass"]->Bind(shader->Uniform("voxelTexture[0]"), 5);
+	//m_textureMap["brick"]->Bind(shader->Uniform("voxelTexture[1]"), 6);
+
+	Material * brickMat = m_materialMap["brick"];
+	brickMat->m_albedo.Bind(shader->Uniform("voxelTexture[1]"), 6);
+	brickMat->m_normal.Bind(shader->Uniform("normalMap[1]"),  maxTextures + 1);
+	brickMat->m_metallic.Bind(shader->Uniform("metallicTexture[1]"), 2 * maxTextures + 1);
+	brickMat->m_roughness.Bind(shader->Uniform("roughnessTexture[1]"), 3 * maxTextures + 1);
 
 	//max 15 normal maps
 	m_textureMap["grassNormal"]->Bind(shader->Uniform("normalMap[0]"), maxTextures);
-	m_textureMap["brickNormal"]->Bind(shader->Uniform("normalMap[1]"), maxTextures + 1);
+	//m_textureMap["brickNormal"]->Bind(shader->Uniform("normalMap[1]"), maxTextures + 1);
 
 
 	//GLint samplers[] = { 3, 4 };
@@ -645,8 +651,9 @@ void Graphics::DeferredRenderVoxels(Shader *shader)
 
 	g_game->m_voxelManager->Render();
 
-	m_textureMap["brick"]->Unbind();
-	m_textureMap["brickNormal"]->Unbind();
+	brickMat->Unbind();
+	/*m_textureMap["brick"]->Unbind();
+	m_textureMap["brickNormal"]->Unbind();*/
 
 	m_textureMap["grass"]->Unbind();
 	m_textureMap["grassNormal"]->Unbind();

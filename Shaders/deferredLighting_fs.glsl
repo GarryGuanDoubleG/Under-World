@@ -67,46 +67,45 @@ float ShadowCalculation(int cascadeIndex, vec4 FragPosLightSpace, vec3 normal)
 	return shadow;
 }
 
-vec3 fresnelSchlick(float cosTheta, vec3 F0)
-{
-	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
-}
-
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
-	float a = roughness * roughness;
-	float a2 = a * a;
-	float NdotH = max(dot(H, H), 0.0);
-	float NdotH2 = NdotH * NdotH;
+    float a = roughness*roughness;
+    float a2 = a*a;
+    float NdotH = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH*NdotH;
 
-	float nom = a2;
-	float demon = (NdotH2 * (a2 - 1.0) + 1.0);
-	demon = M_PI * demon * demon;
+    float nom   = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = M_PI * denom * denom;
 
-	return nom / demon;
+    return nom / denom;
 }
-
+// ----------------------------------------------------------------------------
 float GeometrySchlickGGX(float NdotV, float roughness)
 {
-	float r = (roughness + 1.0);
-	float k = (r * r) / 8.0;
+    float r = (roughness + 1.0);
+    float k = (r*r) / 8.0;
 
-	float nom = NdotV;
-	float demon = NdotV * (1.0 - k) + k;
+    float nom   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
 
-	return nom / demon;
+    return nom / denom;
 }
-
+// ----------------------------------------------------------------------------
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 {
-	float NdotV = max(dot(N, V), 0.0);
-	float NdotL = max(dot(N, L), 0.0);
-	float ggx2 = GeometrySchlickGGX(NdotV, roughness);
-	float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
 
-	return ggx1 * ggx2;
+    return ggx1 * ggx2;
 }
-
+// ----------------------------------------------------------------------------
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
 float CascadeShadows(vec3 FragPos, vec3 viewPos, vec3 normal)
 {
 	float shadow;
@@ -129,8 +128,8 @@ float CascadeShadows(vec3 FragPos, vec3 viewPos, vec3 normal)
 
 vec3 CalculateLighting(vec3 viewDir, vec3 normal, vec3 albedo, float roughness, float metallic)
 {
-	vec3 lightDir = -sunDir;
-	vec3 radiance = vec3(1.0f); // light color
+	vec3 lightDir = -normalize(sunDir);
+	vec3 radiance = 5.0f * vec3(1.0f); // light color
 	vec3 halfVec = normalize(lightDir + viewDir);
 	vec3 Lo = vec3(0.0f);//color with correction
 
@@ -138,7 +137,6 @@ vec3 CalculateLighting(vec3 viewDir, vec3 normal, vec3 albedo, float roughness, 
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
     vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo, metallic);
-
 
 	float NDF = DistributionGGX(normal, halfVec, roughness);
 	float G = GeometrySmith(normal, viewDir, lightDir, roughness);
@@ -149,8 +147,8 @@ vec3 CalculateLighting(vec3 viewDir, vec3 normal, vec3 albedo, float roughness, 
 	kD *= 1.0 - metallic;
 
 	vec3 nominator = NDF * G * F;
-	float denominator = 4.0 * max(dot(normal, viewDir), 0.0) * max(dot(normal, lightDir), 0.0);
-	vec3 specular = nominator / max(denominator, 0.001);
+	float denominator = 4.0 * max(dot(normal, viewDir), 0.0) * max(dot(normal, lightDir), 0.0) + 0.001;
+	vec3 specular = nominator / denominator;
 
 	float NdotL = max(dot(normal, lightDir), 0.0);
 	Lo += (kD * albedo / M_PI + specular) * radiance * NdotL;
@@ -169,25 +167,31 @@ void main()
 		return;
 	}
 
-    vec3 normal = normalize(texture(gNormal, UV).rgb);
-    vec3 albedo = texture(gAlbedoSpec, UV).rgb;
+    vec3 albedo = pow(texture(gAlbedoSpec, UV).rgb, vec3(2.2));
+	vec3 normal = normalize(texture(gNormal, UV).rgb);
 	float roughness = texture(gRoughness, UV).r;
 	float metallic = texture(gMetallic, UV).r;
     float ao = texture(gSSAO, UV).r;
-	vec3 viewDir = normalize(-FragPos);
+
+
+	vec3 viewDir = normalize(viewPos - FragPos);
+	//vec3 viewDir = normalize(viewPos - vec3(InvViewMat * vec4(FragPos, 1.0f)));
 
 	//calculate shadows
 	float shadow = CascadeShadows(FragPos, viewPos, normal);
-	
+	shadow = min(shadow, 0.0f);
+	//float shadow = 0;
 	//physically based rendering
 	vec3 Lo = CalculateLighting(viewDir, normal, albedo, roughness, metallic);
 
 	//ambient component
 	vec3 ambient = vec3(0.03) * albedo * ao;
+	//vec3 ambient = vec3(0.2) * albedo;
 
-	//gamma correction with shadowing
 	vec3 color = ambient + (1.0 - shadow) * Lo;
+	 ////HDR tonemapM_PIng
 	color = color / (color + vec3(1.0));
+	//gamma correction with shadowing
 	color = pow(color, vec3(1.0 / 2.2));
 
 	FragColor = vec4(color, 1.0);

@@ -4,5 +4,11 @@
     "normal": "Resources\\materials\\iron\\normal.png",
     "metallic": "Resources\\materials\\iron\\metallic.png",
     "roughness": "Resources\\materials\\iron\\roughness.png"
+  },
+  "brick": {
+    "albedo": "Resources\\materials\\brick\\albedo.png",
+    "normal": "Resources\\materials\\brick\\normal.png",
+    "metallic": "Resources\\materials\\brick\\metallic.png",
+    "roughness": "Resources\\materials\\brick\\roughness.png"
   }
 }

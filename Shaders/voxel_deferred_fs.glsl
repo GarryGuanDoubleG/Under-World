@@ -18,6 +18,8 @@ in VS_OUT
 	flat int texID;
 }fs_in;
 
+
+
 void main()
 {    
 	int index = int(fs_in.texID);
@@ -36,9 +38,12 @@ void main()
     // and the diffuse per-fragment color
     gAlbedoSpec.rgb = GetTriPlanarTex(fs_in.WorldFragPos, blending, scale, index).rgb;
 
+    //// store specular intensity in gAlbedoSpec's alpha component
+    gAlbedoSpec.a = .75f;
+
 	//metallic
-	outMetallic = 1.0f;
+	outMetallic = GetTriPlanarMetallic(fs_in.WorldFragPos, blending, scale, index);
 
 	//roughness
-	outRoughness = 0.0f;
+	outRoughness = GetTriPlanarRoughness(fs_in.WorldFragPos, blending, scale, index);
 }

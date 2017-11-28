@@ -5,6 +5,9 @@
 
 uniform sampler2D voxelTexture[MAX_TEXTURES];
 uniform sampler2D normalMap[MAX_TEXTURES];
+uniform sampler2D metallicTexture[MAX_TEXTURES];
+uniform sampler2D roughnessTexture[MAX_TEXTURES];
+
 
 vec3 getTriPlanarBlend(vec3 _wNorm){
 	// in wNorm is the world-space normal of the fragment
@@ -20,6 +23,24 @@ vec3 GetTriPlanarTex(vec3 FragPos, vec3 blending, float scale, int index)
 	vec3 xaxis = texture2D( voxelTexture[STONE], FragPos.yz * scale).rgb;
 	vec3 yaxis = texture2D( voxelTexture[STONE], FragPos.xz * scale).rgb;
 	vec3 zaxis = texture2D( voxelTexture[STONE], FragPos.xy * scale).rgb;
+
+	return xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
+}
+
+float GetTriPlanarMetallic(vec3 FragPos, vec3 blending, float scale, int index)
+{
+	float xaxis = texture2D( metallicTexture[STONE], FragPos.yz * scale).r;
+	float yaxis = texture2D( metallicTexture[STONE], FragPos.xz * scale).r;
+	float zaxis = texture2D( metallicTexture[STONE], FragPos.xy * scale).r;
+
+	return xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
+}
+
+float GetTriPlanarRoughness(vec3 FragPos, vec3 blending, float scale, int index)
+{
+	float xaxis = texture2D( roughnessTexture[STONE], FragPos.yz * scale).r;
+	float yaxis = texture2D( roughnessTexture[STONE], FragPos.xz * scale).r;
+	float zaxis = texture2D( roughnessTexture[STONE], FragPos.xy * scale).r;
 
 	return xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
 }

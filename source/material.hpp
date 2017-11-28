@@ -13,5 +13,7 @@ public:
 	~Material();
 
 	void BindMaterial(Shader *shader, GLuint activeTex);
+
+	void Unbind();
 	
 };

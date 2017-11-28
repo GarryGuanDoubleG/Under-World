@@ -98,7 +98,7 @@ bool is_skybox(vec3 fragPos)
 //A remapping function, that maps values from one range to another, to be used when combining noises to make our clouds
 float Remap(float original_value, float original_min, float original_max, float new_min, float new_max)
 {
-	return new_min + (((original_value - original_min) / (original_max - original_min)) * (new_max - new_min));
+	return new_min + ((original_value - original_min) / ((original_max - original_min) * (new_max - new_min) + 0.0001));
 }
 	
 //Our density height function. It is called three times, as we have three gradients for the three major cloud types. It gives us a float, representing the gradient.
@@ -437,7 +437,7 @@ void main()
 			density = SampleCloudDensity(ray, coverage, atmosphereY);
 			vec4 particle = vec4(density);
 			
-			if(density > 0.0)
+			if(density > 0.0001)
 			{
 				//result.rgb = vec3(density) + vec3(1000.f);
 				zeroAccumulator = 0;

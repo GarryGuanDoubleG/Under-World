@@ -6,31 +6,30 @@ layout (location = 3) in vec3 tangent;
 
 out vec2 UV;
 out vec3 FragPos;
-out vec3 Normal;
-
+out mat3 TBN;
 
 //uniforms
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-uniform sampler2D normalMap;
 
 void main(void)
 {
 	vec4 worldPos  = model * vec4(verts, 1.0f);
 
-	FragPos = vec3(view * worldPos);//fragment position in view space for ssao
+	FragPos = vec3(worldPos);//fragment position in view space for ssao
 	UV = verts_UV;
+
 	
-	mat3 normalMat = transpose(inverse(mat3(model)));
-	vec3 T = normalize(normalMat * tangent);
-	vec3 N = normalize(normalMat * normal);
+	vec3 T = normalize(vec3(model * vec4(tangent, 0.0)));
+	vec3 N = normalize(vec3(model * vec4(normal, 0.0)));
 	vec3 B = cross(N, T);
 
-	mat3 TBN = transpose(mat3(T, B, B));
-	Normal = normalize(texture(normalMap, verts_UV).rgb * 2.0 - 1.0);
-	Normal = normalize(TBN * Normal);
+	// re-orthogonalize T with respect to N
+	T = normalize(T - dot(T, N) * N);
+
+	TBN = mat3(T, B, N);
 
 	gl_Position = projection * view * worldPos;
 }

@@ -23,3 +23,11 @@ void Material::BindMaterial(Shader * shader, GLuint activeTex)
 	m_metallic.Bind(shader->Uniform("metallic"), activeTex + 2);
 	m_roughness.Bind(shader->Uniform("roughness"), activeTex + 3);
 }
+
+void Material::Unbind()
+{
+	m_albedo.Unbind();
+	m_normal.Unbind();
+	m_metallic.Unbind();
+	m_roughness.Unbind();
+}
