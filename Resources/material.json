@@ -1,6 +1,7 @@
 {
   "iron": {
     "albedo": "Resources\\materials\\iron\\albedo.png",
+    "ao": "Resources\\materials\\iron\\ao.png",
     "normal": "Resources\\materials\\iron\\normal.png",
     "metallic": "Resources\\materials\\iron\\metallic.png",
     "roughness": "Resources\\materials\\iron\\roughness.png"
@@ -10,5 +11,18 @@
     "normal": "Resources\\materials\\brick\\normal.png",
     "metallic": "Resources\\materials\\brick\\metallic.png",
     "roughness": "Resources\\materials\\brick\\roughness.png"
+  },
+  "floor": {
+    "albedo": "Resources\\materials\\floor\\albedo.png",
+    "normal": "Resources\\materials\\floor\\normal.png",
+    "metallic": "Resources\\materials\\floor\\metallic.png",
+    "roughness": "Resources\\materials\\floor\\roughness.png"
+  },
+  "grass": {
+    "ao": "Resources\\materials\\grass\\ao.png",
+    "albedo": "Resources\\materials\\grass\\albedo.png",
+    "normal": "Resources\\materials\\grass\\normal.png",
+    "metallic": "Resources\\materials\\grass\\metallic.png",
+    "roughness": "Resources\\materials\\grass\\roughness.png"
   }
 }

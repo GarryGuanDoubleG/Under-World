@@ -95,7 +95,7 @@ bool intersect_atmosphere(vec3 cam_pos, vec3 d, out float offset, out float max_
 vec3 worldspace_to_atmosphere(vec3 pos) {
   //pos.z += GET_SETTING(scattering, atmosphere_start);
   pos.y += 100;//atmosphere start
-  pos /= 1000.0;
+  pos /= Rg;
   pos.y = max(0, pos.y);
   pos.y += Rg;
   return pos;

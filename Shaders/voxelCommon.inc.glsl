@@ -4,6 +4,7 @@
 #define DIRT 2
 
 uniform sampler2D voxelTexture[MAX_TEXTURES];
+uniform sampler2D AOTexture[MAX_TEXTURES];
 uniform sampler2D normalMap[MAX_TEXTURES];
 uniform sampler2D metallicTexture[MAX_TEXTURES];
 uniform sampler2D roughnessTexture[MAX_TEXTURES];
@@ -23,6 +24,15 @@ vec3 GetTriPlanarTex(vec3 FragPos, vec3 blending, float scale, int index)
 	vec3 xaxis = texture2D( voxelTexture[STONE], FragPos.yz * scale).rgb;
 	vec3 yaxis = texture2D( voxelTexture[STONE], FragPos.xz * scale).rgb;
 	vec3 zaxis = texture2D( voxelTexture[STONE], FragPos.xy * scale).rgb;
+
+	return xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
+}
+
+float GetTriPlanarAO(vec3 FragPos, vec3 blending, float scale, int index)
+{
+	float xaxis = texture2D( AOTexture[STONE], FragPos.yz * scale).r;
+	float yaxis = texture2D( AOTexture[STONE], FragPos.xz * scale).r;
+	float zaxis = texture2D( AOTexture[STONE], FragPos.xy * scale).r;
 
 	return xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
 }

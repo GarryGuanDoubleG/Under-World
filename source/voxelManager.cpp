@@ -9,7 +9,7 @@ void VoxelManager::Init()
 {
 	m_voxelSize = 1024;
 	m_renderRange = 3;
-	m_chunkSize = 16;
+	m_chunkSize = 32;
 	 
 	std::cout << "Voxel Init\n";
 	float time = g_game->GetElapsedTime();

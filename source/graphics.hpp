@@ -7,6 +7,7 @@ struct DeferredBuffer
 	Texture Position;
 	Texture Normal;
 	Texture AlbedoSpec;
+	Texture AO;
 	Texture Metallic;
 	Texture Roughness;
 
@@ -16,6 +17,7 @@ struct DeferredBuffer
 		Position.CreateTexture2D(width, height, GL_RGB32F, GL_RGB);
 		Normal.CreateTexture2D(width, height, GL_RGB16F, GL_RGB);
 		AlbedoSpec.CreateTexture2D(width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
+		AO.CreateTexture2D(width, height, GL_RED, GL_RGB, GL_FLOAT);
 		Metallic.CreateTexture2D(width, height, GL_RED, GL_RGB, GL_FLOAT);
 		Roughness.CreateTexture2D(width, height, GL_RED, GL_RGB, GL_FLOAT);
 	}
@@ -32,6 +34,7 @@ struct DeferredBuffer
 		Position.Bind(shader->Uniform("gPosition"), activeTex);
 		Normal.Bind(shader->Uniform("gNormal"), activeTex + 1);
 		AlbedoSpec.Bind(shader->Uniform("gAlbedoSpec"), activeTex + 2);
+		AO.Bind(shader->Uniform("gAO"), activeTex + 3);
 		Metallic.Bind(shader->Uniform("gMetallic"), activeTex + 3);
 		Roughness.Bind(shader->Uniform("gRoughness"), activeTex + 4);
 	}

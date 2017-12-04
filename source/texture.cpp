@@ -1,28 +1,24 @@
 #include "game.hpp"
 #include "texture.hpp"
 
-Texture::Texture()
+Texture::Texture() : m_type(Inactive)
 {
-
-
 
 }
 
-Texture::Texture(string filepath)
+Texture::Texture(string filepath) : m_type(Inactive)
 {
 	LoadTexture(filepath);
 }
 
-Texture::Texture(const char * filename, const char * directory)
+Texture::Texture(const char * filename, const char * directory) : m_type(Inactive)
 {
 	std::string name = directory;
 	name += filename;
 }
 
-Texture::Texture(aiTexture * texture)
+Texture::Texture(aiTexture * texture) : m_type(Inactive)
 {
-	m_type = Tex2D;
-
 	if(!texture) return;
 
 	//now generate texture with data
@@ -201,6 +197,8 @@ void Texture::TriFiltering()
 
 void Texture::Bind(GLuint shaderLoc, GLuint activeTex)
 {
+	if (m_type == Inactive) return;
+
 	m_activeTex = activeTex;
 	glActiveTexture(GL_TEXTURE0 + activeTex); // Active proper texture unit before binding
 	glUniform1i(shaderLoc, activeTex);

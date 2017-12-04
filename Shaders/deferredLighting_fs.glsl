@@ -10,6 +10,7 @@ in vec2 UV;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
+uniform sampler2D gAO;
 uniform sampler2D gMetallic;
 uniform sampler2D gRoughness;
 uniform sampler2D gSSAO;
@@ -132,7 +133,7 @@ float CascadeShadows(vec3 FragPos, vec3 normal)
 vec3 CalculateLighting(vec3 viewDir, vec3 normal, vec3 albedo, float roughness, float metallic)
 {
 	vec3 lightDir = -normalize(sunDir);
-	vec3 radiance = vec3(35.0f); // light color
+	vec3 radiance = vec3(10.0f); // light color
 	vec3 halfVec = normalize(lightDir + viewDir);
 
 	vec3 N = normal;
@@ -209,7 +210,7 @@ void main()
 	vec3 normal = texture(gNormal, UV).rgb;
 	float roughness = texture(gRoughness, UV).r;
 	float metallic = texture(gMetallic, UV).r;
-    float ao = texture(gSSAO, UV).r;
+    float ao = texture(gSSAO, UV).r;// + texture(gAO, UV).r;
 
 	vec3 viewDir = normalize(viewPos - FragPos);
 	//vec3 viewDir = normalize(viewPos - vec3(InvViewMat * vec4(FragPos, 1.0f)));

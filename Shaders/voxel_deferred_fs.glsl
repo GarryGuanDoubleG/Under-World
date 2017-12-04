@@ -6,8 +6,9 @@
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec3 gNormal;
 layout (location = 2) out vec4 gAlbedoSpec;
-layout (location = 3) out float outMetallic;
-layout (location = 4) out float outRoughness;
+layout (location = 3) out float outAO;
+layout (location = 4) out float outMetallic;
+layout (location = 5) out float outRoughness;
 
 
 in VS_OUT
@@ -40,6 +41,9 @@ void main()
 
     //// store specular intensity in gAlbedoSpec's alpha component
     gAlbedoSpec.a = .75f;
+
+	//Ambient Occlusion
+	outAO = GetTriPlanarAO(fs_in.WorldFragPos, blending, scale, index);
 
 	//metallic
 	outMetallic = GetTriPlanarMetallic(fs_in.WorldFragPos, blending, scale, index);

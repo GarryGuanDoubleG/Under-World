@@ -110,18 +110,20 @@ map<string, Material*> ResManager::LoadMaterials()
 		Json obj = it.value();
 		string key = it.key();
 		
-		Texture materialTex[4];
+		Texture materialTex[5];
 		 
 		if (obj.find("albedo") != obj.end())
 			materialTex[0] = Texture(obj["albedo"].get<string>());
+		if (obj.find("ao") != obj.end())
+			materialTex[1] = Texture(obj["ao"].get<string>());
 		if (obj.find("normal") != obj.end())
-			materialTex[1] = Texture(obj["normal"].get<string>());
+			materialTex[2] = Texture(obj["normal"].get<string>());
 		if (obj.find("metallic") != obj.end())
-			materialTex[2] = Texture(obj["metallic"].get<string>());
+			materialTex[3] = Texture(obj["metallic"].get<string>());
 		if (obj.find("roughness") != obj.end())
-			materialTex[3] = Texture(obj["roughness"].get<string>());
+			materialTex[4] = Texture(obj["roughness"].get<string>());
 
-		materialMap[key] = new Material(materialTex[0], materialTex[1], materialTex[2], materialTex[3]);
+		materialMap[key] = new Material(materialTex[0], materialTex[1], materialTex[2], materialTex[3], materialTex[4]);
 	}
 
 	in.close();

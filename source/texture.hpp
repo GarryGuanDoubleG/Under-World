@@ -11,7 +11,8 @@ enum TextureType
 	Normal = 6,
 	Metallic = 7,
 	Roughness =8,
-	DepthMap = 9
+	DepthMap = 9,
+	Inactive = 10
 };
 
 class Texture

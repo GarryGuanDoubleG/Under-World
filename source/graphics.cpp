@@ -256,11 +256,12 @@ void Graphics::InitDeferredFBO()
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_deferredBuffer.Position.GetTexID(), 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_deferredBuffer.Normal.GetTexID(), 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_deferredBuffer.AlbedoSpec.GetTexID(), 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_deferredBuffer.Metallic.GetTexID(), 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, m_deferredBuffer.Roughness.GetTexID(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_deferredBuffer.AO.GetTexID(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, m_deferredBuffer.Metallic.GetTexID(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, GL_TEXTURE_2D, m_deferredBuffer.Roughness.GetTexID(), 0);
 
-	unsigned int attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
-	glDrawBuffers(5, attachments);
+	unsigned int attachments[6] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5 };
+	glDrawBuffers(6, attachments);
 
 	//depth map
 	glGenRenderbuffers(1, &m_depthRBO);
@@ -501,7 +502,7 @@ DeferredBuffer Graphics::DeferredRenderScene()
 
 	Shader *quad = m_shaderMap["quad"];
 	quad->Use();
-	//m_deferredBuffer.Normal.Bind(quad->Uniform("tex"), 0);
+	//m_deferredBuffer.AO.Bind(quad->Uniform("tex"), 0);
 	m_textureMap["scene"]->Bind(quad->Uniform("tex"), 0);
 	RenderToQuad();
 
@@ -589,8 +590,10 @@ void Graphics::DeferredRenderLighting(Shader *shader)
 	shader->SetMat4("InvViewMat", m_camera->GetInverseViewMat());
 	shader->SetUniform3fv("viewPos", m_camera->m_pos);
 
-
+	//render to quad
 	RenderToQuad();
+
+	//unbind active textures
 	m_deferredBuffer.Unbind();
 	m_shadowMaps[0].Unbind();
 	m_shadowMaps[1].Unbind();
@@ -634,8 +637,9 @@ void Graphics::DeferredRenderVoxels(Shader *shader)
 	m_textureMap["grass"]->Bind(shader->Uniform("voxelTexture[0]"), 5);
 	//m_textureMap["brick"]->Bind(shader->Uniform("voxelTexture[1]"), 6);
 
-	Material * brickMat = m_materialMap["iron"];
+	Material * brickMat = m_materialMap["grass"];
 	brickMat->m_albedo.Bind(shader->Uniform("voxelTexture[1]"), 6);
+	brickMat->m_ao.Bind(shader->Uniform("AOTexture[1]"), 7);
 	brickMat->m_normal.Bind(shader->Uniform("normalMap[1]"),  maxTextures + 1);
 	brickMat->m_metallic.Bind(shader->Uniform("metallicTexture[1]"), 2 * maxTextures + 1);
 	brickMat->m_roughness.Bind(shader->Uniform("roughnessTexture[1]"), 3 * maxTextures + 1);
