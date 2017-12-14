@@ -26,7 +26,7 @@ void main()
 	int index = int(fs_in.texID);
 	
 	//calculate texture value at this fragment
-	float scale = .00016f;
+	float scale = .000016f;
 
 	vec3 blending = getTriPlanarBlend(fs_in.normal);
 

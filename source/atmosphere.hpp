@@ -13,9 +13,24 @@ class Atmosphere
 	GLuint quadVao;
 	GLuint m_FBO;
 	Texture m_outputTex;
+
+	//imgui values
+	//uniform shader values
+	float m_HR;
+	glm::vec3 m_betaR;
+	
+	//mie factors
+	float m_HM;
+	glm::vec3 m_betaMSca;
+	float m_mieG;
+public:
+
+	bool m_showImGUI;
 public:
 	Atmosphere();
 	Atmosphere(GLuint quadVao);
+
+	void SetUniforms(Shader *shader);
 
 	void Precompute();
 	void PrecomputeTransmittance();
@@ -29,6 +44,8 @@ public:
 	void AddDeltas(Texture & deltaE, Texture & deltaSR);
 
 	void RenderToQuad();
+	void RenderImGUI();
+	void BindScatteringTextures(Shader * shader);
 	Texture Render(DeferredBuffer & gbuffer, Texture *scene);
 private:
 

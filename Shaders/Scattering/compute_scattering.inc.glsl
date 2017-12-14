@@ -224,8 +224,6 @@ vec3 get_inscattered_light(vec3 surface_pos, vec3 view_dir, inout vec3 attenuati
   return inscattered_light;
 }
 
-
-
 vec3 DoScattering(vec3 surface_pos, vec3 view_dir, out float sky_clip)
 {
   vec3 attenuation = vec3(0);

@@ -15,6 +15,8 @@ uniform sampler2D gMetallic;
 uniform sampler2D gRoughness;
 uniform sampler2D gSSAO;
 
+uniform samplerCube globalIrradianceMap;
+
 //shadow map info
 uniform sampler2D g_shadowMap[NUM_SHADOW_MAPS];
 uniform float g_shadowRanges[NUM_SHADOW_MAPS];
@@ -104,10 +106,15 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     return ggx1 * ggx2;
 }
 
-// ----------------------------------------------------------------------------
 vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
-    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+// ----------------------------------------------------------------------------
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
 float CascadeShadows(vec3 FragPos, vec3 normal)
@@ -130,7 +137,7 @@ float CascadeShadows(vec3 FragPos, vec3 normal)
 	return shadow;
 }
 
-vec3 CalculateLighting(vec3 viewDir, vec3 normal, vec3 albedo, float roughness, float metallic)
+vec3 CalculateLighting(vec3 viewDir, vec3 normal, vec3 albedo, float roughness, float metallic, inout vec3 diffuse)
 {
 	vec3 lightDir = -normalize(sunDir);
 	vec3 radiance = vec3(10.0f); // light color
@@ -151,26 +158,29 @@ vec3 CalculateLighting(vec3 viewDir, vec3 normal, vec3 albedo, float roughness, 
 	// Cook-Torrance BRDF
     float NDF = DistributionGGX(N, H, roughness);   
     float G   = GeometrySmith(N, V, L, roughness);      
-    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
-           
+    vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+
     vec3 nominator    = NDF * G * F; 
     float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001; // 0.001 to prevent divide by zero.
     vec3 specular = nominator / denominator;
         
     // kS is equal to Fresnel
-    vec3 kS = F;
+    //vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+	vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
     // for energy conservation, the diffuse and specular light can't
     // be above 1.0 (unless the surface emits light); to preserve this
     // relationship the diffuse component (kD) should equal 1.0 - kS.
     vec3 kD = vec3(1.0) - kS;
+	//kD *=  1.0 - metallic;
     // multiply kD by the inverse metalness such that only non-metals 
     // have diffuse lighting, or a linear blend if partly metal (pure metals
     // have no diffuse light).
-    kD *= 1.0 - metallic;	  
+
+	vec3 irradiance = texture(globalIrradianceMap, N).rgb;
+	diffuse = irradiance * albedo * kD;
 
     // scale light by NdotL
-    float NdotL = max(dot(N, L), 0.0);        
-
+    float NdotL = max(dot(N, L), 0.0);
     // add to outgoing radiance Lo
     Lo += (kD * albedo / M_PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 
@@ -210,19 +220,20 @@ void main()
 	vec3 normal = texture(gNormal, UV).rgb;
 	float roughness = texture(gRoughness, UV).r;
 	float metallic = texture(gMetallic, UV).r;
-    float ao = texture(gSSAO, UV).r;// + texture(gAO, UV).r;
+    //float ao = max(texture(gSSAO, UV).r, texture(gAO, UV).r);
+	float ao = texture(gSSAO, UV).r;
 
 	vec3 viewDir = normalize(viewPos - FragPos);
-	//vec3 viewDir = normalize(viewPos - vec3(InvViewMat * vec4(FragPos, 1.0f)));
 
 	//calculate shadows
 	float shadow = CascadeShadows(FragPos, normal);
-	//float shadow = 0;
+	
 	//physically based rendering
-	vec3 Lo = CalculateLighting(viewDir, normal, albedo, roughness, metallic);
+	vec3 diffuse = vec3(0.0f);
+	vec3 Lo = CalculateLighting(viewDir, normal, albedo, roughness, metallic, diffuse);
 
 	//ambient component
-	vec3 ambient = vec3(0.03) * albedo * ao;
+	vec3 ambient = diffuse * ao;
 	//vec3 ambient = vec3(0.2) * albedo;
 
 	vec3 color = ambient + (1.0 - shadow) * Lo;

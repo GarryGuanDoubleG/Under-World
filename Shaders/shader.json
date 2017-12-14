@@ -1,156 +1,160 @@
 {
-  "depthMap": {
-    "fs": "Shaders/depthShader_fs.glsl",
-    "vs": "Shaders/depthShader_vs.glsl"
+    "add_delta_e": {
+        "compute": "Shaders/Scattering/add_delta_e.compute.glsl"
+    },
+    "add_delta_sr": {
+        "compute": "Shaders/Scattering/add_delta_sr.compute.glsl"
+    },
+    "applyCloud": {
+        "fs": "Shaders/Clouds/applyCloud_fs.glsl",
+        "vs": "Shaders/quad_vs.glsl"
+    },
+    "atmosphere": {
+        "fs": "Shaders/Scattering/atmosphere_fs.glsl",
+        "vs": "Shaders/Scattering/atmosphere_vs.glsl"
+    },
+    "atmosphereEnvMap": {
+        "fs": "Shaders/Scattering/atmosphereEnvMap_fs.glsl",
+        "vs": "Shaders/Scattering/atmosphereEnvMap_vs.glsl"
+    },
+    "billboard": {
+        "fs": "Shaders/billboard_fs.glsl",
+        "vs": "Shaders/billboard_vs.glsl"
+    },
+    "cloudCurlNoise": {
+        "compute": "Shaders/Clouds/cloudCurlNoise.glsl"
+    },
+    "cloudHighFreqNoise": {
+        "compute": "Shaders/Clouds/cloudHighFreqNoise.glsl"
+    },
+    "cloudLowFreqNoise": {
+        "compute": "Shaders/Clouds/cloudLowFreqNoise.glsl"
+    },
+  "convolution": {
+    "fs": "Shaders/PreProcessing/convolution_fs.glsl",
+    "vs": "Shaders/skybox_vs.glsl"
   },
-  "mouseBox": {
-    "fs": "Shaders/mouseBox_fs.glsl",
-    "vs": "Shaders/mouseBox_vs.glsl"
-  },
-  "billboard": {
-    "fs": "Shaders/billboard_fs.glsl",
-    "vs": "Shaders/billboard_vs.glsl"
-  },
-  "model": {
-    "fs": "Shaders/model_fs.glsl",
-    "vs": "Shaders/model_vs.glsl"
-  },
+    "copy_inscatter": {
+        "compute": "Shaders/Scattering/copy_inscatter.compute.glsl"
+    },
+    "copy_irradiance": {
+        "compute": "Shaders/Scattering/copy_irradiance.compute.glsl"
+    },
+    "deferred": {
+        "fs": "Shaders/deferred_fs.glsl",
+        "vs": "Shaders/deferred_vs.glsl"
+    },
+    "deferredLighting": {
+        "fs": "Shaders/deferredLighting_fs.glsl",
+        "vs": "Shaders/deferredLighting_vs.glsl"
+    },
+    "deferredPBR": {
+        "fs": "Shaders/deferredPBR_fs.glsl",
+        "vs": "Shaders/deferredPBR_vs.glsl"
+    },
+    "delta_e": {
+        "compute": "Shaders/Scattering/delta_e.compute.glsl"
+    },
+    "delta_j": {
+        "compute": "Shaders/Scattering/delta_j.compute.glsl"
+    },
+    "delta_sm_sr": {
+        "compute": "Shaders/Scattering/delta_sm_sr.compute.glsl"
+    },
+    "delta_sr": {
+        "compute": "Shaders/Scattering/delta_sr.compute.glsl"
+    },
+    "depthMap": {
+        "fs": "Shaders/depthShader_fs.glsl",
+        "vs": "Shaders/depthShader_vs.glsl"
+    },
+    "GenerateWeatherData": {
+        "compute": "Shaders/Clouds/generateWeatherData.glsl"
+    },
+    "health": {
+        "fs": "Shaders/health_fs.glsl",
+        "vs": "Shaders/health_vs.glsl"
+    },
+    "hud": {
+        "fs": "Shaders/ui.frag",
+        "vs": "Shaders/ui.vert"
+    },
+    "irradiance_n": {
+        "compute": "Shaders/Scattering/irradiance_n.compute.glsl"
+    },
+    "lighting": {
+        "fs": "Shaders/lighting_fs.glsl",
+        "vs": "Shaders/lighting_vs.glsl"
+    },
+    "minimap": {
+        "fs": "Shaders/minimap_fs.glsl",
+        "vs": "Shaders/minimap_vs.glsl"
+    },
+    "model": {
+        "fs": "Shaders/model_fs.glsl",
+        "vs": "Shaders/model_vs.glsl"
+    },
+    "mouseBox": {
+        "fs": "Shaders/mouseBox_fs.glsl",
+        "vs": "Shaders/mouseBox_vs.glsl"
+    },
+    "object": {
+        "fs": "Shaders/object_fs.glsl",
+        "vs": "Shaders/object_vs.glsl"
+    },
+    "quad": {
+        "fs": "Shaders/quad_fs.glsl",
+        "vs": "Shaders/quad_vs.glsl"
+    },
+    "ray": {
+        "fs": "Shaders/ray.frag",
+        "vs": "Shaders/ray.vert"
+    },
+    "raymarchClouds": {
+        "fs": "Shaders/Clouds/raymarch_clouds_fs.glsl",
+        "vs": "Shaders/Clouds/raymarch_clouds_vs.glsl"
+    },
+    "skybox": {
+        "fs": "Shaders/skybox_fs.glsl",
+        "vs": "Shaders/skybox_vs.glsl"
+    },
+    "ssao": {
+        "fs": "Shaders/Deferred/SSAO_fs.glsl",
+        "vs": "Shaders/Deferred/SSAO_vs.glsl"
+    },
+    "ssaoBlur": {
+        "fs": "Shaders/Deferred/SSAO_blur_fs.glsl",
+        "vs": "Shaders/Deferred/SSAO_vs.glsl"
+    },
+    "transmittance": {
+        "compute": "Shaders/Scattering/transmittance.glsl"
+    },
+    "transparentObject": {
+        "fs": "Shaders/transparentObject_fs.glsl",
+        "vs": "Shaders/transparentObject_vs.glsl"
+    },
   "unlit": {
-    "vs": "Shaders/unlit_object_vs.glsl",
-    "fs": "Shaders/unlit_object_fs.glsl"
+    "fs": "Shaders/unlit_object_fs.glsl",
+    "vs": "Shaders/unlit_object_vs.glsl"
   },
-  "object": {
-    "fs": "Shaders/object_fs.glsl",
-    "vs": "Shaders/object_vs.glsl"
-  },
-  "transparentObject": {
-    "vs": "Shaders/transparentObject_vs.glsl",
-    "fs": "Shaders/transparentObject_fs.glsl"
-  },
-  "voxel": {
-    "vs": "Shaders/voxel_vs.glsl",
-    "fs": "Shaders/voxel_fs.glsl"
-  },
-  "voxelTex": {
-    "vs": "Shaders/voxelTex_vs.glsl",
-    "fs": "Shaders/voxelTex_fs.glsl"
-  },
-  "voxel_deferred": {
-    "vs": "Shaders/voxel_deferred_vs.glsl",
-    "fs": "Shaders/voxel_deferred_fs.glsl"
-  },
-  "lighting": {
-    "vs": "Shaders/lighting_vs.glsl",
-    "fs": "Shaders/lighting_fs.glsl"
-  },
-  "ssao": {
-    "vs": "Shaders/Deferred/SSAO_vs.glsl",
-    "fs": "Shaders/Deferred/SSAO_fs.glsl"
-  },
-  "ssaoBlur": {
-    "vs": "Shaders/Deferred/SSAO_vs.glsl",
-    "fs": "Shaders/Deferred/SSAO_blur_fs.glsl"
-  },
-  "deferredPBR": {
-    "vs": "Shaders/deferredPBR_vs.glsl",
-    "fs": "Shaders/deferredPBR_fs.glsl"
-  },
-  "deferred": {
-    "vs": "Shaders/deferred_vs.glsl",
-    "fs": "Shaders/deferred_fs.glsl"
-  },
-  "deferredLighting": {
-    "vs": "Shaders/deferredLighting_vs.glsl",
-    "fs": "Shaders/deferredLighting_fs.glsl"
-  },
-  "minimap": {
-    "vs": "Shaders/minimap_vs.glsl",
-    "fs": "Shaders/minimap_fs.glsl"
-  },
-  "hud": {
-    "vs": "Shaders/ui.vert",
-    "fs": "Shaders/ui.frag"
-  },
-  "ray": {
-    "vs": "Shaders/ray.vert",
-    "fs": "Shaders/ray.frag"
-  },
-
-  "skybox": {
-    "vs": "Shaders/skybox_vs.glsl",
-    "fs": "Shaders/skybox_fs.glsl"
-  },
-
-  "quad": {
-    "vs": "Shaders/quad_vs.glsl",
-    "fs": "Shaders/quad_fs.glsl"
-  },
-  "water_texture": {
-    "vs": "Shaders/waterTex_vs.glsl",
-    "fs": "Shaders/waterTex_fs.glsl"
-  },
-  "water": {
-    "vs": "Shaders/water_vs.glsl",
-    "fs": "Shaders/water_fs.glsl"
-  },
-  "health": {
-    "vs": "Shaders/health_vs.glsl",
-    "fs": "Shaders/health_fs.glsl"
-  },
-
-  "GenerateWeatherData": {
-    "compute": "Shaders/Clouds/generateWeatherData.glsl"
-  },
-  "cloudHighFreqNoise": {
-    "compute": "Shaders/Clouds/cloudHighFreqNoise.glsl"
-  },
-  "cloudLowFreqNoise": {
-    "compute": "Shaders/Clouds/cloudLowFreqNoise.glsl"
-  },
-  "cloudCurlNoise": {
-    "compute": "Shaders/Clouds/cloudCurlNoise.glsl"
-  },
-  "applyCloud": {
-    "vs": "Shaders/quad_vs.glsl",
-    "fs": "Shaders/Clouds/applyCloud_fs.glsl"
-  },
-  "raymarchClouds": {
-    "vs": "Shaders/Clouds/raymarch_clouds_vs.glsl",
-    "fs": "Shaders/Clouds/raymarch_clouds_fs.glsl"
-  },
-  "atmosphere": {
-    "vs": "Shaders/Scattering/atmosphere_vs.glsl",
-    "fs": "Shaders/Scattering/atmosphere_fs.glsl"
-  },
-  "transmittance": {
-    "compute": "Shaders/Scattering/transmittance.glsl"
-  },
-  "delta_e": {
-    "compute": "Shaders/Scattering/delta_e.compute.glsl"
-  },
-  "delta_sm_sr": {
-    "compute": "Shaders/Scattering/delta_sm_sr.compute.glsl"
-  },
-  "copy_irradiance": {
-    "compute": "Shaders/Scattering/copy_irradiance.compute.glsl"
-  },
-  "copy_inscatter": {
-    "compute": "Shaders/Scattering/copy_inscatter.compute.glsl"
-  },
-  "delta_j": {
-    "compute": "Shaders/Scattering/delta_j.compute.glsl"
-  },
-  "irradiance_n": {
-    "compute": "Shaders/Scattering/irradiance_n.compute.glsl"
-  },
-  "delta_sr": {
-    "compute": "Shaders/Scattering/delta_sr.compute.glsl"
-  },
-  "add_delta_e": {
-    "compute": "Shaders/Scattering/add_delta_e.compute.glsl"
-  },
-  "add_delta_sr": {
-    "compute": "Shaders/Scattering/add_delta_sr.compute.glsl"
-  }
+    "voxel": {
+        "fs": "Shaders/voxel_fs.glsl",
+        "vs": "Shaders/voxel_vs.glsl"
+    },
+    "voxel_deferred": {
+        "fs": "Shaders/voxel_deferred_fs.glsl",
+        "vs": "Shaders/voxel_deferred_vs.glsl"
+    },
+    "voxelTex": {
+        "fs": "Shaders/voxelTex_fs.glsl",
+        "vs": "Shaders/voxelTex_vs.glsl"
+    },
+    "water": {
+        "fs": "Shaders/water_fs.glsl",
+        "vs": "Shaders/water_vs.glsl"
+    },
+    "water_texture": {
+        "fs": "Shaders/waterTex_fs.glsl",
+        "vs": "Shaders/waterTex_vs.glsl"
+    }
 }
-

@@ -18,7 +18,7 @@ float CalculateMaxRayDistance(float earthRadius, float atmosphereStartHeight, fl
 	return cloudOuterDistance - cloudInnerDistance;
 }
 
-Weather::Weather() : m_showCloudParams(false)
+Weather::Weather() : m_showImGUI(false)
 {
 
 }
@@ -35,7 +35,7 @@ Weather::Weather(GLuint quadVao)
 	//unbind framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	m_showCloudParams = false;
+	m_showImGUI = false;
 }
 
 Weather::~Weather()
@@ -81,10 +81,12 @@ void Weather::Render(DeferredBuffer gBuffer, Texture *shadedScene)
 	Shader *shader = g_game->GetShader("raymarchClouds");
 	shader->Use();
 	//render clouds
+	glm::vec3 cameraPos = camera->GetPosition();
+	//cameraPos *= 1e-3;
 
 	gBuffer.Position.Bind(shader->Uniform("gPosition"), 0);
 	shader->SetUniform3fv("sunDir", g_game->m_skydome->GetSunDirection());
-	shader->SetUniform3fv("cameraPos", camera->GetPosition());
+	shader->SetUniform3fv("cameraPos", cameraPos);
 	shader->SetMat4("invViewMat", camera->GetInverseViewMat());
 
 	m_cloudParams.LoadParams(shader);
@@ -109,13 +111,13 @@ void Weather::ApplyToScene(Texture * shadedScene)
 
 void Weather::RenderImGui()
 {
-	if (!m_showCloudParams) return;
-	ImGui::Begin("Another Window", &m_showCloudParams);
+	if (!m_showImGUI) return;
+	ImGui::Begin("Another Window", &m_showImGUI);
 	ImGui::Text("Cloud Params!");
 
 	ImGui::SliderFloat("Start Height", &m_cloudParams.atmosphereStartHeight, 0.0f, 100000.0f);
 	ImGui::SliderFloat("End Height", &m_cloudParams.atmosphereEndHeight, 0.0f, 100000.0f);
-	ImGui::SliderFloat("Max Distance", &m_cloudParams.maxDistance, 0.0f, 300000.0f);
+	ImGui::SliderFloat("Max Distance", &m_cloudParams.maxDistance, 0.0f, 6300000.0f);
 
 	//update dependant values
 	m_cloudParams.atmosphereThickness = m_cloudParams.atmosphereEndHeight - m_cloudParams.atmosphereStartHeight;

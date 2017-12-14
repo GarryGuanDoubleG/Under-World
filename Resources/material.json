@@ -6,6 +6,13 @@
     "metallic": "Resources\\materials\\iron\\metallic.png",
     "roughness": "Resources\\materials\\iron\\roughness.png"
   },
+  "copper": {
+    "albedo": "Resources\\materials\\copper\\albedo.png",
+    "ao": "Resources\\materials\\copper\\ao.png",
+    "normal": "Resources\\materials\\copper\\normal.png",
+    "metallic": "Resources\\materials\\copper\\metallic.png",
+    "roughness": "Resources\\materials\\copper\\roughness.png"
+  },
   "brick": {
     "albedo": "Resources\\materials\\brick\\albedo.png",
     "normal": "Resources\\materials\\brick\\normal.png",

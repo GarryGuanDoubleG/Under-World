@@ -38,6 +38,10 @@ Game::Game() : m_running(true)
 	m_weather = new Weather(m_graphics->GetVAO("quad"));
 	m_weather->LoadCloudData();
 
+	m_preprocessor = new Preprocessor();
+	Texture *globalIrradianceMap = m_preprocessor->ComputeEnvMap(m_atmosphere, m_camera, m_skydome, m_graphics->GetVAO("cube"));
+	m_graphics->AppendIrradianceMap(globalIrradianceMap, "global");
+
 	m_entitiesList = new Entity[MAX_ENTITIES];
 	for (int i = 0; i < MAX_ENTITIES - 1; i++)
 		m_entitiesList[i].m_nextFree = &m_entitiesList[i + 1];
@@ -73,7 +77,8 @@ void Game::Draw()
 
 	if (m_flag & DEFERRED_MODE)
 	{
-		m_graphics->RenderScene();
+		//m_graphics->RenderScene();
+		m_preprocessor->RenderSkybox(m_camera, m_graphics->GetVAO("cube"));
 	}
 	else
 	{
@@ -81,7 +86,8 @@ void Game::Draw()
 		Texture postProcessing = m_atmosphere->Render(gBuffer, GetTexture("scene"));
 		m_weather->Render(gBuffer, &postProcessing);
 	}
-	
+
+
 	RenderImGUI();
 	m_graphics->Display();
 }
@@ -93,7 +99,9 @@ void Game::RenderImGUI()
 	bool show_another_window = false;
 	//default debug imgui window
 	{
-		if (ImGui::Button("Cloud Params")) m_weather->m_showCloudParams ^= 1;
+		if (ImGui::Button("Cloud Params")) m_weather->m_showImGUI ^= 1;
+		if (ImGui::Button("Atmosphere Params")) m_atmosphere->m_showImGUI ^= 1;
+
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::InputFloat3("Position ", &m_camera->m_pos[0], 5);
 		ImGui::InputFloat("Speed", &m_camera->m_speed, 5);
@@ -102,6 +110,8 @@ void Game::RenderImGUI()
 	}
 
 	m_weather->RenderImGui();
+	m_atmosphere->RenderImGUI();
+
 	ImGui::Render();
 }
 

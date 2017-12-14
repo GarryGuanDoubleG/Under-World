@@ -197,7 +197,11 @@ void Texture::TriFiltering()
 
 void Texture::Bind(GLuint shaderLoc, GLuint activeTex)
 {
-	if (m_type == Inactive) return;
+	if (m_type == Inactive)
+	{
+		cout << "Warning: Binding an inactive texture" << endl;
+		return;
+	}
 
 	m_activeTex = activeTex;
 	glActiveTexture(GL_TEXTURE0 + activeTex); // Active proper texture unit before binding
@@ -296,6 +300,43 @@ void Texture::SetDepthMap(GLuint width, GLuint height)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+//creates an empty 1 x 1 texture with a value of 255 ubyte
+Texture Texture::CreateEmpty2D(int format)
+{
+	m_type = Tex2D;
+
+	glGenTextures(1, &m_texID);
+	glBindTexture(GL_TEXTURE_2D, m_texID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	//setup format & pixel data for texture based input format
+	switch (format) {
+	case GL_RED:{
+			GLubyte data[] = { 255 };
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, format, GL_UNSIGNED_BYTE, data);
+			break;
+		}
+	case GL_RGB: {
+		GLubyte data[] = { 255, 255, 255 };
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, format, GL_UNSIGNED_BYTE, data);
+		break;
+	}
+	case GL_RGBA: {
+		GLubyte data[] = { 255, 255, 255, 255 };
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, format, GL_UNSIGNED_BYTE, data);
+		break;
+	}
+	default:
+		break;
+	}
+
+	return *this;
+}
+
 void Texture::CreateTexture2D(int w, int h, GLuint internalFormat, GLuint format, GLuint type, const GLvoid *value)
 {
 	glGenTextures(1, &m_texID);
@@ -306,6 +347,24 @@ void Texture::CreateTexture2D(int w, int h, GLuint internalFormat, GLuint format
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	m_type = Tex2D;
+}
+
+void Texture::CreateCubeMap(int w, int h, GLuint format, GLuint type, const GLvoid * value)
+{
+	m_type = Skybox;
+
+	glGenTextures(1, &m_texID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_texID);
+	for (GLuint i = 0; i < 6; i++)
+	{
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, w, h, 0, GL_RGB, type, value);
+	}
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 void Texture::CreateImage2D(int w, int h, bool float32)

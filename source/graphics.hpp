@@ -67,11 +67,14 @@ class Graphics
 	//maps for rendering
 	map<string, GLuint> m_vaoMap;
 	map<string, GLuint> m_vboMap;
+
 	map<string, Texture*> m_textureMap;
+	map<string, Texture*> m_irradianceMaps;
+	map<string, Material*> m_materialMap;
+
 	map<string, Shader*> m_shaderMap;
 	map<string, Model*> m_modelMap;
-	map<string, Material*> m_materialMap;
-	
+
 	//Cascading Shadow Maps
 	vector<Texture> m_shadowMaps;
 	glm::mat4 m_lightProjViewMats[NUM_SHADOW_MAPS];
@@ -117,6 +120,8 @@ public:
 	void SetCamera(Camera *camera);
 	void SetShaders(map<string, Shader*> &shaders);
 	void SetTextures(map<string, Texture*> &textures);
+	void SetIrradianceMaps(map<string, Texture*> &cubeMaps);
+	void AppendIrradianceMap(Texture * irradianceMap, const char * key);
 	void SetModel(map<string, Model*>& models);
 	void SetMaterials(map<string, Material*>& materials);
 	void SetFlag(GLuint flag);
@@ -124,6 +129,8 @@ public:
 	void XORSetFlag(GLuint flag);
 
 	Shader * GetShader(const char *key);
+
+	Model * GetModel(const char * key);
 
 	GLuint GetVAO(const char * name);
 

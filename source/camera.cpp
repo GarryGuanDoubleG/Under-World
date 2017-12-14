@@ -13,9 +13,9 @@ Camera::Camera(glm::vec3 position, glm::vec3 target)
 	m_view_mat = glm::lookAt(m_pos, m_pos + m_forward, m_up);
 
 	//set up perspective mat4
-	m_nearPlane = 1.0f;
+	m_nearPlane = 0.1f;
 	m_farPlane = 200000.0f;
-	m_fieldOfView = 120.0f;
+	m_fieldOfView = glm::radians(90.0f);
 	m_perspect_proj = glm::perspective(m_fieldOfView, SCREEN_WIDTH / SCREEN_HEIGHT, m_nearPlane, m_farPlane);
 	//m_perspect_proj = glm::ortho(-840.f, 840.f, -540.f, 540.f, m_nearPlane, 200000.f);
 

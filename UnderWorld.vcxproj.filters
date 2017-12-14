@@ -79,6 +79,21 @@
     <Filter Include="Shaders\Deferred Rendering\PBR">
       <UniqueIdentifier>{ccd4c7f9-26c5-4046-8b5d-349270a74f0f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\graphics">
+      <UniqueIdentifier>{25a5ea76-687f-41ad-a96c-7e835ebb0efb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics">
+      <UniqueIdentifier>{1196aa89-9912-4484-aee8-2f47f8d08925}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\PreProcessing">
+      <UniqueIdentifier>{529f3d6f-ade5-42c2-ac65-6195a342024c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\PreProcessing\Scattering">
+      <UniqueIdentifier>{fe866c21-30fc-452e-9da6-3fe7149dd43a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\PreProcessing\Convolution">
+      <UniqueIdentifier>{9cb9303d-af80-4060-ad60-d4ade917372e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -199,12 +214,6 @@
     <None Include="Shaders\Ocean\oceanFFT_fs.glsl">
       <Filter>Shaders\PostProcessing\Ocean</Filter>
     </None>
-    <None Include="Shaders\skybox_vs.glsl">
-      <Filter>Shaders\Forward Rendering</Filter>
-    </None>
-    <None Include="Shaders\skybox_fs.glsl">
-      <Filter>Shaders\Forward Rendering</Filter>
-    </None>
     <None Include="Shaders\deferredLighting_fs.glsl">
       <Filter>Shaders\Deferred Rendering</Filter>
     </None>
@@ -259,12 +268,30 @@
     <None Include="Resources\material.json">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Shaders\PreProcessing\GlobalCubeMap_fs.glsl">
+      <Filter>Shaders\PreProcessing\Scattering</Filter>
+    </None>
+    <None Include="Shaders\PreProcessing\GlobalCubeMap_vs.glsl">
+      <Filter>Shaders\PreProcessing\Scattering</Filter>
+    </None>
+    <None Include="Shaders\skybox_vs.glsl">
+      <Filter>Shaders\Forward Rendering</Filter>
+    </None>
+    <None Include="Shaders\skybox_fs.glsl">
+      <Filter>Shaders\Forward Rendering</Filter>
+    </None>
+    <None Include="Shaders\Scattering\atmosphereEnvMap_fs.glsl">
+      <Filter>Shaders\PreProcessing\Scattering</Filter>
+    </None>
+    <None Include="Shaders\Scattering\atmosphereEnvMap_vs.glsl">
+      <Filter>Shaders\PreProcessing\Scattering</Filter>
+    </None>
+    <None Include="Shaders\PreProcessing\convolution_fs.glsl">
+      <Filter>Shaders\PreProcessing\Convolution</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\game.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\graphics.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\resManager.hpp">
@@ -372,11 +399,14 @@
     <ClInclude Include="source\material.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\preprocessor.hpp">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\graphics.hpp">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\graphics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -490,6 +520,12 @@
     </ClCompile>
     <ClCompile Include="source\material.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\preprocessor.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\graphics.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

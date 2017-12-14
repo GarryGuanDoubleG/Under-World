@@ -28,7 +28,7 @@ Skydome::Skydome(Model * model, Camera *camera)
 	m_timeScale= .003f;
 	m_timeOfDay = 12.f;
 	m_sunDirection = -1.f * glm::vec3(.7f, .3f, 0);
-
+	m_sunIntensity = 10.0f;
 	//float orthoSize = 50000.0f;
 	////glm::mat4 orthoLightProj = glm::ortho(-camera->GetFarPlane(), camera->GetFarPlane(), -camera->GetFarPlane(), camera->GetFarPlane(), 1.0f, camera->GetFarPlane());
 	//m_orthoLightProj = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, -orthoSize, 2.0f * orthoSize);

@@ -139,7 +139,7 @@ class Weather
 
 	CloudParams m_cloudParams;
 public:
-	bool m_showCloudParams;
+	bool m_showImGUI;
 
 public:
 	Weather();

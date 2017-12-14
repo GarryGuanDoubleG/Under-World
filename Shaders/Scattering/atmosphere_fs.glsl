@@ -21,6 +21,7 @@ uniform mat4 invViewMat;
 
 const float EXPOSURE = 1.f;
 
+
 #pragma include "scatterFunctions.inc.glsl"
 #pragma include "compute_scattering.inc.glsl"
 

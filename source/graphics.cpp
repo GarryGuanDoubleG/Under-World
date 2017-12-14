@@ -102,43 +102,49 @@ bool Graphics::InitGraphics(int winWidth, int winHeight)
 
 void Graphics::InitShapes()
 {
-	static const GLfloat cube[] = {
-		-1.0f,-1.0f,-1.0f, // triangle 1 : begin
-		-1.0f,-1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f, // triangle 1 : end
-		1.0f, 1.0f,-1.0f, // triangle 2 : begin
-		-1.0f,-1.0f,-1.0f,
-		-1.0f, 1.0f,-1.0f, // triangle 2 : end
-		1.0f,-1.0f, 1.0f,
-		-1.0f,-1.0f,-1.0f,
-		1.0f,-1.0f,-1.0f,
-		1.0f, 1.0f,-1.0f,
-		1.0f,-1.0f,-1.0f,
-		-1.0f,-1.0f,-1.0f,
-		-1.0f,-1.0f,-1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f,-1.0f,
-		1.0f,-1.0f, 1.0f,
-		-1.0f,-1.0f, 1.0f,
-		-1.0f,-1.0f,-1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f,-1.0f, 1.0f,
-		1.0f,-1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f,-1.0f,-1.0f,
-		1.0f, 1.0f,-1.0f,
-		1.0f,-1.0f,-1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f,-1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f,-1.0f,
-		-1.0f, 1.0f,-1.0f,
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f,-1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f,-1.0f, 1.0f
+	const GLfloat cube[] = {
+		// Positions          
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		-1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f
 	};
 
 	GLuint cube_vao;
@@ -343,6 +349,16 @@ void Graphics::SetTextures(map<string, Texture*>& textures)
 	m_textureMap.insert(textures.begin(), textures.end());
 }
 
+void Graphics::SetIrradianceMaps(map<string, Texture*>& cubeMaps)
+{
+	m_irradianceMaps.insert(cubeMaps.begin(), cubeMaps.end());
+}
+
+void Graphics::AppendIrradianceMap(Texture *irradianceMap, const char *key)
+{
+	m_irradianceMaps[key] = irradianceMap;
+}
+
 void Graphics::SetModel(map<string, Model*> &models)
 {
 	m_modelMap = models;
@@ -366,6 +382,11 @@ void Graphics::XORSetFlag(GLuint flag)
 Shader * Graphics::GetShader(const char * key)
 {
 	return m_shaderMap[key];
+}
+
+Model * Graphics::GetModel(const char *key)
+{
+	return m_modelMap[key];
 }
 
 GLuint Graphics::GetVAO(const char * name)
@@ -500,11 +521,11 @@ DeferredBuffer Graphics::DeferredRenderScene()
 	glBlitFramebuffer(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	Shader *quad = m_shaderMap["quad"];
-	quad->Use();
-	//m_deferredBuffer.AO.Bind(quad->Uniform("tex"), 0);
-	m_textureMap["scene"]->Bind(quad->Uniform("tex"), 0);
-	RenderToQuad();
+	//Shader *quad = m_shaderMap["quad"];
+	//quad->Use();
+	////m_deferredBuffer.AO.Bind(quad->Uniform("tex"), 0);
+	//m_textureMap["scene"]->Bind(quad->Uniform("tex"), 0);
+	//RenderToQuad();
 
 	return m_deferredBuffer;
 }
@@ -577,10 +598,15 @@ void Graphics::DeferredRenderLighting(Shader *shader)
 
 	m_deferredBuffer.Bind(shader, 0);//binds 0-4 inclusive
 	m_textureMap["ssaoBlur"]->Bind(shader->Uniform("gSSAO"), 5); //ssao tex
+
+	//bind Cascading Shadow Maps
 	m_shadowMaps[0].Bind(shader->Uniform("g_shadowMap[0]"), 6);
 	m_shadowMaps[1].Bind(shader->Uniform("g_shadowMap[1]"), 7);
 	m_shadowMaps[2].Bind(shader->Uniform("g_shadowMap[2]"), 8);
 	
+	//bind irradiance map
+	m_irradianceMaps["global"]->Bind(shader->Uniform("globalIrradianceMap"), 9);
+
 	//shadow info
 	//glUniform1iv(shader->Uniform("g_shadowMap"), NUM_SHADOW_MAPS, &shadowLoc[0]);
 	glUniformMatrix4fv(shader->Uniform("g_lightSpaceMatrix"), NUM_SHADOW_MAPS, GL_FALSE, (const GLfloat *)&m_lightProjViewMats[0][0]);
@@ -615,7 +641,7 @@ void Graphics::DeferredRenderModel(Shader *shader, const string &name, const glm
 	//model->Draw(shader);
 
 	//draw sphere
-	Material *ironMat = m_materialMap["iron"];
+	Material *ironMat = m_materialMap["copper"];
 	ironMat->BindMaterial(shader, 0);
 
 	glm::mat4 sphereMatrix = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(1000, 4000, 1000)), glm::vec3(10.0));
@@ -648,12 +674,6 @@ void Graphics::DeferredRenderVoxels(Shader *shader)
 	m_textureMap["grassNormal"]->Bind(shader->Uniform("normalMap[0]"), maxTextures);
 	//m_textureMap["brickNormal"]->Bind(shader->Uniform("normalMap[1]"), maxTextures + 1);
 
-
-	//GLint samplers[] = { 3, 4 };
-	//GLint samplersNormalMap[] = { 15,16 };
-	//glUniform1iv(shader->Uniform("voxelTexture"), 2, &samplers[0]);
-	//glUniform1iv(shader->Uniform("normalMap"), 2, &samplersNormalMap[0]);
-	////glUniform3fv(shader->Uniform("sunDir"), 1, &m_skydome->m_sunDirection[0]);
 
 	g_game->m_voxelManager->Render();
 

@@ -114,8 +114,12 @@ map<string, Material*> ResManager::LoadMaterials()
 		 
 		if (obj.find("albedo") != obj.end())
 			materialTex[0] = Texture(obj["albedo"].get<string>());
+		//Ambient Occlusion texture
 		if (obj.find("ao") != obj.end())
 			materialTex[1] = Texture(obj["ao"].get<string>());
+		else
+			materialTex[1] = Texture().CreateEmpty2D(GL_RED);
+		//load normal map
 		if (obj.find("normal") != obj.end())
 			materialTex[2] = Texture(obj["normal"].get<string>());
 		if (obj.find("metallic") != obj.end())

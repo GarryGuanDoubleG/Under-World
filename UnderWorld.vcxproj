@@ -184,10 +184,15 @@
     <None Include="Shaders\Ocean\oceanFFT_fs.glsl" />
     <None Include="Shaders\deferredPBR_fs.glsl" />
     <None Include="Shaders\deferredPBR_vs.glsl" />
+    <None Include="Shaders\PreProcessing\convolution_fs.glsl" />
+    <None Include="Shaders\PreProcessing\GlobalCubeMap_fs.glsl" />
+    <None Include="Shaders\PreProcessing\GlobalCubeMap_vs.glsl" />
     <None Include="Shaders\quad_fs.glsl" />
     <None Include="Shaders\quad_vs.glsl" />
     <None Include="Shaders\Scattering\add_delta_e.compute.glsl" />
     <None Include="Shaders\Scattering\add_delta_sr.compute.glsl" />
+    <None Include="Shaders\Scattering\atmosphereEnvMap_fs.glsl" />
+    <None Include="Shaders\Scattering\atmosphereEnvMap_vs.glsl" />
     <None Include="Shaders\Scattering\atmosphere_fs.glsl" />
     <None Include="Shaders\Scattering\atmosphere_vs.glsl" />
     <None Include="Shaders\Scattering\compute_scattering.inc.glsl" />
@@ -216,6 +221,7 @@
     <ClInclude Include="source\camera.hpp" />
     <ClInclude Include="source\chunk.hpp" />
     <ClInclude Include="source\material.hpp" />
+    <ClInclude Include="source\preprocessor.hpp" />
     <ClInclude Include="source\weather.hpp" />
     <ClInclude Include="source\density.hpp" />
     <ClInclude Include="source\entity.hpp" />
@@ -269,6 +275,7 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="source\material.cpp" />
+    <ClCompile Include="source\preprocessor.cpp" />
     <ClCompile Include="source\weather.cpp" />
     <ClCompile Include="source\density.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotSet</EnableEnhancedInstructionSet>

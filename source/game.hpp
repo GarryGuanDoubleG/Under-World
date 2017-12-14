@@ -55,6 +55,7 @@ using namespace std;
 #include "graphics.hpp"
 #include "atmosphere.hpp"
 #include "weather.hpp"
+#include "preprocessor.hpp"
 
 #define SCREEN_WIDTH 1680.0f
 #define SCREEN_HEIGHT 1080.0f
@@ -76,10 +77,18 @@ private:
 	int m_flag;
 
 	Camera *m_camera;
-	Graphics *m_graphics;
 	ResManager *m_resManager;
 	Entity *m_entitiesList;
 
+	//PreProcessing
+	Preprocessor *m_preprocessor;
+	
+	//Processing
+	Graphics *m_graphics;
+	
+	//PostProcessing
+	
+	//weather system
 	Atmosphere *m_atmosphere;
 	Weather *m_weather;
 public:
