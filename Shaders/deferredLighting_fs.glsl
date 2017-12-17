@@ -16,6 +16,8 @@ uniform sampler2D gRoughness;
 uniform sampler2D gSSAO;
 
 uniform samplerCube globalIrradianceMap;
+uniform samplerCube prefilterMap;
+uniform sampler2D brdfLUT;
 
 //shadow map info
 uniform sampler2D g_shadowMap[NUM_SHADOW_MAPS];
@@ -137,7 +139,7 @@ float CascadeShadows(vec3 FragPos, vec3 normal)
 	return shadow;
 }
 
-vec3 CalculateLighting(vec3 viewDir, vec3 normal, vec3 albedo, float roughness, float metallic, inout vec3 diffuse)
+vec3 CalculateLighting(vec3 viewDir, vec3 normal, vec3 albedo, float roughness, float metallic)
 {
 	vec3 lightDir = -normalize(sunDir);
 	vec3 radiance = vec3(10.0f); // light color
@@ -165,19 +167,10 @@ vec3 CalculateLighting(vec3 viewDir, vec3 normal, vec3 albedo, float roughness, 
     vec3 specular = nominator / denominator;
         
     // kS is equal to Fresnel
-    //vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
-	vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
-    // for energy conservation, the diffuse and specular light can't
-    // be above 1.0 (unless the surface emits light); to preserve this
-    // relationship the diffuse component (kD) should equal 1.0 - kS.
-    vec3 kD = vec3(1.0) - kS;
-	//kD *=  1.0 - metallic;
-    // multiply kD by the inverse metalness such that only non-metals 
-    // have diffuse lighting, or a linear blend if partly metal (pure metals
-    // have no diffuse light).
+    vec3 kS = F;
 
-	vec3 irradiance = texture(globalIrradianceMap, N).rgb;
-	diffuse = irradiance * albedo * kD;
+    vec3 kD = vec3(1.0) - kS;
+	kD *=  1.0 - metallic;
 
     // scale light by NdotL
     float NdotL = max(dot(N, L), 0.0);
@@ -206,7 +199,7 @@ vec3 PhongLighting(vec3 albedo, vec3 normal, vec3 viewDir, vec3 ao, float shadow
 
 //pbr lighting using Cook-Torrance BRDF
 void main()
-{             
+{
     // retrieve data from gbuffer
     vec3 FragPos = texture(gPosition, UV).rgb;
 	FragPos = (InvViewMat * vec4(FragPos, 1.0f)).rgb;
@@ -216,28 +209,43 @@ void main()
 		return;
 	}
 
+	vec3 viewDir = normalize(viewPos - FragPos);
+	
+	//access g buffers
     vec3 albedo = pow(texture(gAlbedoSpec, UV).rgb, vec3(2.2));
-	vec3 normal = texture(gNormal, UV).rgb;
+	vec3 normal = normalize(texture(gNormal, UV).rgb);
 	float roughness = texture(gRoughness, UV).r;
 	float metallic = texture(gMetallic, UV).r;
-    //float ao = max(texture(gSSAO, UV).r, texture(gAO, UV).r);
-	float ao = texture(gSSAO, UV).r;
-
-	vec3 viewDir = normalize(viewPos - FragPos);
+	float ao = texture(gAO, UV).r;
 
 	//calculate shadows
 	float shadow = CascadeShadows(FragPos, normal);
+
+	//calcualte lighting
+	vec3 F0 = mix(vec3(0.04), albedo, metallic);
 	
-	//physically based rendering
-	vec3 diffuse = vec3(0.0f);
-	vec3 Lo = CalculateLighting(viewDir, normal, albedo, roughness, metallic, diffuse);
+	const float MAX_REFLECTION_LOD = 4.0;
+	vec3 R = reflect(-viewDir, normal);
+	vec3 filteredEnvColor = textureLod(prefilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;
+
+	vec3 F = fresnelSchlickRoughness(max(dot(normal, viewDir), 0.0), F0, roughness);
+	vec2 envBRDF = texture(brdfLUT, vec2(max(dot(normal, viewDir), 0.0), roughness)).rg;
+	vec3 specular = filteredEnvColor * (F * envBRDF.x + envBRDF.y);
+
+	vec3 kS = F;
+	vec3 kD = 1.0 - kS;
+	kD *= 1.0 - metallic;
 
 	//ambient component
-	vec3 ambient = diffuse * ao;
-	//vec3 ambient = vec3(0.2) * albedo;
+	vec3 irradiance = texture(globalIrradianceMap, normal).rgb;
+	vec3 diffuse = irradiance * albedo;
+	vec3 ambient = (kD * diffuse + specular) * ao;
 
+	//BRDF calculation
+	vec3 Lo = CalculateLighting(viewDir, normal, albedo, roughness, metallic);
 	vec3 color = ambient + (1.0 - shadow) * Lo;
-	 ////HDR tonemapM_PIng
+	
+	////HDR tonemapM_PIng
 	color = color / (color + vec3(1.0));
 	//gamma correction with shadowing
 	color = pow(color, vec3(1.0 / 2.2));

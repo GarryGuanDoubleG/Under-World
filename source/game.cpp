@@ -38,9 +38,16 @@ Game::Game() : m_running(true)
 	m_weather = new Weather(m_graphics->GetVAO("quad"));
 	m_weather->LoadCloudData();
 
+
+	//preprocess IBL irradiance map, speculative, and brdfLUT
 	m_preprocessor = new Preprocessor();
-	Texture *globalIrradianceMap = m_preprocessor->ComputeEnvMap(m_atmosphere, m_camera, m_skydome, m_graphics->GetVAO("cube"));
-	m_graphics->AppendIrradianceMap(globalIrradianceMap, "global");
+	m_graphics->AddIrradianceMap(m_preprocessor->ComputeEnvironMap(m_atmosphere, m_camera, m_skydome, m_graphics->GetVAO("cube")), "global");
+	
+	//bi directional reflectance distribution func look up tex
+	m_graphics->AddTexture(m_preprocessor->ComputeBRDFLUT(512, 512), "brdfLUT");
+	//prefilter the environment map
+	m_graphics->AddTexture(m_preprocessor->PrefilterEnvironMap(128, 128), "prefilterGlobalMap");
+
 
 	m_entitiesList = new Entity[MAX_ENTITIES];
 	for (int i = 0; i < MAX_ENTITIES - 1; i++)
@@ -78,7 +85,8 @@ void Game::Draw()
 	if (m_flag & DEFERRED_MODE)
 	{
 		//m_graphics->RenderScene();
-		m_preprocessor->RenderSkybox(m_camera, m_graphics->GetVAO("cube"));
+		m_preprocessor->RenderSkybox(m_camera, GetVAO("cube"));
+		//m_preprocessor->RenderTexture("brdfLUT");
 	}
 	else
 	{
@@ -187,6 +195,11 @@ glm::vec3 Game::GetPlayerPosition()
 Shader * Game::GetShader(const char * name)
 {
 	return m_graphics->GetShader(name);
+}
+
+GLuint Game::GetVAO(const char *name)
+{
+	return m_graphics->GetVAO(name);
 }
 
 Texture * Game::GetTexture(const char *name)

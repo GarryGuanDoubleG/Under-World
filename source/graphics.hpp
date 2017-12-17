@@ -35,8 +35,8 @@ struct DeferredBuffer
 		Normal.Bind(shader->Uniform("gNormal"), activeTex + 1);
 		AlbedoSpec.Bind(shader->Uniform("gAlbedoSpec"), activeTex + 2);
 		AO.Bind(shader->Uniform("gAO"), activeTex + 3);
-		Metallic.Bind(shader->Uniform("gMetallic"), activeTex + 3);
-		Roughness.Bind(shader->Uniform("gRoughness"), activeTex + 4);
+		Metallic.Bind(shader->Uniform("gMetallic"), activeTex + 4);
+		Roughness.Bind(shader->Uniform("gRoughness"), activeTex + 5);
 	}
 
 	void UnbindGBuffer()
@@ -119,9 +119,10 @@ public:
 
 	void SetCamera(Camera *camera);
 	void SetShaders(map<string, Shader*> &shaders);
+	void AddTexture(Texture * tex, const char * key);
 	void SetTextures(map<string, Texture*> &textures);
 	void SetIrradianceMaps(map<string, Texture*> &cubeMaps);
-	void AppendIrradianceMap(Texture * irradianceMap, const char * key);
+	void AddIrradianceMap(Texture * irradianceMap, const char * key);
 	void SetModel(map<string, Model*>& models);
 	void SetMaterials(map<string, Material*>& materials);
 	void SetFlag(GLuint flag);

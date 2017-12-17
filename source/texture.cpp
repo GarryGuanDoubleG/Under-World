@@ -59,6 +59,8 @@ void Texture::LoadTexture(string filepath)
 	{
 		cout << "Could not load image " << filepath << endl;
 		cout << IMG_GetError() << endl;
+		
+		m_type = Inactive;
 		return;
 	}
 
@@ -349,7 +351,7 @@ void Texture::CreateTexture2D(int w, int h, GLuint internalFormat, GLuint format
 	m_type = Tex2D;
 }
 
-void Texture::CreateCubeMap(int w, int h, GLuint format, GLuint type, const GLvoid * value)
+void Texture::CreateCubeMap(int w, int h, GLuint format, GLuint type, GLuint filter, const GLvoid * value)
 {
 	m_type = Skybox;
 
@@ -363,8 +365,8 @@ void Texture::CreateCubeMap(int w, int h, GLuint format, GLuint type, const GLvo
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, filter);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, filter);
 }
 
 void Texture::CreateImage2D(int w, int h, bool float32)
@@ -395,6 +397,22 @@ void Texture::CreateImage2D(int w, int h, GLuint texRepeat, GLuint internalForma
 	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, w, h, 0, format, type, NULL);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Texture::CreateImage2D(int w, int h, GLuint internalFormat, GLuint format, GLuint type, GLuint WrapMode, GLuint Filter, const GLvoid * value)
+{
+	m_type = Tex2D;
+
+	glGenTextures(1, &m_texID);
+	glBindTexture(GL_TEXTURE_2D, m_texID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, WrapMode);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, WrapMode);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Filter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Filter);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, w, h, 0, format, type, value);
+
+	glBindTexture(GL_TEXTURE_2D, 0); 
 }
 
 void Texture::CreateImage3D(int w, int h, int d, bool float32)

@@ -70,12 +70,11 @@ void Weather::RenderToQuad()
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);	
 }
-
-
-
+ 
 void Weather::Render(DeferredBuffer gBuffer, Texture *shadedScene)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_cloudFBO);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	Camera *camera = g_game->GetCamera();
 	Shader *shader = g_game->GetShader("raymarchClouds");

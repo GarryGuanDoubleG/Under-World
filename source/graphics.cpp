@@ -86,15 +86,21 @@ bool Graphics::InitGraphics(int winWidth, int winHeight)
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
-	glCullFace(GL_BACK);
-	// Accept fragment if it closer to the camera than the former one
 	glDepthFunc(GL_LEQUAL);
+
+	//back face culling
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	
+	//front face is counter clockwise tri
+	glFrontFace(GL_CCW);
+
+	//seamless cube maps
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	
+	// Accept fragment if it closer to the camera than the former one
 	//glEnable(GL_BLEND);
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	
 
 	atexit(SDL_Quit);
 	return true;
@@ -103,7 +109,7 @@ bool Graphics::InitGraphics(int winWidth, int winHeight)
 void Graphics::InitShapes()
 {
 	const GLfloat cube[] = {
-		// Positions          
+		// positions          
 		-1.0f,  1.0f, -1.0f,
 		-1.0f, -1.0f, -1.0f,
 		1.0f, -1.0f, -1.0f,
@@ -344,6 +350,11 @@ void Graphics::SetShaders(map<string, Shader*>& shaders)
 	m_shaderMap = shaders;
 }
 
+void Graphics::AddTexture(Texture *tex, const char *key)
+{
+	m_textureMap[key] = tex;
+}
+
 void Graphics::SetTextures(map<string, Texture*>& textures)
 {
 	m_textureMap.insert(textures.begin(), textures.end());
@@ -354,7 +365,7 @@ void Graphics::SetIrradianceMaps(map<string, Texture*>& cubeMaps)
 	m_irradianceMaps.insert(cubeMaps.begin(), cubeMaps.end());
 }
 
-void Graphics::AppendIrradianceMap(Texture *irradianceMap, const char *key)
+void Graphics::AddIrradianceMap(Texture *irradianceMap, const char *key)
 {
 	m_irradianceMaps[key] = irradianceMap;
 }
@@ -596,16 +607,18 @@ void Graphics::DeferredRenderLighting(Shader *shader)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shader->Use();
 
-	m_deferredBuffer.Bind(shader, 0);//binds 0-4 inclusive
-	m_textureMap["ssaoBlur"]->Bind(shader->Uniform("gSSAO"), 5); //ssao tex
+	m_deferredBuffer.Bind(shader, 0);//binds 0-5 inclusive
+	m_textureMap["ssaoBlur"]->Bind(shader->Uniform("gSSAO"), 6); //ssao tex
 
 	//bind Cascading Shadow Maps
-	m_shadowMaps[0].Bind(shader->Uniform("g_shadowMap[0]"), 6);
-	m_shadowMaps[1].Bind(shader->Uniform("g_shadowMap[1]"), 7);
-	m_shadowMaps[2].Bind(shader->Uniform("g_shadowMap[2]"), 8);
+	m_shadowMaps[0].Bind(shader->Uniform("g_shadowMap[0]"), 7);
+	m_shadowMaps[1].Bind(shader->Uniform("g_shadowMap[1]"), 8);
+	m_shadowMaps[2].Bind(shader->Uniform("g_shadowMap[2]"), 9);
 	
 	//bind irradiance map
-	m_irradianceMaps["global"]->Bind(shader->Uniform("globalIrradianceMap"), 9);
+	m_irradianceMaps["global"]->Bind(shader->Uniform("globalIrradianceMap"), 10);
+	m_textureMap["prefilterGlobalMap"]->Bind(shader->Uniform("prefilterMap"), 11);
+	m_textureMap["brdfLUT"]->Bind(shader->Uniform("brdfLUT"), 12);
 
 	//shadow info
 	//glUniform1iv(shader->Uniform("g_shadowMap"), NUM_SHADOW_MAPS, &shadowLoc[0]);
@@ -621,10 +634,14 @@ void Graphics::DeferredRenderLighting(Shader *shader)
 
 	//unbind active textures
 	m_deferredBuffer.Unbind();
+	m_irradianceMaps["global"]->Unbind();
 	m_shadowMaps[0].Unbind();
 	m_shadowMaps[1].Unbind();
 	m_shadowMaps[2].Unbind();
 	m_textureMap["ssaoBlur"]->Unbind();
+	m_textureMap["prefilterGlobalMap"]->Unbind();
+	m_textureMap["brdfLUT"]->Unbind();
+
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -641,12 +658,14 @@ void Graphics::DeferredRenderModel(Shader *shader, const string &name, const glm
 	//model->Draw(shader);
 
 	//draw sphere
-	Material *ironMat = m_materialMap["copper"];
+	Material *ironMat = m_materialMap["gold"];
 	ironMat->BindMaterial(shader, 0);
 
 	glm::mat4 sphereMatrix = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(1000, 4000, 1000)), glm::vec3(10.0));
 	shader->SetMat4("model", sphereMatrix);
 	m_modelMap["sphere"]->DrawVertices();
+
+	ironMat->Unbind();
 }
 
 void Graphics::DeferredRenderVoxels(Shader *shader)
@@ -666,12 +685,12 @@ void Graphics::DeferredRenderVoxels(Shader *shader)
 	Material * brickMat = m_materialMap["grass"];
 	brickMat->m_albedo.Bind(shader->Uniform("voxelTexture[1]"), 6);
 	brickMat->m_ao.Bind(shader->Uniform("AOTexture[1]"), 7);
-	brickMat->m_normal.Bind(shader->Uniform("normalMap[1]"),  maxTextures + 1);
-	brickMat->m_metallic.Bind(shader->Uniform("metallicTexture[1]"), 2 * maxTextures + 1);
-	brickMat->m_roughness.Bind(shader->Uniform("roughnessTexture[1]"), 3 * maxTextures + 1);
+	brickMat->m_normal.Bind(shader->Uniform("normalMap[1]"),  8);
+	brickMat->m_metallic.Bind(shader->Uniform("metallicTexture[1]"), 9);
+	brickMat->m_roughness.Bind(shader->Uniform("roughnessTexture[1]"), 10);
 
 	//max 15 normal maps
-	m_textureMap["grassNormal"]->Bind(shader->Uniform("normalMap[0]"), maxTextures);
+	m_textureMap["grassNormal"]->Bind(shader->Uniform("normalMap[0]"), 11);
 	//m_textureMap["brickNormal"]->Bind(shader->Uniform("normalMap[1]"), maxTextures + 1);
 
 

@@ -94,6 +94,9 @@
     <Filter Include="Shaders\PreProcessing\Convolution">
       <UniqueIdentifier>{9cb9303d-af80-4060-ad60-d4ade917372e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\PreProcessing\PBR">
+      <UniqueIdentifier>{98c3acca-bf6c-4163-8843-2c75bc3c7cbd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -283,11 +286,20 @@
     <None Include="Shaders\Scattering\atmosphereEnvMap_fs.glsl">
       <Filter>Shaders\PreProcessing\Scattering</Filter>
     </None>
-    <None Include="Shaders\Scattering\atmosphereEnvMap_vs.glsl">
-      <Filter>Shaders\PreProcessing\Scattering</Filter>
-    </None>
     <None Include="Shaders\PreProcessing\convolution_fs.glsl">
       <Filter>Shaders\PreProcessing\Convolution</Filter>
+    </None>
+    <None Include="Shaders\PreProcessing\brdf_fs.glsl">
+      <Filter>Shaders\PreProcessing\PBR</Filter>
+    </None>
+    <None Include="Shaders\PreProcessing\brdf_vs.glsl">
+      <Filter>Shaders\PreProcessing\PBR</Filter>
+    </None>
+    <None Include="Shaders\PreProcessing\prefilter_fs.glsl">
+      <Filter>Shaders\PreProcessing\PBR</Filter>
+    </None>
+    <None Include="Shaders\cubemap_vs.glsl">
+      <Filter>Shaders\PreProcessing</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

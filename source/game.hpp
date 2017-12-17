@@ -114,6 +114,8 @@ public:
 
 	Shader * GetShader(const char * name);
 
+	GLuint GetVAO(const char * name);
+
 	Texture * GetTexture(const char * name);
 
 	Camera * GetCamera();

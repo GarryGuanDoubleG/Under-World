@@ -167,6 +167,7 @@
     <None Include="Shaders\Clouds\raymarch_clouds_fs.glsl" />
     <None Include="Shaders\Clouds\raymarch_clouds_vs.glsl" />
     <None Include="Shaders\common.inc.glsl" />
+    <None Include="Shaders\cubemap_vs.glsl" />
     <None Include="Shaders\deferredLighting_fs.glsl" />
     <None Include="Shaders\deferredLighting_vs.glsl" />
     <None Include="Shaders\Deferred\SSAO_blur_fs.glsl" />
@@ -184,15 +185,17 @@
     <None Include="Shaders\Ocean\oceanFFT_fs.glsl" />
     <None Include="Shaders\deferredPBR_fs.glsl" />
     <None Include="Shaders\deferredPBR_vs.glsl" />
+    <None Include="Shaders\PreProcessing\brdf_fs.glsl" />
+    <None Include="Shaders\PreProcessing\brdf_vs.glsl" />
     <None Include="Shaders\PreProcessing\convolution_fs.glsl" />
     <None Include="Shaders\PreProcessing\GlobalCubeMap_fs.glsl" />
     <None Include="Shaders\PreProcessing\GlobalCubeMap_vs.glsl" />
+    <None Include="Shaders\PreProcessing\prefilter_fs.glsl" />
     <None Include="Shaders\quad_fs.glsl" />
     <None Include="Shaders\quad_vs.glsl" />
     <None Include="Shaders\Scattering\add_delta_e.compute.glsl" />
     <None Include="Shaders\Scattering\add_delta_sr.compute.glsl" />
     <None Include="Shaders\Scattering\atmosphereEnvMap_fs.glsl" />
-    <None Include="Shaders\Scattering\atmosphereEnvMap_vs.glsl" />
     <None Include="Shaders\Scattering\atmosphere_fs.glsl" />
     <None Include="Shaders\Scattering\atmosphere_vs.glsl" />
     <None Include="Shaders\Scattering\compute_scattering.inc.glsl" />
