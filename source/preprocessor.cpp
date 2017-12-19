@@ -103,6 +103,45 @@ Texture * Preprocessor::ComputeEnvironMap(Atmosphere *atmosphere, Camera * camer
 	return m_textureMap["global"];
 }
 
+//creates an irradiance map by convoluting the input texture
+Texture *Preprocessor::ConvoluteCubeMap(Texture *cubeMap, Camera *camera, GLuint cubeVAO, int w, int h)
+{
+	glm::mat4 cubeMapViewMatrixes[] =
+	{
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+	};
+
+	Texture *irradianceMap = new Texture();
+	irradianceMap->CreateCubeMap(32, 32, GL_RGB16F, GL_FLOAT, GL_LINEAR, nullptr);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
+	glBindRenderbuffer(GL_FRAMEBUFFER, m_renderBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
+
+	Shader *irradianceShader = g_game->GetShader("convolution");
+	irradianceShader->Use();
+
+	cubeMap->Bind(irradianceShader->Uniform("envMap"), 0);
+	glViewport(0, 0, 32, 32);
+	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+	irradianceShader->SetMat4("projection", projection);
+	for (int i = 0; i < 6; i++)	
+	{ 
+		irradianceShader->SetMat4("view", cubeMapViewMatrixes[i]);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceMap->GetTexID(), 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		RenderCube(cubeVAO);
+	}
+
+	return irradianceMap;
+}
+
 Texture *Preprocessor::PrefilterEnvironMap(int w, int h)
 {
 	Texture *prefilterEnvMap = new Texture();
@@ -119,7 +158,7 @@ Texture *Preprocessor::PrefilterEnvironMap(int w, int h)
 
 	Texture *environmentMap = m_textureMap["globalEnv"];
 	environmentMap->Bind(shader->Uniform("environmentMap"), 0);
-	
+
 	glm::mat4 cubeMapViewMatrixes[] =
 	{
 		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
@@ -163,45 +202,6 @@ Texture *Preprocessor::PrefilterEnvironMap(int w, int h)
 	return prefilterEnvMap;
 }
 
-//creates an irradiance map by convoluting the input texture
-Texture *Preprocessor::ConvoluteCubeMap(Texture *cubeMap, Camera *camera, GLuint cubeVAO, int w, int h)
-{
-	glm::mat4 cubeMapViewMatrixes[] =
-	{
-		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
-		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
-		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
-	};
-
-	Texture *irradianceMap = new Texture();
-	irradianceMap->CreateCubeMap(32, 32, GL_RGB16F, GL_FLOAT, GL_LINEAR, nullptr);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
-	glBindRenderbuffer(GL_FRAMEBUFFER, m_renderBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
-
-	Shader *irradianceShader = g_game->GetShader("convolution");
-	irradianceShader->Use();
-
-	cubeMap->Bind(irradianceShader->Uniform("envMap"), 0);
-	glViewport(0, 0, 32, 32);
-	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-	irradianceShader->SetMat4("projection", projection);
-	for (int i = 0; i < 6; i++)	
-	{ 
-		irradianceShader->SetMat4("view", cubeMapViewMatrixes[i]);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceMap->GetTexID(), 0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		RenderCube(cubeVAO);
-	}
-
-	return irradianceMap;
-}
-
 void Preprocessor::RenderToQuad(GLuint quadVAO)
 {
 	glBindVertexArray(quadVAO);
@@ -226,9 +226,9 @@ void Preprocessor::RenderSkybox(Camera *camera, GLuint cubeVAO)
 	shader->SetMat4("projection", projection);
 	shader->SetMat4("view", view);
 	
-	m_textureMap["prefilterGlobalMap"]->Bind(shader->Uniform("environmentMap"), 0);
+	m_textureMap["global"]->Bind(shader->Uniform("environmentMap"), 0);
 	RenderCube(cubeVAO);
-	m_textureMap["prefilterGlobalMap"]->Unbind();
+	m_textureMap["global"]->Unbind();
 }
 
 void Preprocessor::RenderTexture(const char *key)

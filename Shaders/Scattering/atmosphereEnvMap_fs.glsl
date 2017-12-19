@@ -44,6 +44,6 @@ void main()
 	inscatterLight += vec3(1, 0.1, 0.3) * disk_factor * upper_disk_factor * silhouette_col * 3.0 * 1e3;
 	//tone map
 	result = vec4(HDR(inscatterLight), 1.0f);
-	//result = vec4(vec3(1.0f, 0.0, 0.0), 1.0f);
+	//result = vec4(vec3(1.0f), 1.0f);
 	//result = vec4(FragPos, 1.0f);
 }
